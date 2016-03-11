@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Visualization on Erdmanczyk.io</title>
+    <link>http://serdmanczyk.github.io/tags/visualization/</link>
+    <description>Recent content in Visualization on Erdmanczyk.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 25 Feb 2015 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://serdmanczyk.github.io/tags/visualization/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Moving to Seattle, How&#39;s the Weather? (graphs!)</title>
+      <link>http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/</link>
+      <pubDate>Wed, 25 Feb 2015 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/</guid>
+      <description>&lt;p&gt;My wife and I recently relocated from Charlotte, NC to Seattle, WA and so far we&amp;rsquo;ve loved it!&lt;/p&gt;
+
+&lt;p&gt;One of the most common things people talk about when you mention moving to the Pacific Northwest is the weather, particularly the kind that results in being wet.  The weather here is obviously different, but in my short time here  it hasn&amp;rsquo;t seemed &lt;em&gt;that&lt;/em&gt; different.  Being the scientific type, I went straight to finding objective data to make heads or tails of my impression so far.&lt;/p&gt;
+
+&lt;p&gt;First step was to find some hard weather data.  I wanted historical weather data by date and city, preferably for free.  I was able to find that via &lt;a href=&#34;http://www.wunderground.com/weather/api/d/docs?MR=1&#34;&gt;Weather Underground&amp;rsquo;s API&lt;/a&gt; .  I hacked together a quick python script to grab data for the dates I needed.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import requests
+import json
+from datetime import datetime,timedelta
+import re
+import time
+import os
+import sys
+import arrow
+
+APIKEY = &#39;__REDACTED__&#39;
+
+def urliter():
+	Locations = [
+		(&#39;NC&#39;, &#39;Charlotte&#39;),
+		(&#39;WA&#39;, &#39;Seattle&#39;)
+	]
+
+	def DateIter(start, end):
+	    start = arrow.get(start)
+	    end = arrow.get(end)
+
+	    for day in arrow.Arrow.span_range(&#39;day&#39;, start, end):
+	        yield day[0]
+
+	for location in Locations:
+		for day in DateIter(&#39;2014-11-12&#39;, &#39;2015-02-24&#39;):
+			url = &#39;http://api.wunderground.com/api/{key}/history_{year:04d}{month:02d}{day:02d}/q/{state}/{city}.json&#39;.format(**{
+				&#39;key&#39;:APIKEY,
+				&#39;year&#39;:day.year,
+				&#39;month&#39;:day.month,
+				&#39;day&#39;:day.day,
+				&#39;state&#39;:location[0],
+				&#39;city&#39;:location[1],
+			})
+
+			directory = location[1]
+
+			filename = &#39;{year:04d}{month:02d}{day:02d}.json&#39;.format(**{
+				&#39;year&#39;:day.year,
+				&#39;month&#39;:day.month,
+				&#39;day&#39;:day.day
+			})
+
+			yield (
+				directory,
+				filename,
+				url
+			)
+
+for rq in urliter():
+	directory,filename,url = rq
+
+	time.sleep(7)
+	print(&amp;quot;get:&amp;quot;, url)
+	respobj = requests.get(url).json()
+	
+	dirpath = os.path.abspath(directory)
+	if not os.path.exists(dirpath):
+		os.makedirs(dirpath)
+
+	filepath = os.path.join(dirpath,filename)
+	print(&amp;quot;save:&amp;quot;, filepath)
+	with open(filepath, &amp;quot;w&amp;quot;) as opf:
+	    json.dump(respobj, opf, indent=3, sort_keys=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That effectively grabbed and organized all the data, and conformed to the rate limit (10 requests / minute).  The next step I took was storing it all in a query-able format, so I turned to my old friend MongoDB.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import json
+import os
+from math import sqrt,pow
+import sys
+from pymongo import MongoClient
+import arrow
+
+def fileloader(directory):
+    adir = os.path.abspath(directory)
+    for dirpath, dirnames, filenames in os.walk(adir):
+        for filename in filenames:
+            filepath = os.path.join(dirpath, filename)
+            _,etx = os.path.splitext(filepath)
+            if etx == &amp;quot;.json&amp;quot;:
+                with open(filepath) as opf:
+                    yield filepath, json.load(opf)
+
+locations = (
+    (&amp;quot;Seattle&amp;quot;, &amp;quot;WA&amp;quot;),
+    (&amp;quot;Charlotte&amp;quot;, &amp;quot;NC&amp;quot;)
+)
+
+client = MongoClient()
+weatherdata = client.weatherdata
+
+summaries_db = weatherdata.summaries
+observations_db = weatherdata.observations
+
+for loc in locations:
+    city,state = loc
+    for filepath,datapoint in fileloader(city):
+        summary = datapoint[&#39;history&#39;][&#39;dailysummary&#39;][0]
+
+        isodate = &amp;quot;{year}-{mon}-{mday}T{hour}:{min}:00.000&amp;quot;.format(**summary[&amp;quot;date&amp;quot;])
+        del summary[&amp;quot;date&amp;quot;]
+
+        summary.update({
+            &amp;quot;city&amp;quot; : city,
+            &amp;quot;state&amp;quot; : state,
+            &amp;quot;isodate&amp;quot; : arrow.get(isodate).datetime,
+        })
+
+        sum_id = summaries_db.insert(summary)
+        # print(&amp;quot;summary&amp;quot;, rec_id)
+
+        observations = datapoint[&#39;history&#39;][&#39;observations&#39;]
+        obs_ids = []
+        for observation in observations:
+            isodt = &amp;quot;{year}-{mon}-{mday}T{hour}:{min}:00.000&amp;quot;.format(**observation[&amp;quot;utcdate&amp;quot;])
+            del observation[&amp;quot;date&amp;quot;]
+            del observation[&amp;quot;utcdate&amp;quot;]
+            observation.update({
+                &amp;quot;city&amp;quot; : city,
+                &amp;quot;state&amp;quot; : state,
+                &amp;quot;isodatetime&amp;quot; : arrow.get(isodt).datetime
+            })
+
+            obs_id = observations_db.insert(observation)
+            obs_ids.append(obs_id)
+        print city, &amp;quot;:&amp;quot;, summary[&#39;isodate&#39;]
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Having it stored in MongoDB made it quick and convenient to query the data and pick apart how to interpret the data into something useful.  I was primarily seeking to represent the general distribution of temperatures, humidities, and intensity/types of precipitation between the two cities.  Eventually, I threw together a script to grab all of that data and throw it into plots using &lt;a href=&#34;https://plot.ly/python/&#34;&gt;plotly&amp;rsquo;s python API&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;from pymongo import MongoClient
+import plotly.plotly as py
+from plotly.graph_objs import *
+import json
+
+client = MongoClient()
+weatherdata = client.weatherdata
+observations_db = weatherdata.observations
+summaries_db = weatherdata.summaries
+
+filters = {
+    &#39;_id&#39;:False,
+    &#39;isodatetime&#39;:False,
+    &#39;isodate&#39;:False,
+}
+
+charlotte = observations_db.find({
+    &#39;city&#39;:&#39;Charlotte&#39;
+},filters)
+
+seattle = observations_db.find({
+    &#39;city&#39;:&#39;Seattle&#39;
+},filters)
+
+# print(json.dumps(list(sorted(set([c[&#39;conds&#39;] for c in charlotte])))))
+
+def getvals(dataset, params):
+    output = tuple([] for _ in params)
+
+    for point in dataset:
+        for i,param in enumerate(params):
+            key,filt,typ = param
+            val = point[key]
+            if filt(val):
+                output[i].append(typ(val))
+
+    return (output if (len(output) &amp;gt; 1) else output[0])
+
+validtemp = lambda val:val != &amp;quot;-9999&amp;quot;
+validhum = lambda val:val != &amp;quot;N/A&amp;quot;
+validcond = lambda val:val != &amp;quot;Unknown&amp;quot;
+
+params = (
+    (&#39;tempi&#39;, validtemp, float),
+    (&#39;hum&#39;, validhum, float),
+    (&#39;conds&#39;, validcond, str)
+)
+
+clt_temps,clt_hums,clt_conds = getvals(charlotte, params)
+sea_temps,sea_hums,sea_conds = getvals(seattle, params)
+
+name = &#39;Charlotte vs. Seattle Temperature&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_temps,
+                name = &#39;Charlotte&#39;,
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_temps,
+                name = &#39;Seattle&#39;,
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+name = &#39;Charlotte vs. Seattle Humidity&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_hums,
+                name = &#39;Charlotte&#39;,
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_hums,
+                name = &#39;Seattle&#39;,
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+intensities = [
+  &amp;quot;Heavy Thunderstorms and Rain&amp;quot;,
+  &amp;quot;Thunderstorms and Rain&amp;quot;,
+  &amp;quot;Heavy Rain&amp;quot;, &amp;quot;Ice Pellets&amp;quot;, &amp;quot;Light Ice Pellets&amp;quot;,
+  &amp;quot;Light Freezing Rain&amp;quot;, &amp;quot;Rain&amp;quot;, &amp;quot;Light Rain&amp;quot;,
+  &amp;quot;Light Snow&amp;quot;, &amp;quot;Light Freezing Fog&amp;quot;,
+  &amp;quot;Drizzle&amp;quot;, &amp;quot;Light Drizzle&amp;quot;, &amp;quot;Mist&amp;quot;,
+  &amp;quot;Overcast&amp;quot;, &amp;quot;Fog&amp;quot;, &amp;quot;Haze&amp;quot;,
+  &amp;quot;Mostly Cloudy&amp;quot;, &amp;quot;Partly Cloudy&amp;quot;,
+  &amp;quot;Scattered Clouds&amp;quot;, &amp;quot;Clear&amp;quot;
+]
+
+def countintensities(dataset):
+    counts = {}
+    for cond in dataset:
+        counts[cond] = ((counts[cond]+1) if counts.get(cond) else 1)
+
+    countgetter = lambda val:(counts[val] if val in counts else 0)
+    return list(map(countgetter, intensities))
+
+name = &#39;Charlotte vs. Seattle Weather Rain Intensity&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Bar(
+                x = intensities,
+                y = countintensities(clt_conds),
+                name = &#39;Charlotte&#39;
+            ),
+            Bar(
+                x = intensities,
+                y = countintensities(sea_conds),
+                name = &#39;Seattle&#39;
+            )
+        ]),
+        layout = Layout(
+            barmode=&#39;group&#39;,
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+charlotte = summaries_db.find({
+    &#39;city&#39;:&#39;Charlotte&#39;
+},filters)
+
+seattle = summaries_db.find({
+    &#39;city&#39;:&#39;Seattle&#39;
+},filters)
+
+validprecip = lambda val:val != &amp;quot;T&amp;quot;
+
+params = (
+    (&#39;precipi&#39;, validprecip, float),
+)
+
+clt_precip = getvals(charlotte, params)
+sea_precip = getvals(seattle, params)
+
+name = &#39;Charlotte vs. Seattle Precipitation&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_precip,
+                name = &#39;Charlotte&#39;,
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_precip,
+                name = &#39;Seattle&#39;,
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that weather condition intensity is organized completely based on my own subjective interpretation.
+{: .notice}&lt;/p&gt;
+
+&lt;p&gt;The above script gave me the following plots:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_humidity.png&#34; alt=&#34;CharSeaHums&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_temperature.png&#34; alt=&#34;CharSeaTemps&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_precipitation.png&#34; alt=&#34;CharSeaPrecip&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_weather_rain_intensity.png&#34; alt=&#34;CharSeaConds&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;All data “Powered by Weather Underground” &lt;a href=&#34;http://wunderground.com/&#34;&gt;&lt;img height=&#34;45&#34; width=&#34;193&#34; src=&#34;http://serdmanczyk.github.io/images/movseaweather/wundergroundLogo_4c_horz.png&#34;&gt;&lt;/a&gt; as &lt;a href=&#34;http://www.wunderground.com/weather/api/d/terms.html&#34;&gt;per API usage requirements&lt;/a&gt;.
+{: .notice}&lt;/p&gt;
+
+&lt;p&gt;The plots pretty much showed me what I expected, that the weather here is milder, more consistent, and though it rains more, when it rains it&amp;rsquo;s usually lighter and more constant than it is in Charlotte (where apparently it can&amp;rsquo;t rain without absolutely pouring).&lt;/p&gt;
+
+&lt;p&gt;But there was another thing I noticed after moving here that isn&amp;rsquo;t mentioned as much.  Having arrived in November I immediately noticed the sun setting nearly an hour earlier, a result of the higher latitude.  I also became curious of how sunrise and sunset times differed for the cities throughout the year.  Calculating sunrise and sunset times only requires performing some &lt;a href=&#34;http://en.wikipedia.org/wiki/Sunrise_equation&#34;&gt;mathematical computations&lt;/a&gt; based on longitude and latitude.  But since I don&amp;rsquo;t have all the time in the world I thought it much easier to google an existing module rather than re-write it from scratch, and came up with the fantastic &lt;a href=&#34;http://pythonhosted.org//astral/&#34;&gt;astral module&lt;/a&gt;.  Using this I threw up a quick script to plot sunrise, sunset, and hours of sunlight:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import arrow
+from astral import Astral
+import plotly.plotly as py
+from plotly.graph_objs import *
+import sys
+import math
+from dateutil import tz
+import pprint
+
+pp = pprint.PrettyPrinter(indent=3)
+
+a = Astral()
+a.solar_depression = &#39;civil&#39; 
+
+start = arrow.get(&amp;quot;2014-01-01&amp;quot;)
+end = arrow.get(&amp;quot;2014-12-31&amp;quot;)
+
+types = [&#39;sunlight&#39;, &#39;sunrise&#39;, &#39;sunset&#39;]
+cities = {
+    &#39;Charlotte&#39; : {key:[] for key in types},
+    &#39;Seattle&#39; : {key:[] for key in types}
+}
+
+dates = [day[0] for day in arrow.Arrow.span_range(&#39;day&#39;, start, end)]
+totals = {city:0 for city in cities}
+
+def floathours(dto):
+    return dto.hour + (dto.minute / 60.0) + (dto.second / 3600.0)
+
+for location in cities:
+    city = a[location]
+    for day in dates:
+        sun = city.sun(date=day, local=True)
+        sunrise = floathours(arrow.get(sun[&#39;dawn&#39;]))
+        sunset = floathours(arrow.get(sun[&#39;sunset&#39;]))
+        hours_sunlight = sunset - sunrise
+
+        cities[location][&#39;sunrise&#39;].append(sunrise)
+        cities[location][&#39;sunset&#39;].append(sunset)
+        cities[location][&#39;sunlight&#39;].append(hours_sunlight)
+        totals[location] = totals[location] + hours_sunlight
+
+d = []
+for stype in types:
+    for city in cities:
+        d.append(
+            Scatter(
+                name=&amp;quot;{city} - {type}&amp;quot;.format(**{
+                    &amp;quot;city&amp;quot;:city,
+                    &amp;quot;type&amp;quot;:stype
+                }),
+                x=dates,
+                y=cities[city][stype]
+            )
+        )
+
+data = Data(d)
+
+layout = Layout(
+    title=&#39;Charlotte vs. Seattle Sunlight&#39;,
+    yaxis=YAxis(
+        title=&#39;Hours (24)&#39;,
+        domain = [0,24]
+    )
+)
+
+plot_url = py.plot(data, layout=layout, filename=&#39;Charlotte vs. Seattle Sunlight&#39;)
+print(plot_url)
+
+print(&#39;Charlotte: &#39;, totals[&#39;Charlotte&#39;])
+print(&#39;Seattle: &#39;, totals[&#39;Seattle&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Which created this plot:&lt;/p&gt;
+
+&lt;iframe width=&#34;640&#34; height=&#34;480&#34; frameborder=&#34;0&#34; seamless=&#34;seamless&#34; scrolling=&#34;no&#34; src=&#34;https://plot.ly/~serdmanczyk/224/charlotte-vs-seattle-sunlight/?width=640&amp;height=480&#34; &gt;&lt;/iframe&gt;
+
+&lt;p&gt;The orange lines represent Seattle, and the blue lines represent Charlotte.  The lines on top represent sunset times, bottom the sunrise times, and in the middle the total hours of sunlight across the whole year.  So it can be seen that daylight differences in Seattle are slightly more drastic, but with a result of more total sunlight hours throughout the year.&lt;/p&gt;
+
+&lt;p&gt;Besides the sunlight analysis, all of this is just superficial comparisons.  This was just for kicks and gave me an excuse to mess with weather data.  I&amp;rsquo;ve heard in a few conversations with locals that this winter in Seattle has been substantially sunnier than past years.  &lt;a href=&#34;http://cliffmass.blogspot.com/2015/02/the-origin-of-this-winters-weather.html?m=1&#34;&gt;Professor of Atmospheric Sciences Cliff Mass&amp;rsquo; blog&lt;/a&gt; actually explains the odd weather affecting the US Pacific Northwest and Northeast really well from the perspective of someone who is actually a professional on the subject.  He makes a strong case the weather patterns are due to natural variation and not global warming (while still acknowledging global warming as a pressing issue).&lt;/p&gt;
+
+&lt;p&gt;One thing is for sure, I can&amp;rsquo;t wait for summer here where the days will be long, the air will be dry, and the heat won&amp;rsquo;t commonly go over 70 degrees.  I will not miss the humid heat of the Southeast.  Also, you can&amp;rsquo;t beat the view here:&lt;/p&gt;
+
+&lt;p&gt;&lt;blockquote class=&#34;instagram-media&#34; data-instgrm-captioned data-instgrm-version=&#34;4&#34; style=&#34; background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:658px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);&#34;&gt;&lt;div style=&#34;padding:8px;&#34;&gt; &lt;div style=&#34; background:#F8F8F8; line-height:0; margin-top:40px; padding:50% 0; text-align:center; width:100%;&#34;&gt; &lt;div style=&#34; background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAMAAAApWqozAAAAGFBMVEUiIiI9PT0eHh4gIB4hIBkcHBwcHBwcHBydr+JQAAAACHRSTlMABA4YHyQsM5jtaMwAAADfSURBVDjL7ZVBEgMhCAQBAf//42xcNbpAqakcM0ftUmFAAIBE81IqBJdS3lS6zs3bIpB9WED3YYXFPmHRfT8sgyrCP1x8uEUxLMzNWElFOYCV6mHWWwMzdPEKHlhLw7NWJqkHc4uIZphavDzA2JPzUDsBZziNae2S6owH8xPmX8G7zzgKEOPUoYHvGz1TBCxMkd3kwNVbU0gKHkx+iZILf77IofhrY1nYFnB/lQPb79drWOyJVa/DAvg9B/rLB4cC+Nqgdz/TvBbBnr6GBReqn/nRmDgaQEej7WhonozjF+Y2I/fZou/qAAAAAElFTkSuQmCC); display:block; height:44px; margin:0 auto -44px; position:relative; top:-22px; width:44px;&#34;&gt;&lt;/div&gt;&lt;/div&gt; &lt;p style=&#34; margin:8px 0 0 0; padding:0 4px;&#34;&gt; &lt;a href=&#34;https://instagram.com/p/x2wF7glzkI/&#34; style=&#34; color:#000; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none; word-wrap:break-word;&#34; target=&#34;_top&#34;&gt;Rainier is glowing.&lt;/a&gt;&lt;/p&gt; &lt;p style=&#34; color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;&#34;&gt;A photo posted by Steven Erdmanczyk (@serdmanczyk) on &lt;time style=&#34; font-family:Arial,sans-serif; font-size:14px; line-height:17px;&#34; datetime=&#34;2015-01-15T01:04:34+00:00&#34;&gt;Jan 14, 2015 at 5:04pm PST&lt;/time&gt;&lt;/p&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;script async defer src=&#34;//platform.instagram.com/en_US/embeds.js&#34;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Well, hope you enjoyed my shitty weather blog.  If you&amp;rsquo;re local to Seattle and happened here, hit me up!  I&amp;rsquo;m interested in meeting up with more developers/makers/engineers in the area (or y&amp;rsquo;know, other cool people too).&lt;/p&gt;
+
+&lt;p&gt;With the post I hope to get back in the swing of blogging.  I plan to pick up again on the GardenSpark project soon.  I also have plans for an automated pet feeder projects in the works!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>GardenSpark: Part One - Prototype / stream to plotly</title>
+      <link>http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/</link>
+      <pubDate>Tue, 22 Jul 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/</guid>
+      <description>
+
+&lt;pre&gt;
+This project is undergoing a revamp.  Stay tuned for updates!
+&lt;/pre&gt;
+
+&lt;h2 id=&#34;intro:2753be554e797cd6a2ab8852ac642412&#34;&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;My specialty is working with software and electronics, but also being a fan of nature and reducing our footprint on earth, sometimes I feel my occupation is often contradictory to some of my philosophies.  In the interest of closing this gap and walking down the path of leveraging technology to help us live a lower impact existence, I thought a great personal project would be a system that helps use technology to connect people with growing their our own food.&lt;/p&gt;
+
+&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;repo=gardenspark&amp;type=fork&amp;size=large&#34; height=&#34;30&#34; width=&#34;100&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:100px; height: 30px;&#34; allowTransparency=&#34;true&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;type=follow&amp;size=large&#34; height=&#34;30&#34; width=&#34;240&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:240px; height: 30px;&#34; allowTransparency=&#34;false&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;This is definitely a budding application with a few products just recently being funded on Kickstarter.  Just to list a few projects/products:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.edyn.com/&#34;&gt;Edyn&lt;/a&gt;: (my favorite) Garden sensor and smart watering device&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.harvestgeek.com/&#34;&gt;HarvestGeek&lt;/a&gt;: Garden sensing and visualization (unfortunately it seems they are behind on delivering after their kickstarter was funded)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.growerbot.com/&#34;&gt;GrowerBot&lt;/a&gt;: (formerly Garduino) An Arduino based plant monitoring system&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://gardenbot.org/&#34;&gt;GardenBot&lt;/a&gt;: Not a product, but an open source set of plant sensor designs and tutorials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://bit.ly/1pnlyFF&#34;&gt;Streaming Data to Plotly Using the DHT22&lt;/a&gt; - A simple example of streaming environment data to a live graph online.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This is definitely an area of interest With the growing popularity of the &amp;ldquo;Internet of Things.&amp;rdquo;  This will give me the opportunity to start playing around in that area, renew/refresh my embedded programming skills, and also learn and implement other new frameworks in the process.&lt;/p&gt;
+
+&lt;p&gt;The current scope of this project goes through the following stages, with this post covering the first stage:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Prototype integrating a micro-controller with sensors, and stream the readings to &lt;a href=&#34;https://plot.ly/&#34;&gt;plotly&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Set up a server using &lt;a href=&#34;http://nodejs.org/&#34;&gt;nodejs&lt;/a&gt; to consume sensor data, save data to a database, and offer a simple web interface to preview the data.&lt;/li&gt;
+&lt;li&gt;Upgrade web interface to plot eye friendly charts of the data using the &lt;a href=&#34;http://d3js.org/&#34;&gt;D3&lt;/a&gt; library.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Other planned non-step dependent additions&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Connect pump to mcu for automated watering based on sensor readings&lt;/li&gt;
+&lt;li&gt;Implement manual trigger for watering via cloud API&lt;/li&gt;
+&lt;li&gt;Design pretty enclosure for sensors that&amp;rsquo;s environment proof&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Add battery/solar power to mcu.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;After some reading through parts used in the other projects I decided on the following hardware to start:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.spark.io/&#34;&gt;Spark Core&lt;/a&gt; for processing and internet connectivity
+
+&lt;ul&gt;
+&lt;li&gt;Built-in WiFi and cloud connection libraries&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.adafruit.com/products/385&#34;&gt;DHT22&lt;/a&gt; for Air Temperature / Humidity
+
+&lt;ul&gt;
+&lt;li&gt;0 to 100% humidity w/ 2 to 5% accuracy&lt;/li&gt;
+&lt;li&gt;-40 to 80 °C temperature w/ +-0.5°C accuracy&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://amzn.to/1qMxZGs&#34;&gt;LM335&lt;/a&gt; for measuring Soil Temperature
+
+&lt;ul&gt;
+&lt;li&gt;-40C to +100°C temperature w/ +-1°C accuracy&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://amzn.com/B00B886H7S&#34;&gt;DFRobot Soil Moisture Sensor&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Analog voltage output increases with wetness&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.adafruit.com/products/439&#34;&gt;TSL2561&lt;/a&gt; for measuring Lux (Light)
+
+&lt;ul&gt;
+&lt;li&gt;0.1 - 40,000 Lux&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Since apparently all the other projects get their own cool titles I&amp;rsquo;ve dubbed the working title for my project: GardenSpark.  It goes in a garden, it uses the Spark Core, and it intends to &amp;lsquo;spark&amp;rsquo; interest in growing your own plants and food.  Aren&amp;rsquo;t I clever.&lt;/p&gt;
+
+&lt;h2 id=&#34;humidity-air-temperature:2753be554e797cd6a2ab8852ac642412&#34;&gt;Humidity / Air Temperature&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/dht22.jpg&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Connecting to the &lt;a href=&#34;http://www.adafruit.com/products/385&#34;&gt;DHT22&lt;/a&gt; was made super easy by using the Arduino libraries for the sensor provided by &lt;a href=&#34;https://learn.adafruit.com/dht/downloads&#34;&gt;Adafruit&lt;/a&gt;.  It uses a single wire bus, so getting a reading involves setting a pin high for a specified amount of milliseconds, then switching the pin back to an input and counting on your board&amp;rsquo;s timing to process the duration of highs and lows in the returned signal which contains the sensors serialized response values.  Luckily, the adafruit libraries were pretty much plug-and-play on the Spark despite being written for Arduino.  Connecting was simple:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Vin -&amp;gt; Spark 3.3V*&lt;/li&gt;
+&lt;li&gt;GND -&amp;gt; Spark GND&lt;/li&gt;
+&lt;li&gt;data pin -&amp;gt; Spark Digital pin (your preference)&lt;/li&gt;
+&lt;li&gt;data pin -&amp;gt; pull-up resistor -&amp;gt; 3.3V*&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;lux-light:2753be554e797cd6a2ab8852ac642412&#34;&gt;Lux (Light)&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/TLS2561.png&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&#34;http://www.adafruit.com/products/439&#34;&gt;TSL2561&lt;/a&gt; communicates via I2C, which the Spark Core conveniently provides on pins D0(Serial Data / SDA) and D1(Serial Clock / SCL) via their &lt;a href=&#34;http://docs.spark.io/firmware/#communication-wire&#34;&gt;Wire&lt;/a&gt; library.  Also, like the DTH22, Adafruit is once again kind enough to provide a &lt;a href=&#34;https://learn.adafruit.com/tsl2561/&#34;&gt;tutorial&lt;/a&gt; and  &lt;a href=&#34;https://learn.adafruit.com/tsl2561/use&#34;&gt;code library&lt;/a&gt; to do the communications and calculations for you.  This library was basically plug-and-play on the Spark as well, save for some modification to match the Arduino application headers and I2C library to the Spark Core.  Wiring the sensor was also easy, as it only required four pins:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Vin -&amp;gt; Spark Core 3.3V*&lt;/li&gt;
+&lt;li&gt;GND -&amp;gt; Spark GND&lt;/li&gt;
+&lt;li&gt;SDA -&amp;gt; Spark D0(SDA)&lt;/li&gt;
+&lt;li&gt;SCL -&amp;gt; Spark D1(SCL)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;soil-moisture:2753be554e797cd6a2ab8852ac642412&#34;&gt;Soil Moisture&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/SoilMoistureSensor.png&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;For sensing soil moisture, instead of going through the trouble of &lt;a href=&#34;http://gardenbot.org/howTo/soilMoisture/&#34;&gt;using nails&lt;/a&gt;, I went with a pre-made sensor from &lt;a href=&#34;http://amzn.com/B00B886H7S&#34;&gt;DFRobot&lt;/a&gt; to save time.  I may make my own sensor to match the final prototype enclosure.  Of course, there are no pre-defined units for how moist soil is, so the sensor only gives an analog output voltage approximately proportional to how wet the soil is.  One pitfall of the sensor documentation is that it is written specifically for Arduino users, giving the output values as:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;0-300: dry soil&lt;/li&gt;
+&lt;li&gt;300-700: humid soil&lt;/li&gt;
+&lt;li&gt;700-900: in water&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;What do these values mean?  These are actually the output of AnalogRead() on the Arduino, and a look at the Arduino documentation for AnalogRead() says that the output maps values of 0 to 5V to integer values of 0 to 1023, or ~4.9mV per value.  The Spark Core is different, so our values aren&amp;rsquo;t the same.  The Spark analogRead() maps values between 0 to 3.3V(instead of 5V) to integer values from 0 to 4095, or ~0.8mV per unit.  So to figure what the Spark Core reading is for those values we need to:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;convert those AnalogRead() values to the actual voltage output&lt;/li&gt;
+&lt;li&gt;convert that voltage output from that of a Vin of 5V down to 3.3V&lt;/li&gt;
+&lt;li&gt;convert that to the analogRead() value on the Spark Core for that voltage&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Our actual values come out mapped to be:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;|Arduino (Vin=5V)| AnalogRead() | Vout   |Spark Core (Vin=3.3V)| Vout  |  analogRead() |
+||:-----------: | :----: || :---: | :-----------: |
+||  0           |  0     || 0     | 0             |
+||  300         |  1.465 || 0.967 | 1200          |
+||  700         |  3.418 || 2.256 | 2800          |
+||  900         |  4.395 || 2.90  | 3600          |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Of course this is all still approximate.  Dry is dry and wet is wet, but it was fun to calculate.&lt;/p&gt;
+
+&lt;h2 id=&#34;soil-temperature:2753be554e797cd6a2ab8852ac642412&#34;&gt;Soil Temperature&lt;/h2&gt;
+
+&lt;p&gt;This one was the most interesting.  I used &lt;a href=&#34;http://gardenbot.org/howTo/soilTemp/&#34;&gt;this tutorial&lt;/a&gt; on GardenBot as a template.  It gives an excellent starting point and base info, but I found their schematics and description a bit disjointed.  Oddly, it starts off telling you to solder adjustment resistors with the sensor to go in the ground, and then proceeds later to explain why this is a bad idea (changes in soil temperature changes resistance, resistance effects calibration).  I did a bit of research to figure better resistance values and get a complete schematic, with a little help from &lt;a href=&#34;http://bit.ly/1nJAbNY&#34;&gt;this post on StackExchange&lt;/a&gt;.  After having refreshed my electronics knowledge a bit, my wiring ended up as the following schematic, which may be simpler and easier to understand than the GardenBot schematics:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/LM335_Temp_Schematic.png&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I chose to use a potentiometer to adjust the LM335 during the prototyping phace, and did some calculations to figure that the resistor between the output node and ground needed to be 270 ohms (not 1K) so that the LM335 would get the proper current for the temperature values I desired to read.  The capacitor is there as a noise filter.  I&amp;rsquo;ll pick two resistors similar to the pot setting for the final prototype.&lt;/p&gt;
+
+&lt;p&gt;Calculating the readings on the Spark was a bit straightforward.  It&amp;rsquo;s a matter of multiplying by a constant to convert the voltage reading to kelvin then adding an offest to convert to celsius.  The sensor&amp;rsquo;s output is approximately +10mv for every Kelvin.  You&amp;rsquo;ll remember from the last section that the Spark readings analog input as integers between 0-4096 to correspond with voltages from 0-3.3V.  The formula for converting the analog input to Kelvin is: Kelvin = input*(3.&lt;sup&gt;3&lt;/sup&gt;&amp;frasl;&lt;sub&gt;4096&lt;/sub&gt;)*100.  To convert to Celsius you simply subtract 273.15.&lt;/p&gt;
+
+&lt;p&gt;Currently I have the LM335 connected on the breadboard and am observing it in relation to the DHT22.  Their appears to be some adjusting to do still to get it accurately calibrated, which I&amp;rsquo;ll have to do when I have access to better equipment (such as at our local &lt;a href=&#34;http://hackerspacecharlotte.org/&#34;&gt;Charlotte Hackerspace&lt;/a&gt;).  Once that&amp;rsquo;s done I plan to do the further physical work to heat-shrink the sensor into a component that can be inserted into the soil.&lt;/p&gt;
+
+&lt;h2 id=&#34;streaming-to-plotly:2753be554e797cd6a2ab8852ac642412&#34;&gt;Streaming to Plotly&lt;/h2&gt;
+
+&lt;p&gt;Connecting to the internet with the Spark is made easy out of the box, you simply set your WiFi credentials with the mobile app or the &lt;a href=&#34;]http://docs.spark.io/cli/&#34;&gt;spark cli&lt;/a&gt; and it will automatically connect every time it runs.  Programming the MCU is made easy by their web IDE, but you can also program via USB by setting up the nodejs based spark cli, which I found very useful.  It still requires the spark cloud to compile code into a firmware binary.  The language is very similar to Arduino (which is based on &lt;a href=&#34;http://wiring.org.co/&#34;&gt;Wiring&lt;/a&gt;, which is base on &lt;a href=&#34;http://processing.org/&#34;&gt;Processing&lt;/a&gt;&amp;hellip;).&lt;/p&gt;
+
+&lt;p&gt;For connecting the core to the plotly API, once again, a library already exists!  Plotly provides an &lt;a href=&#34;https://github.com/plotly/arduino-api&#34;&gt;Arduino library&lt;/a&gt;, which was re-purposed ever so slightly &lt;a href=&#34;https://github.com/krvarma/Plotly_SparkCore&#34;&gt;here&lt;/a&gt; for the Spark Core.  It makes plotting easy by encapsulating the &lt;a href=&#34;https://plot.ly/streaming/&#34;&gt;Plotly REST API&lt;/a&gt; calls to initialize the graph and send data into an easy to use C++ class.  Unfortunately there were some errors in the HTTP POST built on the Spark Core version, but I easily corrected them (and it seems as of the time of this writing, the errors have been fixed in the repository).  Since the update interval I desired was farther apart than the plotly API allows, I also had to add code to send a &lt;a href=&#34;https://github.com/plotly/Streaming-Demos#advanced-streaming-concepts&#34;&gt;heartbeat message&lt;/a&gt; within every minute interval to ensure plotly doesn&amp;rsquo;t disconnect.  After getting the library running, I had data!  You can check out my streaming test graph (live from my house!) below (update, the stream is now coming from my intermediary nodejs server, but it&amp;rsquo;s still the same data source):&lt;/p&gt;
+
+&lt;iframe width=&#34;800&#34; height=&#34;600&#34; frameborder=&#34;0&#34; seamless=&#34;seamless&#34; scrolling=&#34;no&#34; src=&#34;https://plot.ly/~serdmanczyk/19/800/600&#34;&gt;&lt;/iframe&gt;
+
+&lt;h2 id=&#34;putting-it-all-together:2753be554e797cd6a2ab8852ac642412&#34;&gt;Putting it All Together&lt;/h2&gt;
+
+&lt;p&gt;With all the parts assembled, the base sketch was very simple.  To start I chose to plot data every five minutes, which would make a full 24 hours of data on the graph equal a manageable 288 points.  All I needed to do was:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Initialize the requisite classes and variables&lt;/li&gt;
+&lt;li&gt;Monitor millis() (milliseconds elapsed in program) value
+
+&lt;ul&gt;
+&lt;li&gt;Every 5 minutes, read sensor data and send to plotly&lt;/li&gt;
+&lt;li&gt;Every 50 seconds (within a minute): send a heartbeat to plotly so the server doesn&amp;rsquo;t close the connection&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;You&amp;rsquo;ll also notice I used Spark&amp;rsquo;s firmware library to set &amp;lsquo;variables&amp;rsquo; for the sensor readings.  This enabled me to monitor readings from the sensors on the fly through &lt;a href=&#34;http://docs.spark.io/api/#reading-data-from-a-core-variables&#34;&gt;Spark&amp;rsquo;s cloud API&lt;/a&gt; rather than have to wait 5 minutes to check the readings being plotted, which was very handy especially because it was wireless unlike a serial connection. Here&amp;rsquo;s my entire main sketch:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#include &amp;quot;plotly_spark.h&amp;quot;
+#include &amp;quot;plotly_defines.h&amp;quot;
+#include &amp;quot;math.h&amp;quot;
+#include &amp;quot;DHT.h&amp;quot;
+#include &amp;quot;Adafruit_TSL2561_U.h&amp;quot;
+
+#define TEMPPIN A0
+#define MOISTPIN A1
+#define DHTPIN D4
+#define DHTTYPE DHT22
+
+#define FIVE_MINUTES (5*60*1000)
+#define FIFTY_SECONDS (50*1000)
+
+// convert input volage reading to kelvin; 10mV = 1 K
+#define ANALOGKELVINCONVERSION 0.08056640625 // (3.3/4096)*100
+
+double Temp = 0.0;
+double SoilTemp = 0.0;
+double Humidity = 0.0;
+double Light = 0.0;
+int Moisture = 0;
+
+unsigned long lastloop = 0;
+unsigned long heartbeat = 0;
+
+char *tokens[TOKENS] = {AIRTEMPTOK, HUMIDTOK, SOILTEMPTOK, MOISTURETOK, LIGHTTOK};
+plotly graph = plotly(USERNAME, APITOKEN, tokens, PLOTNAME, TOKENS);
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
+
+void setup() {
+    tsl.enableAutoRange(true);
+    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);
+
+    tsl.begin();
+    dht.begin();
+
+    pinMode(MOISTPIN, INPUT);
+    pinMode(TEMPPIN, INPUT);
+    Spark.variable(&amp;quot;Temperature&amp;quot;, &amp;amp;Temp, DOUBLE);
+    Spark.variable(&amp;quot;SoilTemperature&amp;quot;, &amp;amp;SoilTemp, DOUBLE);
+    Spark.variable(&amp;quot;Humidity&amp;quot;, &amp;amp;Humidity, DOUBLE);
+    Spark.variable(&amp;quot;Light&amp;quot;, &amp;amp;Light, DOUBLE);
+    Spark.variable(&amp;quot;Moisture&amp;quot;, &amp;amp;Moisture, INT);
+
+    graph.fileopt = &amp;quot;extend&amp;quot;;
+    graph.log_level = 4;
+    graph.maxpoints = 288;
+    graph.init();
+    graph.openStream();
+    heartbeat = millis();
+}
+
+void loop() {
+    unsigned long now = millis();
+
+    if ((now - lastloop) &amp;gt; FIVE_MINUTES){
+      sensors_event_t event;
+
+      tsl.getEvent(&amp;amp;event);
+      Light = (double)event.light;
+      Temp = (double)dht.readTemperature();
+      Humidity = (double)dht.readHumidity();
+      Moisture = map(analogRead(MOISTPIN), 0, 4096, 0, 330);
+      SoilTemp = (double)analogRead(TEMPPIN);
+      SoilTemp = (SoilTemp * ANALOGKELVINCONVERSION) - 273.15;
+
+      graph.plot(now, (float)Temp, tokens[0]);
+      graph.plot(now, (float)Humidity, tokens[1]);
+      graph.plot(now, (float)SoilTemp, tokens[2]);
+      graph.plot(now, Moisture, tokens[3]);
+      graph.plot(now, (float)Light, tokens[4]);
+
+      lastloop = now;
+  }else if((now-heartbeat) &amp;gt; FIFTY_SECONDS){
+      graph.heartbeat();
+      heartbeat = now;
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can see the rest of the code in the &lt;a href=&#34;https://github.com/serdmanczyk/gardenspark/tree/sparkonly&#34;&gt;&amp;lsquo;spark only&amp;rsquo; branch of my github repo&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;results:2753be554e797cd6a2ab8852ac642412&#34;&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;Thanks to libraries and resources on the internet getting the basic sensors set up was made super easy.  Setting up the LM335 was a good refresher on basic electronics.  The Spark Core made internet connectivity very easy, and at a super affordable price (especially since mine was a birthday gift from my sister ^_^).  I still need to do some tuning to get the LM335 calibrated, and there are some bugs with the timestamp values drifting using plotly&amp;rsquo;s Arduino API.  After some experimenting with nodejs, it seems much more friendly with plotly&amp;rsquo;s API, so I look forward to getting the server portion going.  I also look forward to getting a database going so I can start observing patterns in the data over time.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

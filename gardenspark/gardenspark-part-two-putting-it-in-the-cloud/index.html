@@ -1,0 +1,536 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Steven J. Erdmanczyk Jr.">
+		<meta name="description" content="Obligatory software soap box">
+		<meta name="generator" content="Hugo 0.15" />
+		<title>GardenSpark: Part Two - Putting It in the Cloud &middot; Erdmanczyk.io</title>
+		<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/monosocialiconsfont.css">
+		
+		<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Erdmanczyk.io" />
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://serdmanczyk.github.io/about'>About</a>
+	
+
+	
+	<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>GardenSpark: Part Two - Putting It in the Cloud</h1>
+                    <h2 class="headline">September 11, 2014</h2>
+                     
+                        <div id="toc" class="well col-md-4 col-sm-6">
+                            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#intro:80bdf840bb03d6cab3ef663bac316d7c">Intro</a></li>
+<li><a href="#sending-the-data:80bdf840bb03d6cab3ef663bac316d7c">Sending the Data</a></li>
+<li><a href="#setting-up-the-server-using-nodejs:80bdf840bb03d6cab3ef663bac316d7c">Setting Up the Server Using Nodejs</a></li>
+<li><a href="#consuming-server-sent-events:80bdf840bb03d6cab3ef663bac316d7c">Consuming Server Sent Events</a></li>
+<li><a href="#saving-to-a-database:80bdf840bb03d6cab3ef663bac316d7c">Saving to a database</a></li>
+<li><a href="#sending-to-plotly:80bdf840bb03d6cab3ef663bac316d7c">Sending to plotly</a></li>
+<li><a href="#caching-readings-for-plotly:80bdf840bb03d6cab3ef663bac316d7c">Caching readings for plotly</a></li>
+<li><a href="#hosting-an-interface:80bdf840bb03d6cab3ef663bac316d7c">Hosting an interface</a></li>
+<li><a href="#summary:80bdf840bb03d6cab3ef663bac316d7c">Summary</a></li>
+</ul></li>
+</ul>
+</nav>
+                        </div>
+                      
+                </header>
+                <section id="post-body">
+                    
+
+<pre>
+This project is undergoing a revamp.  Stay tuned for updates!
+</pre>
+
+<h2 id="intro:80bdf840bb03d6cab3ef663bac316d7c">Intro</h2>
+
+<p>This is the second part of my project hacking together a home plant/garden monitoring system using the <a href="https://www.spark.io/">Spark Core</a>, sensors, web technologies, and wizardry.  The first part involved making a prototype of Spark attached to a few sensors, then using the Spark itself to stream the sensor data to <a href="https://plot.ly/">plotly</a>.  For my next step I wanted to put an entity in the cloud to consume the data from the Spark, store it away in a database, offer a web interface to access that stored data, as well as handle streaming that data to plotly.</p>
+
+<table><tr><td><iframe src="http://ghbtns.com/github-btn.html?user=serdmanczyk&repo=gardenspark&type=fork&size=large" height="30" width="100" frameborder="0" scrolling="0" style="width:100px; height: 30px;" allowTransparency="true"></iframe></td><td><iframe src="http://ghbtns.com/github-btn.html?user=serdmanczyk&type=follow&size=large" height="30" width="240" frameborder="0" scrolling="0" style="width:240px; height: 30px;" allowTransparency="false"></iframe></td></tr></table>
+
+<iframe width="800" height="600" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~serdmanczyk/19/800/600"></iframe>
+
+<h2 id="sending-the-data:80bdf840bb03d6cab3ef663bac316d7c">Sending the Data</h2>
+
+<p>The first step was to alter the Spark sketch to send the data to an intermediary server rather than just to plotly.  I considered a couple options for delivering data such as through TCP in a proprietary format or packaged in HTTP POST requests as JSON.  I eventually decided to use the Spark firmware&rsquo;s ability to <a href="http://docs.spark.io/firmware/#spark-publish">publish events</a> to Spark&rsquo;s cloud servers which can easily be <a href="http://docs.spark.io/api/#reading-data-from-a-core-events">subscribed to</a> by HTTP via <a href="http://dev.w3.org/html5/eventsource/">server sent events</a>.  Being integrated into the Spark firmware, this was simple to setup, and the connection from the core to the Spark cloud is very reliable.  This also decoupled by server code from being connected to the core, making testing simpler.  My main sketch code is now even simpler:</p>
+
+<pre><code>#include &quot;math.h&quot;
+#include &quot;defines.h&quot;
+#include &quot;DHT.h&quot;
+#include &quot;Adafruit_TSL2561_U.h&quot;
+
+unsigned long timesync = 0;
+unsigned long lastloop = 0;
+
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
+
+void setup() {
+    tsl.enableAutoRange(true);            /* Auto-gain ... switches automatically between 1x and 16x */
+    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
+    tsl.begin();
+    dht.begin();
+
+    pinMode(MOISTPIN, INPUT);
+    pinMode(TEMPPIN, INPUT);
+
+    timesync = millis();
+}
+
+void loop() {
+    unsigned long now = millis();
+
+    if ((now - lastloop) &gt; TEN_SECONDS){
+        sensors_event_t event;
+        char data[42];
+        double AirTemp = 0.0;
+        double SoilTemp = 0.0;
+        double Humidity = 0.0;
+        double Light = 0.0;
+        double Moisture = 0;
+
+        tsl.getEvent(&amp;event);
+        Light = (double)event.light;
+        AirTemp = (double)dht.readTemperature();
+        Humidity = (double)dht.readHumidity();
+        Moisture = ((double)map(analogRead(MOISTPIN), 0, 4096, 0, 330) / 100);  // convert to voltage
+        SoilTemp = ((double)analogRead(TEMPPIN) * ANALOGKELVINCONVERSION) + KELVINCELSIUSCONVERSION;
+
+        sprintf(data, &quot;[%03.03f,%03.03f,%03.03f,%03.03f,%03.03f]&quot;, AirTemp, SoilTemp, Humidity, Moisture, Light);
+        Spark.publish(&quot;Readings&quot;, data, 300, PRIVATE);
+
+        lastloop = now;
+    }else if ((now - timesync) &gt; HALF_A_DAY){
+        Spark.syncTime();
+        timesync = now;
+    }
+}
+</code></pre>
+
+<h2 id="setting-up-the-server-using-nodejs:80bdf840bb03d6cab3ef663bac316d7c">Setting Up the Server Using Nodejs</h2>
+
+<p>As an impetus to learn, and to see what all the hype was about, I decided to use Nodejs to power the server side for this project, for it&rsquo;s ease in getting up and running and for its appeal to IoT (internet of things) applications</p>
+
+<p>I found it very helpful to take an aside and read some material on the basic workings of Javascript before trying to do too much with Nodejs.  I found this book: <a href="http://eloquentjavascript.net/">Eloquent Javascript</a> a great primer that helped integrate my knowledge based on programming in C to how programming works in Javascript-land.</p>
+
+<p>For hosting, my <a href="https://www.openshift.com/">OpenShift</a> account had one more free gear available.  Creating a server with a MongoDB database was as simple as running a few commands from the command line using <a href="https://www.openshift.com/blogs/using-rhc-to-manage-paas-apps">rhc</a>, updates are managed automatically using git, and all imported node modules are managed by OpenShift using the same <a href="https://www.npmjs.org/doc/files/package.json.html">package.json file</a> npm uses.  Pretty forking easy.</p>
+
+<h2 id="consuming-server-sent-events:80bdf840bb03d6cab3ef663bac316d7c">Consuming Server Sent Events</h2>
+
+<p>The first order of business in my server application was get it connected to the data from the Spark.  Subscribing to the events is as simple as <a href="http://techblog.hybris.com/2014/05/02/consuming-spark-core-sse-events-via-node-js/">sending an HTTP request and leaving the connection open</a>.  However, with my application running for days at a time, I was running into trouble with the connection closing every twelve hours or so (not surpisingly).  Instead of taking a lot of time to homebake a solution, I searched through the <a href="https://www.npmjs.org/">npm repository</a> to find an implementation of html5&rsquo;s <a href="https://www.npmjs.org/package/eventsource">EventSource</a> that&rsquo;s been working very well at reconnecting in the event of errors.  Here&rsquo;s a snipper of my implementation:</p>
+
+<pre><code>SparkCloud.prototype.init = function init(done){
+    var self = this,
+        url = &quot;https://api.spark.io/v1/devices/&quot; + self.config.DeviceId + &quot;/events&quot;,
+        evsSettings = {
+           rejectUnauthorized: false,
+           headers:{
+              &quot;Transfer-Encoding&quot;:&quot;Chunked&quot;,
+              Authorization: &quot;Bearer &quot;+ self.config.AccessToken
+           }
+        };
+
+    var es = new EventSource(url,evsSettings);
+    es.addEventListener('Readings', function ParseEvent(event) {
+        var sparkObj = JSON.parse(event.data),
+            Readings = JSON.parse(sparkObj.data),
+            SparkData = {
+                &quot;TimeStamp&quot;: sparkObj.published_at,
+                &quot;Air Temperature&quot;: Readings[0],
+                &quot;Soil Temperature&quot;: Readings[1],
+                &quot;Humidity&quot;: Readings[2],
+                &quot;Soil Moisture&quot;: Readings[3],
+                &quot;Light&quot;: Readings[4]
+            };
+
+        self.emit('data', SparkData)
+    }, false);
+
+    es.onerror = function(){
+        console.log(&quot;Error with EventSource connection with SparkCloud&quot;);
+    };
+
+    self.es = es;
+    done();
+};
+</code></pre>
+
+<p>&lsquo;SparkCloud,&rsquo; in the context of the code above, is my own object that inherits from <a href="http://www.sitepoint.com/nodejs-events-and-eventemitter/">EventEmitter</a>.  It gathers data from Spark&rsquo;s stream in the background and emits an object to the rest of my application when data from my core becomes available.</p>
+
+<p>In the future, Spark intends to add the to feature register an address for their servers to POST the data to via HTTP when events are published.  When this comes available I may implement it at it makes for a better model, but SSE is working in the mean time.</p>
+
+<h2 id="saving-to-a-database:80bdf840bb03d6cab3ef663bac316d7c">Saving to a database</h2>
+
+<p>Now that I had my server sending the data, I wanted to save it.  Streaming to plotly is pretty cool, but after you&rsquo;ve expanded beyond your maximum points on your plot you start losing data.  When it comes to plant data, only the past few hours of data is pretty boring, my goal is to see days/weeks/months of data with summaries, bells, and whistles.</p>
+
+<p>The node-mongodb-native module is recommended but I decided to use the mongojs module because it makes the code easier to read and implement.  A brief overview of the two is given on the <a href="https://www.openshift.com/blogs/getting-started-with-mongodb-on-nodejs-on-openshift">OpenShift blog</a>.  To start I only needed three methods.  One to add new data, to get the most recent entry, and to get entries from a start date to an end date.  Not too complicated, here&rsquo;s the entire module:</p>
+
+<pre><code>&quot;use strict&quot;
+var mongojs = require('mongojs'),
+    connection_string = '127.0.0.1:27017/gardenspark';
+
+// if OPENSHIFT env variables are present, use the available connection info:
+if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
+    connection_string = process.env.OPENSHIFT_MONGODB_DB_USERNAME + &quot;:&quot; +
+      process.env.OPENSHIFT_MONGODB_DB_PASSWORD + &quot;@&quot; +
+      process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
+      process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
+      process.env.OPENSHIFT_APP_NAME;
+};
+
+var db = mongojs(connection_string, ['readings']),
+    readings = db.readings;
+
+readings.ensureIndex({TimeStamp:1});
+
+exports.insert = function insert(Data){
+    console.log(&quot;saved data: &quot; + Data.TimeStamp);
+    readings.insert(Data, {safe:true}, function(err, objects){
+        if (err) {console.warn(err.message);}
+    });
+
+    delete Data._id;
+};
+
+exports.getReadings = function getReadings(start, end, callback){
+    function validDate(dateStr, def){
+        return (Date(dateStr) !== &quot;Invalid Date&quot;) ? new Date(dateStr) : new Date(def);
+    };
+
+    var query = {
+            TimeStamp:{
+                $gt:(validDate(start, 0).toISOString()),
+                $lt:(validDate(end, Date.now()).toISOString())
+            }
+        },
+        results = [];
+
+    readings.find(query,{_id:false})
+        .forEach(function(err,doc){
+            if (!doc) {
+                return callback(results);
+            };
+            results.push(doc);
+        });
+};
+
+exports.getLatest = function getLatest(callback){
+    var latest = {};
+
+    readings.find({},{_id:false})
+        .sort({TimeStamp:-1})
+        .limit(1)
+        .forEach(function(err,doc){
+            if (!doc) {
+                callback(latest);
+            };
+
+            latest = doc;
+        });
+};
+</code></pre>
+
+<h2 id="sending-to-plotly:80bdf840bb03d6cab3ef663bac316d7c">Sending to plotly</h2>
+
+<p>For streaming to plotly, I simply adapted code from their <a href="https://github.com/plotly/plotly-nodejs/tree/master/examples">streaming example</a>, to my application, with some modifications for specifying plot names and tokens in a separate file, and adding a heartbeast function and pass a plotting function to a callback from my initialization.  It&rsquo;s noticeably more amicable streaming the data from nodejs to plotly rather than from the Spark.  Hopefully this pieces of the server code will be short lived as my planned next step is to switch from using plotly to drawing the plots myself with my own code.</p>
+
+<h2 id="caching-readings-for-plotly:80bdf840bb03d6cab3ef663bac316d7c">Caching readings for plotly</h2>
+
+<p>As another feature I wanted to have the ability to modify the interval at which the application will send data to plotly.  With data being sent from the Spark every 10 seconds the plot will fill rather quickly, and rather than needing to do a git add/commit/push/etc. to update the OpenShift app every time I want to update the interval, using a REST call seemed a lot more convenient.</p>
+
+<p>With the interval to plot possibly longer or shorter than the interval data is being received, just plotting the most recent value received wouldn&rsquo;t accurately represent the data over that time period.  Instead, I made a module that would cache the average of the readings received over the plotting period.  After the interval from the last plot had elapsed, it would send the average to plotly instead.  Here&rsquo;s a snippet of the moving average piece:</p>
+
+<pre><code>DataCache.prototype.append = function append(data){
+    var self = this,
+        c = this.data.count;
+
+    for (var key in data){
+        if (key === &quot;TimeStamp&quot;){
+            continue;
+        };
+        if (key in self.data){
+            var o = self.data[key],
+                n = data[key];
+
+            self.data[key] = o + ((n-o)/(c+1));
+        }else{
+            self.data[key] = data[key];
+        }
+    };
+    self.data.count++;
+};
+</code></pre>
+
+<p>This obviously doesn&rsquo;t handle all error conditions, so isn&rsquo;t a fully robust, but handles well in my app where I have full control.  Then for modifying the interval I simply made another method for the DataCache object.  The interval is stored as a member.  When the interval length is modified, the interval variable is cleared and modified.  Every time the interval is triggered, the object will emit the averaged data (if any) to any listeners.</p>
+
+<pre><code>DataCache.prototype.setEmitInterval = function setEmitInterval(ms){
+    var self = this;
+
+    self.timeout = ms;
+    if (self.interval !== undefined){
+        clearInterval(self.interval);
+    };
+
+    self.interval = setInterval(function(){
+        if (self.data.count &gt; 0){
+            self.emit('interval', self.get());
+        };
+    }, self.timeout);
+};
+</code></pre>
+
+<h2 id="hosting-an-interface:80bdf840bb03d6cab3ef663bac316d7c">Hosting an interface</h2>
+
+<p><img src="/images/gardenspark/web_interface_preview.png" alt="web interface" /></p>
+
+<p>It seems there&rsquo;s quite the variety of frameworks for rendering web interfaces for Nodejs.  I stuck with the what seemed the most basic: <a href="http://expressjs.com/">express</a>.  All I wanted was a simple home page that displays the latest reading alongside the current interval time.  Besides that, I wanted to be able to request data between specified time intervals in either a web page or, if the content type header is specified, as JSON for the use in APIs (such as a plotting utility).  I made sure to default the page for displaying readings to the 50 most recent readings, and not to return all data unless explicitly requested.  Using jade templates made rendering the pages from simple javascript objects a breeze.</p>
+
+<pre><code>app.get('/', function(req,res){
+    db.getLatest(function(data){
+        if (req.headers['content-type'] === 'application/json'){
+            res.send(JSON.stringify(data));
+        }else{
+            data.TimeStamp = (new Date(data.TimeStamp));
+            var rs = \_.map(data, function(v,k,l){
+                    return {name:k,value:v};
+                });
+            res.render('index',{
+                title:name,
+                readings:rs,
+                interval:cache.timeout.toString()
+            });
+        };
+
+    });
+});
+
+app.get('/readings', function(req, res){
+        var n = Date.now(),
+            all = (req.query.all ? true : false),
+            startDate = (req.query.start || 0),
+            endDate = (req.query.end || n);
+
+    if (startDate === 0 &amp;&amp; endDate === n &amp;&amp; !all){
+        endDate = Date.now();
+        startDate = endDate - 300000; // Five minutes ago
+    }else if (all){
+        startDate = 0;
+        endDate = Date.now();
+    };
+
+    db.getReadings(startDate, endDate, function(results) {
+        if (req.headers['content-type'] === 'application/json') {
+            res.send(JSON.stringify(results));
+        }else{
+            var ret = {
+                title:name,
+                readings:results || []
+            };
+            res.render('readings', ret);
+        };
+    });
+});
+</code></pre>
+
+<p>Here&rsquo;s a preview of the readings interface:
+<img src="/images/gardenspark/readings_preview.png" alt="readings interface" /></p>
+
+<p>Check it out!  The server is live, so head on over: <a href="http://gardenspark-evargreen.rhcloud.com/">gardenspark-evargreen.rhcloud.com</a>.</p>
+
+<p>Check out the <a href="http://gardenspark-evargreen.rhcloud.com/readings">readings page</a>, and an example of getting readings over <a href="http://gardenspark-evargreen.rhcloud.com/readings?start=2014-09-11T16:00:00.000Z&amp;end=2014-09-11T17:00:00.000Z">an interval</a>.</p>
+
+<h2 id="summary:80bdf840bb03d6cab3ef663bac316d7c">Summary</h2>
+
+<p>Here&rsquo;s a basic diagram of the system as it is now: x</p>
+
+<p><img src="/images/gardenspark/gardenspark_serverdiagram.png" alt="System Overview" /></p>
+
+<p>Thanks to Nodejs&rsquo; architecture, with callbacks and event emitters, it was particularly efficient to implement this architecture in an easy to read and snappy fashion without an excessive amount of get-up-and-go time.  Nodejs will definitely be a handy tool for other personal projects I take up.  Now, with a web interface, it&rsquo;s been easy to check up on my system and verify readings have been occurring properly.  I can now even use it for the practical purpose of seeing if I need to water my plant, if it gets too much sunlight during a particular part of the day, if an A/C vent is hitting it the plant too hard, etc.  Exciting stuff!</p>
+
+<p>For the next part of this project I&rsquo;m going to deviate into the less familiar realm (for myself at least) of graphics and interface design and attempt to implement the <a href="http://d3js.org/">D3</a> library to host the plots themselves via my web interface.  Hopefully this will enable more responsive charts as well as the ability to visualize the data more intuitively.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                
+                        <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Steven J. Erdmanczyk Jr.</span>
+                            <span>Software Developer</span>
+                        </div>
+                    
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fgardenspark%2fgardenspark-part-two-putting-it-in-the-cloud%2f - GardenSpark%3a%20Part%20Two%20-%20Putting%20It%20in%20the%20Cloud "><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'serdmanczyk';
+    var disqus_identifier = 'http:\/\/serdmanczyk.github.io\/gardenspark\/gardenspark-part-two-putting-it-in-the-cloud\/';
+    var disqus_title = 'GardenSpark: Part Two - Putting It in the Cloud';
+    var disqus_url = 'http:\/\/serdmanczyk.github.io\/gardenspark\/gardenspark-part-two-putting-it-in-the-cloud\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/">Python Oberserver Metaclass<aside class="dates">Mar 10</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/">GardenSpark: Part Three - Make the Internet Pretty<aside class="dates">Apr 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/">GardenSpark: Part Two - Putting It in the Cloud<aside class="dates">Sep 11</aside></a>
+        </li>
+        
+   
+    
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/">GardenSpark: Part One - Prototype / stream to plotly<aside class="dates">Jul 22</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/BlogStarts/">Developer Blog Begins<aside class="dates">May 29</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    
+        
+<div id="social">
+    
+    <a class="symbol" href="https://www.github.com/serdmanczyk">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://plus.google.com/u/0/&#43;StevenErdmanczykJr/posts">
+        circlegoogleplus
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="http://stackoverflow.com/users/2406040/serdmanczyk">
+        circlestackoverflow
+    </a>
+    
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2016 Steven J. Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+    </body>
+</html>

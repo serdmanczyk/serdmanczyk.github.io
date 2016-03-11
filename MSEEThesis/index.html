@@ -1,0 +1,478 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Steven J. Erdmanczyk Jr.">
+		<meta name="description" content="Obligatory software soap box">
+		<meta name="generator" content="Hugo 0.15" />
+		<title>Master&#39;s Thesis &middot; Erdmanczyk.io</title>
+		<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/monosocialiconsfont.css">
+		
+		<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Erdmanczyk.io" />
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://serdmanczyk.github.io/about'>About</a>
+	
+
+	
+	<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Master&#39;s Thesis</h1>
+                    <h2 class="headline">May 28, 2014</h2>
+                     
+                        <div id="toc" class="well col-md-4 col-sm-6">
+                            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#intro:87835e7e612fcf69f4ed77ed98e6b1e2">Intro</a></li>
+<li><a href="#networking:87835e7e612fcf69f4ed77ed98e6b1e2">Networking</a></li>
+<li><a href="#rss-rssi-and-syncing-measurements:87835e7e612fcf69f4ed77ed98e6b1e2">RSS, RSSI, and Syncing Measurements</a></li>
+<li><a href="#node-deployment:87835e7e612fcf69f4ed77ed98e6b1e2">Node Deployment</a></li>
+<li><a href="#distance-maintenance:87835e7e612fcf69f4ed77ed98e6b1e2">Distance Maintenance</a></li>
+<li><a href="#healing-the-tether-when-nodes-are-lost:87835e7e612fcf69f4ed77ed98e6b1e2">Healing the Tether when Nodes are Lost</a></li>
+<li><a href="#summary:87835e7e612fcf69f4ed77ed98e6b1e2">Summary</a></li>
+</ul></li>
+</ul>
+</nav>
+                        </div>
+                      
+                </header>
+                <section id="post-body">
+                    
+
+<h2 id="intro:87835e7e612fcf69f4ed77ed98e6b1e2">Intro</h2>
+
+<p>I’ve decided to begin blogging my various endeavors in software development and electrical engineering hackery. To kick it off, I’m writing a post describing the work I did for my Masters of Science in Electrical Engineering thesis. This post will start it off with a brief introduction/overview, then I’ll cover individual aspects of the project.</p>
+
+<p>You can read my <a href="http://webpages.uncc.edu/~jmconrad/GradStudents/Thesis_Erdmanczyk.pdf">full thesis</a> via my advisor’s website, and all source code is available to view at <a href="https://github.com/serdmanczyk/masters-thesis/">github.com/serdmanczyk/masters-thesis/</a>.</p>
+
+<p><img src="/images/msthesis/syspic.jpg" alt="Snapshot of computer and all Sakura boards, all outfitted with XBee radios" /></p>
+
+<p>The title of my thesis was “Adaptive Deployment of Mobile Sensor Nodes.” Unfortunately, like many academic paper titles, that comes off a bit vague. More specifically, my thesis involved researching a method for the dynamic deployment and maintenance of of mobile robots to act as a ‘wireless tether’ of repeaters for radio communications between a deployed robot and its base station in restrictive environments.</p>
+
+<p>That’s quite a mouthful, but in reality it’s actually pretty simple. Let’s consider an example use scenario:</p>
+
+<p>Consider you’re deploying mobile robots into a tunnel, collapsed building, or some other environment where radio communications may become restricted due to interference from obstacles. There’s various reasons you may want to do this: data gathering, equipment maintenance, locating disaster survivors, etc.. You need a way to repeat your signal to the deployed robot, and simply beefing up your transmitter strength won’t work. You could try manually placing radio repeaters, but that’s not feasible in dynamic scenarios. Instead, you could deploy robots that can intelligently move themselves in positions akin to better signal strength as well as recover their ‘tether’ in the case a node is damaged or destroyed. Applications like this were the aim of my thesis.</p>
+
+<p>Designing a system for these situations sounds super cool, and what I completed with my thesis would make a good bottom layer for one of these example applications. Unfortunately I was just one person, was completing my thesis alongside working full-time, had limited access to materials from my universities lab due to time/distance constraints, as well as had a limited personal budget, so obviously my thesis did not involve me designing and implement a full system of actual moving robots that can rescue you from a collapsed building.</p>
+
+<p>What I did do, was designed a piece of such a system and physically simulate it using my laptop and a few embedded boards. Other pieces required for a full system would include the parts for path navigation, collision avoidance, robot localization, pattern recognition, etc.</p>
+
+<p>My resulting application broke down into three hardware pieces performing three general tasks. The hardware pieces were:</p>
+
+<ul>
+<li>A base station run via Python. In my case a laptop, but adaptable to anything that runs python (e.g. Raspberry Pi)</li>
+<li>A tether of mobile nodes programmed in C++, implemented with <a href="http://sakuraboard.net/gr-sakura_en.html">Renesas Sakura</a> boards (provided by my advisor), but easily adaptable to an Arduino device</li>
+<li><a href="http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/point-multipoint-rfmodules/xbee-series1-module">XBee 802.15.4</a> radios for handling wireless communications</li>
+</ul>
+
+<p>The three general tasks were:</p>
+
+<ul>
+<li>The base station would dynamically deploy nodes as needed when the most recently deployed node exceeded range</li>
+<li>Deployed nodes would maintain distance between each other in order to maintain maximal signal strength</li>
+<li>In the case a node was lost, the system of nodes would maneuver and re-connect in order to heal the wireless communications tether</li>
+</ul>
+
+<p>I unfortunately did not get access to sufficient equipment to make the mobile nodes autonomously mobile, and instead had to simulate movement by having the Sakura boards light LEDs indicating their desired direction and then move the boards by hand. However, in my code I did provision for the output of a pulse-width-modulated signal to control a servo or DC motors.</p>
+
+<p>That concludes the basic, top-level overview, now let&rsquo;s delve into how I handled the networking layer in my application.</p>
+
+<h2 id="networking:87835e7e612fcf69f4ed77ed98e6b1e2">Networking</h2>
+
+<!-- EMBED: http://instagram.com/p/gZgK3NFzgv/ -->
+
+<iframe src="//instagram.com/p/gZgK3NFzgv/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
+
+<p>The XBee 802.15.4 nodes are called as such because they implement the low-level <a href="http://en.wikipedia.org/wiki/IEEE_802.15.4">802.15.4 protocol</a>. This is a protocol designed for low-powered device networking, primarily embedded applications, that gives slower speeds but with lower power requirements. The 802.15.4 protocol provides accommodations for layers one and two of the <a href="http://en.wikipedia.org/wiki/OSI_model">OSI model</a>. On layer one they handle converting the digital output to radio waves as well as direct sequence spread spectrum (DSSS) modulation to avoid radio interference. On layer two it provides Media Access Control techniques such as carrier sense multiple access with collision avoidance (CSMA/CA) to prevent radios attempting to access the communications medium at the same time. What 802.15.4 does not provide is networking, so it was up to my application to handle OSI layer three and up.</p>
+
+<p>There’s various ways to configure the XBee nodes to communicate, I won’t expound on them here. In short, I chose to use the XBee API mode to handle communicating with the radios because of the flexibility, speed, and control it offered. I chose not to use Full Function Device / Reduced Function Device functionality, or even ZigBee, to handle networking for a slew of reasons I won’t waste space divulging into here. I’ll just say they were either too power hungry, had limitations too great, or just didn’t fit.</p>
+
+<p>With XBee API mode, all messages sent and received from the radio needed to be packed in a frame format. In particular the transmission request frame would contain the following information:</p>
+
+<ul>
+<li>The destination node address</li>
+<li>A frame ID (used to track transmission success)</li>
+<li>Whether or not the radio should return a ‘success’ packet if transmission succeeds</li>
+<li>The message itself</li>
+</ul>
+
+<p>The received packet would contain the following:</p>
+
+<ul>
+<li>Source address</li>
+<li>Received signal strength indicator (RSSI) measured on message detection</li>
+<li>An optional byte to denote if message is a broadcast message</li>
+</ul>
+
+<p>This provided all the ingredients I needed to handle networking in-app and on-the-fly. The RSSI from the received packets is particularly interesting, as it allows the application to keep record of signal strength with nearby neighbors without additional overhead. Another good reason to use API mode, that I’ll delve into in the next part.</p>
+
+<p>In networking, it’s common for devices in charge of routing to manage a table containing information and routes to known addresses. In the case of my application, networking is pretty simple: either a packet is going towards the base station or away from the base station. This kept routing tables down to two addresses: the neighbor to the front and the neighbor to the back. Of course, the base station would keep check on all nodes deployed, but would only communicate to the nearest node. For deployed nodes, the front and back neighbor are assigned by the base station on deployment.</p>
+
+<p>So, I have a way to address which nodes to talk to, and I have a way to route messages to all other nodes in the system. Done, right? Well, of course I had more problems.</p>
+
+<p>As is the nature of networking, errors will occur. Packets will be lost, so I needed a way to track specifically which packets and attempt to retry. Luckily the optional bits in the transmission frame allowed my app to track which messages had succeeded or not. If a message failed, that radio would pass a message back with a frame ID, and I would use the frame ID to retrieve the message from a short-term cache and retry. If it failed too many times, I abandoned and deleted it. This provided layer two feedback and error handling.</p>
+
+<p>Still, there was some trouble with multi-hop messages being lost, so the next step was to have nodes send an explicit acknowledge message for messages meant to traverse several nodes. If no acknowledge from the destination node within a specified time frame, I would retry the message, and abandon after too many retries as by then the message had probably aged.</p>
+
+<p>So, that’s a basic overview of how I built a simple, low-level, two-way networking piece in my application. This was probably the hardest part, as this was my first time working with wireless communication and doing any explicit networking without additional software or protocol libraries. I’m welcome to any feedback on what I may not have done well enough! So to review I handled networking in my application by:</p>
+
+<ul>
+<li>Taking full control of destination and received addresses using XBee API mode</li>
+<li>Keeping a routing table in deployed nodes of the neighboring nodes to the front and back. Inwards traffic went backwards, outwards traffic went forwards.</li>
+<li>Handling errors by retry-ing packets, abandoning after too many retries.</li>
+<li>Handling lost multi-hop packets via application level acknowledgement messages: retrying after a timeout, abandoning after too many retries.</li>
+</ul>
+
+<p>This system got packet success up to a good 95+% in scenarios with good signal strength.</p>
+
+<p>Now that networking is covered, our next layer to cover is using this to communicate RSSI among all of the nodes and using that to evaluate communications strength amongst the system.</p>
+
+<h2 id="rss-rssi-and-syncing-measurements:87835e7e612fcf69f4ed77ed98e6b1e2">RSS, RSSI, and Syncing Measurements</h2>
+
+<p>So, what is RSS? RSS is an acronym for <a href="http://en.wikipedia.org/wiki/Signal_strength">Received Signal Strength</a> which is a metric used to represent how strong a radio signal is when a message is received on a listening device. In lower powered applications such as with embedded radios, it can commonly be measured as the log base 10 of the ratio of the received signal power to 1 milliwatt, aka <a href="http://www.rapidtables.com/electric/dBm.htm">Decibel-milliwatt</a> (dBm).</p>
+
+<p>RSS was my chosen metric in my application because of its ease of availability via the XBee communication’s API mode. By monitoring the RSS of nearby nodes I could directly observe the perceived signal strength and tie it into controlling the nodes to achieve better communications strength.  This also allowed the application to automatically account for when nodes enter areas that obstruct signal strength, something that would be difficult to detect if the it attempted to control based on a distance or mapping based approach.</p>
+
+<p>With XBee API mode, monitoring the RSS from received messages was easy. The difficulty is, the other node’s perceived RSS may be different from our current node’s RSS due to factors such as environmental interference or other radio’s interfering signals. Acting on just our own measurement may cause our node to move out of our neighboring node’s effective range.</p>
+
+<p>To account for this, I had each node keep track of RSS to its neighbor nodes on each received packet. Every second, nodes would transfer their most recent record of perceived RSS to its neighboring node. Each would keep a running average of the 10 most recently received RSS measurements, both based on perceived strength and the neighbor’s reported strength. The node would act on whichever running average was weaker. The below illustration depicts this process in a friendlier visual manner.</p>
+
+<p><img src="/images/msthesis/RSSSync.png" alt="Node RSS sync process" /></p>
+
+<p>Simple, right? So what about the base station? How is the base station to monitor RSS of all nodes to provide system feedback when it only communicates with the nearest node? To provide this functionality, I implemented a message to be sent from the furthest node. The first message contains the the node’s perceived RSS to its neighbor, its address, as well as the RSS reported to it. The message is passed backwards down the chain, aggregating data concerning each node’s connections and addresses as it goes. When it finally arrives at the base station, it contains information about each node’s signal strength in the chain for that snapshot in time. This process is depicted in the image below.</p>
+
+<p><img src="/images/msthesis/RSSReport.png" alt="RSS report to base station process" /></p>
+
+<p>I’ll point out a couple important potential criticisms. Using RSS does have some deficiency as it only represents measured signal strength, but DOES NOT represent the signal-to-noise ratio during message reception. Unfortunately, time and system constraints prevented me from facilitating the measurement of SNR, but it would be a critical piece of a deliverable system. Also, keeping a running average of the RSS is subject to some aggregation of errors, and a better option may be a running mean or some more complex filtering method.</p>
+
+<p>So that’s how I handled monitoring and syncing signal strength between nodes in my application’s system. This functionality is critical as one of the primary objectives in the system is to maintain distance between nodes in order to maximize communication’s strength. In my  into the primary logical functions of my system: deploying nodes as needed, maintaining distance between nodes, and healing the tether when nodes go down.</p>
+
+<h2 id="node-deployment:87835e7e612fcf69f4ed77ed98e6b1e2">Node Deployment</h2>
+
+<p>When it came to the system’s responsibilities of deployment, distance management, and recovery I had to make a choice with each of how I would split that responsibility among the system parts. Should the logic for deployment be a distributed protocol among the nodes? What about healing and distance management, is that something nodes should defer to the base station? In the case of deployment, the choice of centralizing the logic to the base station was an easy one.</p>
+
+<p>The process I chose to handle deployment is quite simple.</p>
+
+<ul>
+<li>Start-up process
+
+<ul>
+<li>On the Node:
+
+<ol>
+<li>After initialization, send broadcast announcing presence on one second interval</li>
+</ol></li>
+<li>On the Base Station:
+
+<ol>
+<li>After initialization, listen for broadcasts from new nodes</li>
+<li>When a broadcast is heard, add node to internal list</li>
+<li>After a specified start-up interval begin deploying nodes</li>
+</ol></li>
+</ul></li>
+<li>Initial deployment:
+
+<ul>
+<li>Base Station:
+
+<ol>
+<li>Send message to first node assigning rear neighbor address as base station’s address</li>
+<li>Send deployment message (node stops broadcasting)</li>
+</ol></li>
+</ul></li>
+</ul>
+
+<p><img src="/images/msthesis/InitialDeployment.png" alt="Initial Deployment Visualization" /></p>
+
+<ul>
+<li>Continuous deployment:
+
+<ul>
+<li>Base Station:
+
+<ol>
+<li>On an interval, check measured RSS to most recently deployed(nearest) node</li>
+<li>If RSS drops below a set threshold (determined from testing/calculations), deploy next node:</li>
+<li>Send message to recently deployed node assigning rear address as next node to be deployed</li>
+<li>Send message to newly deployed node assigning front address as recently deployed node, and rear address as base station</li>
+<li>Send ‘deploy’ message to newly deployed node</li>
+</ol></li>
+</ul></li>
+</ul>
+
+<p><img src="/images/msthesis/ContinuousDeployment.png" alt="Continuous Deployment Visualization" /></p>
+
+<p>Of course, each assignment and deployment message is checked for an acknowledgement from the destination; if there is no acknowledgement the process bails. Further steps would be to add additional error checking on this process.</p>
+
+<!-- https://www.youtube.com/watch?v=KX1XcLeSdSU -->
+
+<iframe width="560" height="315" src="//www.youtube.com/embed/KX1XcLeSdSU" frameborder="0" allowfullscreen></iframe>
+
+<p>That sums up the deployment process, which is the simplest of the three system tasks. Now let&rsquo;s go over the distance maintenance algorithm.</p>
+
+<h2 id="distance-maintenance:87835e7e612fcf69f4ed77ed98e6b1e2">Distance Maintenance</h2>
+
+<p>I chose to make the distance maintenance algorithm a distributed one. The phrase ‘distributed algorithm’ tends to invoke thoughts of complexity. Implementing a distributed algorithm may require additional code to handle concurrency, error correction, message passing, etc. however in the case of my system, distributed means that I could avoid that complexity as well as increase the speed of response.</p>
+
+<p>My final method was actually rather simple and relied on emergent behavior.</p>
+
+<ul>
+<li>Distance Maintenance Process:
+
+<ol>
+<li>Continually move forward</li>
+<li>If RSS to rear is too low, slow down</li>
+<li>If RSS to rear is exceptionally low, stop</li>
+<li>If RSS to front is too high, stop</li>
+</ol></li>
+</ul>
+
+<p><img src="/images/msthesis/DistanceMaintenance.png" alt="Psuedo-code and diagram" /></p>
+
+<p>Thus the steps to implement are considerably simple. By making each nodes take these actions, the result is the tether acting as sort of a ‘spring.’ If a node moves forward, it effectively ‘pushes’ the node in front of it forwards as well. Each node will ‘pull’ the node to the front back towards it if it goes to far. If you’ve ever read up on <a href="http://en.wikipedia.org/wiki/Boids">Boids</a>, you’ll find this similar. I wasn&rsquo;t directly inspired by the work on Boids, but I suppose you could say I was indirectly inspired because I had heard of similar things in a TED talk (which I cannot remember the name of).</p>
+
+<p>To compare, if I had decided to centrally control distance, it would require the base station to perform a computation on what it knows of signal strengths in the tether. Because of the work I described in part three, the base station does have this information, though it may be slightly outdated when the base station would get around to computing. The base station would also need to send at least one message down the chain to notify each node of its needed control output. This adds layers of latency and possible errors in the process, whereas by having each node process individually it doesn&rsquo;t require any additional messages and causes immediate changes in control output.</p>
+
+<p>Unfortunately, as I mentioned earlier, I never was able to acquire materials to make the nodes truly mobile, so I had to simulate movement by lighting LEDs and moving the nodes with my hands. I did write code for an output to servo motors. Maybe sometime in the future I will acquire a series of Arduino’s just to see this step, because it would be really cool to watch this be performed autonomously.</p>
+
+<!-- https://www.youtube.com/watch?v=kft7dlmPVRk -->
+
+<iframe width="560" height="315" src="//www.youtube.com/embed/kft7dlmPVRk" frameborder="0" allowfullscreen></iframe>
+
+<p>So that covers how I implemented a simple, distributed, emergent algorithm to allow the mobile nodes in the system of my thesis to control their distance to each other. Now let&rsquo;s look at the final and most difficult piece: handling recovery when nodes area lost.</p>
+
+<h2 id="healing-the-tether-when-nodes-are-lost:87835e7e612fcf69f4ed77ed98e6b1e2">Healing the Tether when Nodes are Lost</h2>
+
+<p>If a node is lost, the nodes need not just to intelligently reconnect, they most likely also need to maneuver to be back in range of a healthy node. Once again there came the choice of whether to handle this distributively or centrally, and I once again chose the former.</p>
+
+<p>Any node in the system is expecting to hear from its neighbor to the front or rear at least once on every one second interval, so I made each node assume it had lost contact with a neighbor if it hadn&rsquo;t heard anything in a small multiple of that time frame. If the neighbor was deemed lost the scenario is as follows:</p>
+
+<ul>
+<li>If lost neighbor to rear:
+
+<ol>
+<li>Begin to move backwards to approach remaining tether</li>
+<li>Begin sending ‘lost broadcast’ message announcing it’s lost its rear neighbor</li>
+<li>Upon reception of acknowledgement to lost broadcast, set new neighbor as neighbor to rear</li>
+<li>Resume standard operation</li>
+</ol></li>
+<li>If lost neighbor to front:
+
+<ol>
+<li>Send notification to base station (debug purposes)</li>
+<li>Continue to move forward as normal (will approach chain in front)</li>
+<li>Listen for ‘lost broadcast’</li>
+<li>Upon reception of ‘lost broadcast’ send acknowledgement, set sender as front neighbor</li>
+</ol></li>
+</ul>
+
+<p><img src="/images/msthesis/LostRecovery.png" alt="Lost Node Recovery Diagram" /></p>
+
+<p>So, with the other steps handled the way they are, handling a lost node is actually kept rather simple. The only interruption to normal movement is the node to the front of the lost node moving backwards to recover the tether, all nodes in front of that node will move backwards to follow when RSS drops (see part five). Just as distance maintenance is handled by emergent behavior as the result of a few simple steps, so is healing the tether.</p>
+
+<!-- https://www.youtube.com/watch?v=btbE84ngXd8 -->
+
+<iframe width="560" height="315" src="//www.youtube.com/embed/btbE84ngXd8" frameborder="0" allowfullscreen></iframe>
+
+<p>“What about the base station?” you may ask. Won’t it continue to think that the tether includes the lost node because it deployed them in a certain order? Fortunately, no. If you’ll remember from part three, the base station receives a report from the furthest node every second containing aggregated data about each connection in the chain. If at any point the order of nodes doesn&rsquo;t match the base station’s record, it will update the record to match current data.</p>
+
+<p>That gives a general overview of how my application handles situations where a node is lost. Once again not too complicated given the other layers are designed well.</p>
+
+<h2 id="summary:87835e7e612fcf69f4ed77ed98e6b1e2">Summary</h2>
+
+<p>Thus concludes the &lsquo;blog-ification&rsquo; of the work I did on my thesis.  I spared intricate details on coding and such, because that would drag on longer than I would wish for what I wanted to get across.  I will give a post soon on the basics of using API mode with XBees using Python and Arduino that will include code from this project.  Hopefully the general overview of how I implemented a system of mobile nodes/a base station to provide an automated wireless communications tether can be helpful to others with a similar project and/or may have just been entertaining to read.</p>
+
+<p>In summary the stages of work I did on my thesis were:</p>
+
+<ol>
+<li>Networking - message routing and error handling</li>
+<li>Syncing RSS (signal strength) among nodes and base station.</li>
+<li>Automatically deploying new nodes from the base station</li>
+<li>Maintaining distance between nodes for optimal commmunications strength</li>
+<li>Healing the tether when a node is lost</li>
+</ol>
+
+<p>A seemingly complicated task at first, made simple by splitting it up into parts and iteratively hacking away step-by-step.  Hope you enjoyed reading!</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                
+                        <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Steven J. Erdmanczyk Jr.</span>
+                            <span>Software Developer</span>
+                        </div>
+                    
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fMSEEThesis%2f - Master%27s%20Thesis "><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'serdmanczyk';
+    var disqus_identifier = 'http:\/\/serdmanczyk.github.io\/MSEEThesis\/';
+    var disqus_title = 'Master\x27s Thesis';
+    var disqus_url = 'http:\/\/serdmanczyk.github.io\/MSEEThesis\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/">Python Oberserver Metaclass<aside class="dates">Mar 10</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/">GardenSpark: Part Three - Make the Internet Pretty<aside class="dates">Apr 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/">GardenSpark: Part Two - Putting It in the Cloud<aside class="dates">Sep 11</aside></a>
+        </li>
+        
+   
+    
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/">GardenSpark: Part One - Prototype / stream to plotly<aside class="dates">Jul 22</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/BlogStarts/">Developer Blog Begins<aside class="dates">May 29</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    
+        
+<div id="social">
+    
+    <a class="symbol" href="https://www.github.com/serdmanczyk">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://plus.google.com/u/0/&#43;StevenErdmanczykJr/posts">
+        circlegoogleplus
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="http://stackoverflow.com/users/2406040/serdmanczyk">
+        circlestackoverflow
+    </a>
+    
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2016 Steven J. Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+    </body>
+</html>

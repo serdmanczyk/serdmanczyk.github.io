@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Express on Erdmanczyk.io</title>
+    <link>http://serdmanczyk.github.io/tags/express/</link>
+    <description>Recent content in Express on Erdmanczyk.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 05 Apr 2015 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://serdmanczyk.github.io/tags/express/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>GardenSpark: Part Three - Make the Internet Pretty</title>
+      <link>http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/</link>
+      <pubDate>Sun, 05 Apr 2015 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/</guid>
+      <description>
+
+&lt;pre&gt;
+This project is undergoing a revamp.  Stay tuned for updates!
+&lt;/pre&gt;
+
+&lt;h2 id=&#34;intro:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s been a few months since I&amp;rsquo;ve last done work on this project.  I&amp;rsquo;ve been distracted by job interviews, relocating from Charlotte to Seattle, as well as adjusting to a new job and city with my wife and pets.  Not a bad thing to be distracted by!&lt;/p&gt;
+
+&lt;p&gt;Now that we&amp;rsquo;ve settled a bit, I&amp;rsquo;ve been able to get back into the groove.  In the past couple weeks I&amp;rsquo;ve been able to make a number of changes to the cloud portion of my project.  I&amp;rsquo;ve switched to using webhooks to consume sensor data, added Angularjs to the client framework, improved the web interface, added in-page charts, and implemented live data updates.  That&amp;rsquo;s quite a mouthful!&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/&#34;&gt;
+&lt;figure class=&#34;third&#34;&gt;
+  &lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/postthree_home.png&#34;&gt;
+  &lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/postthree_temphum.png&#34;&gt;
+  &lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/postthree_moistlight.png&#34;&gt;
+  &lt;figcaption&gt;Screenshots of the new web interface&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;spark-webhooks:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Spark Webhooks!&lt;/h2&gt;
+
+&lt;p&gt;Minor change, but now &lt;a href=&#34;https://www.spark.io/&#34;&gt;Spark&lt;/a&gt; supports webhooks!  What does this mean?  Previously, to consume the data being sent into the cloud from the Spark Core, I needed to subscribe to it and consume it within my server code.  In my case I used a NodeJS implementation of the EventSource object.&lt;/p&gt;
+
+&lt;p&gt;Now, with webhooks, you can format a request you want Spark&amp;rsquo;s servers to execute against a specific web endpoint when your Spark Core publishes an event.  In my case, the core publishes my sensor data, so I could specify Spark&amp;rsquo;s servers to POST the sensor data to the &amp;lsquo;/readings&amp;rsquo; endpoint on my server when data is published.  So, with about 10 minutes refactoring of code, I now had a much more elegant solution to how to get the data onto my server.  Here&amp;rsquo;s the code for my webhook (&lt;a href=&#34;http://docs.spark.io/webhooks/&#34;&gt;more on Spark&amp;rsquo;s webhooks here&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;eventName&amp;quot;: &amp;quot;Readings&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;https://gardenspark-evargreen.rhcloud.com/readings&amp;quot;,
+    &amp;quot;requestType&amp;quot;: &amp;quot;POST&amp;quot;,
+    &amp;quot;headers&amp;quot;: {
+        &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;
+    },
+    &amp;quot;json&amp;quot;: {
+        &amp;quot;magicpasscode&amp;quot; : &amp;quot;XXX___SECRET___XXX&amp;quot;
+    },
+    &amp;quot;mydevices&amp;quot;: true
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;implementing-angularjs:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Implementing Angularjs&lt;/h2&gt;
+
+&lt;p&gt;That minor change out of the way, the next change I made was transitioning from rendering the web page content server side using &lt;a href=&#34;http://jade-lang.com/&#34;&gt;Jade&lt;/a&gt; to loading it dynamically client side via Angularjs.  Loading data client side has a number of advantages:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Faster page loading (data loads async)&lt;/li&gt;
+&lt;li&gt;Less strain on server from rendering&lt;/li&gt;
+&lt;li&gt;More dynamic content&lt;/li&gt;
+&lt;li&gt;Easier transitioning between different data presentation models (tables, charts, etc.)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;My prime motivation for choosing Angular as a client framework is that it easily binds data between scripts and html elements via explicit two-way bindings.  This removes the complicated (and ugly code generating) step of having to inspect the DOM to update elements every time data updates.&lt;/p&gt;
+
+&lt;p&gt;If you&amp;rsquo;re looking to implement Angular yourself I recommend starting with the &lt;a href=&#34;http://www.w3schools.com/angular/default.asp&#34;&gt;w3schools tutorial&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;So the process of transitioning to Angularjs was as simple as a couple iterative steps:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Refactor jade templates to remove dependencies on variables&lt;/li&gt;
+&lt;li&gt;Implement AngularJS (create app, controllers, etc.)&lt;/li&gt;
+&lt;li&gt;Integrate Angular data-binding into templates&lt;/li&gt;
+&lt;li&gt;Use Angular to dynamically data
+
+&lt;ul&gt;
+&lt;li&gt;Front page with latest reading&lt;/li&gt;
+&lt;li&gt;Readings page with query specified start and end data&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;At this point I have this for my angular app code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var app = angular.module(&#39;gardenSpark&#39;, [&#39;&#39;]);
+
+app.controller(&#39;readingsController&#39;, function ($scope, $http) {
+   $scope.readings = [];
+   $scope.endDate = moment()
+      .set(&#39;second&#39;, 0)
+      .set(&#39;millisecond&#39;, 0)
+      .toDate();
+   $scope.startDate = moment()
+      .subtract(1, &#39;day&#39;)
+      .set(&#39;second&#39;, 0)
+      .set(&#39;millisecond&#39;, 0)
+      .toDate();
+
+   $scope.refresh = function() {
+     $http({
+         method: &#39;GET&#39;,
+         url: &#39;/readings&#39;,
+         params : {
+            &#39;start&#39; : $scope.startDate.toISOString(),
+            &#39;end&#39; : $scope.endDate.toISOString()
+         },
+         data:&#39;&#39;
+     }).success(function(data){
+        $scope.readings = data;
+     });
+   };
+
+   $scope.refresh();
+ });
+
+app.controller(&#39;latestController&#39;, function ($scope, $http){
+  $scope.reading = {};
+
+     $http.get(&#39;/latest&#39;).success(function(data){
+        $scope.reading = data;
+     });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And these pieces for my web page templates (in jade):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{% raw %} 
+div(ng-controller=&amp;quot;latestController&amp;quot;)
+	h2 GardenSpark
+	pre
+		| ---
+		|	Timestamp: {{reading.timestamp | date:&#39;medium&#39;}}
+		|	Air_Temperature: {{reading.airtemp}}
+		|	Soil_Temperature: {{reading.soiltemp}}
+		|	Humidity: {{reading.humidity}}
+		|	Soil_Moisture: {{reading.soilmoist}}
+		|	Light: {{reading.light}}
+
+div(ng-controller=&amp;quot;readingsController&amp;quot;)
+	input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;startDate&amp;quot;)
+	input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;endDate&amp;quot;)
+	button(ng-click=&amp;quot;refresh()&amp;quot;) refresh
+	table
+		tr
+			th Timestamp
+			th Air Temperature
+			th Soil Temperature
+			th Humidity
+			th Soil Moisture
+			th Light
+		tr(ng-repeat=&amp;quot;reading in readings&amp;quot;)
+			td {{reading.timestamp | date:&#39;medium&#39;}}
+			td {{reading.airtemp}}
+			td {{reading.soiltemp}}
+			td {{reading.humidity}}
+			td {{reading.soilmoist}}
+			td {{reading.light}}
+{% endraw %}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now my start date and end date is bound to the datetime picker elements, which make it easy to dynamically modify the period of time of data I&amp;rsquo;m interested in seeing on the page.&lt;/p&gt;
+
+&lt;h2 id=&#34;reducing-and-smoothing-large-data:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Reducing and Smoothing Large Data&lt;/h2&gt;
+
+&lt;p&gt;It was a big desire of mine to chart the data myself using client side javascript libraries.  First step before doing that was implementing an algorithm to perform reduction and smoothing on the server side to both reduce the amount of data being sent as well as lessen the load on the client scripting perfoming the plotting functionality.  I needed to select a filter that would compact-ify large sets of data while still preserving important features.&lt;/p&gt;
+
+&lt;p&gt;I did some research on existing algorithms.  Some options included &lt;a href=&#34;https://github.com/Tom-Alexander/regression-js&#34;&gt;polynomial regressions&lt;/a&gt;, bayesian algorithms, doing computations based on slope for subsets, or just averaging the data.  Polynomial algorithms wouldn&amp;rsquo;t work well, because the nature of the data doesn&amp;rsquo;t necessarily indicate a polynomial process depending on the time interval being interpreted.  A bayesian algorithm might be best due to the data being better modeled as a &lt;a href=&#34;http://en.wikipedia.org/wiki/Markov_process&#34;&gt;markov process&lt;/a&gt;, but I haven&amp;rsquo;t had time to implement an algorithm of that complexity.  For the time being, I&amp;rsquo;ve decided to simply split any large amount of data into 100 equally spaced subsets and then average the subsets.  This is probably the simplest approach, and for a set of evenly spaced data provides a decent view of trends over time.  This reduces the data to a more handle-able size but has drawbacks such as it hides peaks and the averages aren&amp;rsquo;t &amp;lsquo;true&amp;rsquo; when there are gaps in the data.  This will serve for now while the Spark Core can be expected to consistently log data at the same interval.&lt;/p&gt;
+
+&lt;p&gt;To that end, I made the following simple module.  This runs in the order of O(n + k), where n is the number of datapoints and k is the number of dimensions of the data (in the case of this project 6 dimensions: Air Temperature, Soil Temperature, Humidity, Soil Moisture, Light, Time).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;function split(a, n, processor) {
+    var len = a.length,out = [], i = 0, c = 0;
+    while (i &amp;lt; len) {
+        var size = Math.ceil((len - i) / n--);
+        processor(a.slice(i, i += size), c++);
+    }
+};
+
+module.exports = function(readings) {
+	if (readings.length &amp;lt; 100) {
+		return readings;
+	}
+
+	output = [];
+	split(readings, 100, function(subset) {
+		averaged = {};
+
+		subset.forEach(function (reading, c) {
+		    for (var key in reading){
+		    	var n;
+
+		        if (key === &amp;quot;timestamp&amp;quot;){
+					n = new Date(reading[key]).getTime();
+		        } else {
+		        	n = Number(reading[key]);
+		        }
+
+		        if (key in averaged){
+		            var o = averaged[key];
+
+		            averaged[key] = o + ((n-o)/(c+1));
+		        }else{
+		            averaged[key] = n;
+		        }
+		    };
+		});
+
+		averaged[&#39;timestamp&#39;] = new Date(averaged[&#39;timestamp&#39;]);
+
+		output.push(averaged);
+	});
+
+	return output;
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;self-made-charts-sorry-plotly:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Self Made Charts! (sorry plotly)&lt;/h2&gt;
+
+&lt;p&gt;This was a big desire of mine.  Plotly was useful, as it was simple to get started and their API made streaming easy (also, it was free).  It&amp;rsquo;s a fantastic platform, but understandably performance begins to decline when plotting large sets of data, and being able to chart configurable subsets of data on-the-fly is also fairly difficult.&lt;/p&gt;
+
+&lt;p&gt;There&amp;rsquo;s a plethora of javascript plotting libraries available now on the web, many of them based on D3.  After trying a couple, I settled on &lt;a href=&#34;https://github.com/n3-charts/line-chart&#34;&gt;n3-charts&lt;/a&gt;] because it works seemlessly with Angular&amp;rsquo;s two-way data binding model, and the visual product appealed to me.  Adding this on top of my existing Angular code was very easy, I first removed my tables and added their linechart objects.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;div(ng-controller=&amp;quot;readingsController&amp;quot;)
+    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;startDate&amp;quot;)
+    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;endDate&amp;quot;)
+    button(ng-click=&amp;quot;refresh()&amp;quot;) refresh
+        span(class=&amp;quot;glyphicon glyphicon-leaf&amp;quot;, aria-hidden=&amp;quot;true&amp;quot;)
+
+    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;airhumoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
+    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;moistlightoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I also needed to update my javascript to include the options to set up the charts.  As not to intrude on the application code in my controllers, I added these as constants to the Angular app, then I only needed to import them in the controller code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;app.constant(&#39;tempHumOptions&#39;, {
+  series: [
+    {
+      y: &amp;quot;airtemp&amp;quot;,
+      label: &amp;quot;Air Temperature&amp;quot;,
+      color: &amp;quot;#0099FF&amp;quot;,
+      axis: &amp;quot;y&amp;quot;,
+      type: &amp;quot;line&amp;quot;,
+      thickness: &amp;quot;1px&amp;quot;,
+      dotSize: 2,
+      id: &amp;quot;airtemp&amp;quot;
+    },
+    {
+      y: &amp;quot;soiltemp&amp;quot;,
+      axis: &amp;quot;y&amp;quot;,
+      label: &amp;quot;Soil Temperature&amp;quot;,
+      color: &amp;quot;#009999&amp;quot;,
+      type: &amp;quot;line&amp;quot;,
+      thickness: &amp;quot;1px&amp;quot;,
+      dotSize: 2,
+      id: &amp;quot;soiltemp&amp;quot;
+    },
+    {
+      y: &amp;quot;humidity&amp;quot;,
+      axis: &amp;quot;y2&amp;quot;,
+      label: &amp;quot;Humidity&amp;quot;,
+      color: &amp;quot;#6666FF&amp;quot;,
+      type: &amp;quot;line&amp;quot;,
+      thickness: &amp;quot;1px&amp;quot;,
+      dotSize: 2,
+      id: &amp;quot;humidity&amp;quot;
+    }
+  ],
+  stacks: [],
+  axes: {
+    x: {type: &amp;quot;date&amp;quot;, key: &amp;quot;timestamp&amp;quot;},
+    y: {type: &amp;quot;linear&amp;quot;, min: 14, max: 25},
+    y2: {type: &amp;quot;linear&amp;quot;, min: 0, max:100}
+  },
+  lineMode: &amp;quot;monotone&amp;quot;,
+  tension: 0.7,
+  tooltip: {mode: &amp;quot;scrubber&amp;quot;,interpolate:true},
+  drawLegend: true,
+  drawDots: false,
+  columnsHGap: 5
+});
+
+app.constant(&#39;moistLightOptions&#39;, {
+  series: [
+    {
+      y: &amp;quot;soilmoist&amp;quot;,
+      label: &amp;quot;Soil Moisture&amp;quot;,
+      color: &amp;quot;#996633&amp;quot;,
+      axis: &amp;quot;y&amp;quot;,
+      type: &amp;quot;line&amp;quot;,
+      thickness: &amp;quot;1px&amp;quot;,
+      dotSize: 2,
+      id: &amp;quot;soilmoist&amp;quot;
+    },
+    {
+      y: &amp;quot;light&amp;quot;,
+      axis: &amp;quot;y2&amp;quot;,
+      label: &amp;quot;Light&amp;quot;,
+      color: &amp;quot;#B28F00&amp;quot;,
+      type: &amp;quot;line&amp;quot;,
+      thickness: &amp;quot;1px&amp;quot;,
+      dotSize: 2,
+      id: &amp;quot;light&amp;quot;
+    }
+  ],
+  stacks: [],
+  axes: {
+    x: {type: &amp;quot;date&amp;quot;, key: &amp;quot;timestamp&amp;quot;},
+    y: {type: &amp;quot;linear&amp;quot;, min: 1, max: 2},
+    y2: {type: &amp;quot;linear&amp;quot;, min: 0, max: 400}
+  },
+  lineMode: &amp;quot;cardinal-open&amp;quot;,
+  tension: 0.7,
+  tooltip: {mode: &amp;quot;scrubber&amp;quot;},
+  drawLegend: true,
+  drawDots: false,
+  columnsHGap: 5
+});
+
+app.controller(&#39;readingsController&#39;, function ($scope, $http, tempHumOptions, moistLightOptions) {
+....
+   $scope.airhumoptions = tempHumOptions;
+   $scope.moistlightoptions = moistLightOptions;
+...
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All that done, I had fast, visually appealing charts generated on client-side code in my web page with which I can easily update to preview data from different time spans.  w00t!&lt;/p&gt;
+
+&lt;h2 id=&#34;hosting-server-sent-events:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Hosting Server-Sent Events&lt;/h2&gt;
+
+&lt;p&gt;So now I have charts, and my app is constantly receiving data from the core via the Spark Cloud.  Wouldn&amp;rsquo;t it be cool to have the page automatically update as data is recieved?  In the past I used Server-Sent Events to consume data from the Spark Cloud, so now I decided to utilize this on the server side as a way to publish the data live to the web page.  Publishing the data is as simple as modifying my route for getting the latest data to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// routes/latest.js
+...
+router.get(&#39;/&#39;, function(req,res){
+	if (req.query.one == &#39;true&#39;) {
+	    db.getLatest(function(data){
+			res.end(JSON.stringify(data));
+	    });
+	    return;
+	}
+
+	req.socket.setTimeout(Infinity);
+
+	var genEvent = (function () {
+		var messageCount = 0;
+		return function(data) {
+			var event = [
+				&#39;event: newdata&#39;,
+				&#39;id: &#39; + messageCount,
+				&#39;data: &#39; + JSON.stringify(data),
+			].join(&#39;\n&#39;) + &#39;\n\n&#39;;
+
+			messageCount++;
+			return event;
+		}
+	})()
+
+	spewer.on(&#39;data&#39;, function(data){
+		res.write(genEvent(data));
+    });
+
+    db.getLatest(function(data){
+		res.write(genEvent(data));
+    });
+
+	res.writeHead(200, {
+		&#39;Content-Type&#39;: &#39;text/event-stream&#39;,
+		&#39;Cache-Control&#39;: &#39;no-cache&#39;,
+		&#39;Connection&#39;: &#39;keep-alive&#39;
+	});
+	res.write(&#39;\n&#39;);
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The code simply sends the appropriate headers, keeps the connection open, then as new data is emitted via &amp;lsquo;spewer&amp;rsquo; (an emitter object) it sends it to the client in the appropriate format.  I generate the function that formats the data via a closure as an elegant way to encapsulate the message count (id) of the events.&lt;/p&gt;
+
+&lt;p&gt;With sending SSE so simple, the main question was how to pipe the data from the receiving portion of the code to the response handling portion.  Some examples will use a separate publish/subscribe system such as &lt;a href=&#34;http://redis.io/&#34;&gt;redis&lt;/a&gt;, but as cool as that would be I thought it be overkill in my case.  That would be more useful in distributed systems, or where the system is optimized for multiple processes and there is a need to pass the information between independent instances (future plans!(maybe)).  In my case, I just needed something quick and clean, and as I improve the server I could easily scale.  I simply created a singleton that subclasses the emitter object, then shared that between the modules that receive and send the data.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//  spewer.js
+&amp;quot;use strict&amp;quot;
+var util = require(&#39;util&#39;),
+    Emitter = require(&#39;events&#39;).EventEmitter;
+
+var spewer = function spewer(){
+    Emitter.call(this);
+};
+
+util.inherits(spewer, Emitter)
+
+module.exports = new spewer();
+
+// routes/readings.js
+...
+router.post(&#39;/&#39;, function(req,res){
+    if (req.body.magicpasscode &amp;amp;&amp;amp; req.body.magicpasscode == readings_secret) {
+        var readings = JSON.parse(req.body.data),
+            sparkData = {
+                &amp;quot;timestamp&amp;quot;: req.body.published_at,
+                &amp;quot;airtemp&amp;quot;: readings[0],
+                &amp;quot;soiltemp&amp;quot;: readings[1],
+                &amp;quot;humidity&amp;quot;: readings[2],
+                &amp;quot;soilmoist&amp;quot;: readings[3],
+                &amp;quot;light&amp;quot;: readings[4]
+            };
+
+        spewer.emit(&#39;data&#39;, sparkData);
+        db.insert(sparkData);
+    }
+
+    res.writeHead(200, {&#39;Content-Type&#39;: &#39;application/json&#39;});
+    res.end(&#39;&#39;);
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;On the client side, I just needed to modify my controller to use the html5 EventSource object, which automagically handles connecting, re-connecting, and emitting the data.  I borrowed an angular factory from &lt;a href=&#34;https://github.com/timruffles/chat-event-source&#34;&gt;this example&lt;/a&gt;, that wraps the standard EventSource to apply the handling function within Angular&amp;rsquo;s $scope (&lt;a href=&#34;http://jimhoskins.com/2012/12/17/angularjs-and-apply.html&#34;&gt;more on why, here&lt;/a&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// app.js
+...
+app.factory(&amp;quot;EventSource&amp;quot;, EventSourceNg);
+
+function EventSourceNg($rootScope) {
+  function EventSourceNg(url) {
+    this.source = new EventSource(url);
+  }
+  EventSourceNg.prototype = {
+    addEventListener: function(x, fn) {
+      this.source.addEventListener(x, function(event) {
+        $rootScope.$apply(fn.bind(null, event));
+      });
+    }
+  }
+  if (typeof(EventSource) !== &amp;quot;undefined&amp;quot;) {
+    return EventSourceNg;
+  } else {
+    return undefined;
+  }
+};
+
+// controllers.js
+...
+app.controller(&#39;latestController&#39;, function ($scope, $http, EventSource){
+  $scope.reading = {};
+
+  if (typeof(EventSource) !== &amp;quot;undefined&amp;quot;) {
+    var dataEvent = new EventSource(&#39;/latest&#39;);
+
+    dataEvent.addEventListener(&#39;newdata&#39;, function(event) {
+      $scope.reading = JSON.parse(event.data);
+    }, false);
+  }
+  else {
+     $http({
+           method: &#39;GET&#39;,
+           url: &#39;/latest&#39;,
+           params : {
+              &#39;one&#39;: &#39;true&#39;,
+           },
+           data:&#39;&#39;
+     }).success(function(data){
+        $scope.reading = data;
+     });
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;presentation-with-reveal-js:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Presentation with reveal.js&lt;/h2&gt;
+
+&lt;p&gt;So now I have all this cool stuff, but my web page was still lacking in terms of overall aesthetics.  There&amp;rsquo;s libraries like &lt;a href=&#34;http://getbootstrap.com/2.3.2/&#34;&gt;Twitter Bootstrap&lt;/a&gt; to simplify getting from zero to useful in interface design, but that&amp;rsquo;s better suited to a more complex interface.  For all the parts of this system, it doesn&amp;rsquo;t really require a complicated interface to present the data it needs.  It needs only present one interface with current data and another interface to visualize historical data.  There&amp;rsquo;s no real need for menus, columns, forms, or anything elaborate.&lt;/p&gt;
+
+&lt;p&gt;All I really wanted was to present my information on a single web page, and allow the user to intuitively navigate between sections of the page.  Enter &amp;lsquo;&lt;a href=&#34;http://lab.hakim.se/reveal-js/&#34;&gt;reveal.js&lt;/a&gt;&amp;rsquo;, a handy framework for building &amp;lsquo;powerpoint&amp;rsquo; presentations using html and javascript.  It&amp;rsquo;s a bit of overkill for what I want, but super simple to use, so implementation cost was fairly low.  I could spend the time to figure out how to write my own custom code to do just what I need, but the time cost was more than I&amp;rsquo;m interested in.&lt;/p&gt;
+
+&lt;p&gt;To make my page use reveal.js I simply combined everything into a single file, split the pages into &amp;lsquo;section&amp;rsquo; elements and included the reveal.js scripts.  Which led to the following refactored jade template for my index page:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;doctype
+html(ng-app=&amp;quot;gardenSpark&amp;quot;)
+	head
+		meta(charset=&amp;quot;utf-8&amp;quot;)
+
+		title GardenSpark
+
+		meta(name=&amp;quot;description&amp;quot; content=&amp;quot;DIY home garden sensor!&amp;quot;)
+		meta(name=&amp;quot;author&amp;quot; content=&amp;quot;Steven James Erdmanczyk Jr.&amp;quot;)
+
+		meta(name=&amp;quot;apple-mobile-web-app-capable&amp;quot; content=&amp;quot;yes&amp;quot;)
+		meta(name=&amp;quot;apple-mobile-web-app-status-bar-style&amp;quot; content=&amp;quot;black-translucent&amp;quot;)
+
+		meta(name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui&amp;quot;)
+
+		link(rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;stylesheets/reveal.css&amp;quot;)
+		link(rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;stylesheets/theme/sky.css&amp;quot; id=&amp;quot;theme&amp;quot;)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;    &amp;lt;link rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;stylesheets/zenburn.css&amp;quot;&amp;gt;
+
+    &amp;lt;!--[if lt IE 9]&amp;gt;
+    &amp;lt;script src=&amp;quot;lib/js/html5shiv.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+    &amp;lt;![endif]--&amp;gt;
+body
+    .reveal
+        .slides
+            section(ng-controller=&amp;quot;latestController&amp;quot;)
+                h2 GardenSpark
+                pre
+                    | ---
+                    |   Timestamp: &amp;quot;{{reading.timestamp | date:&#39;medium&#39;}}&amp;quot;
+                    |   Air_Temperature: {{reading.airtemp}}
+                    |   Soil_Temperature: {{reading.soiltemp}}
+                    |   Humidity: {{reading.humidity}}
+                    |   Soil_Moisture: {{reading.soilmoist}}
+                    |   Light: {{reading.light}}
+
+            section(ng-controller=&amp;quot;readingsController&amp;quot;)
+                section
+                    h2 Temperature / Humidity
+                    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;startDate&amp;quot;)
+                    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;endDate&amp;quot;)
+
+                    button(ng-click=&amp;quot;refresh()&amp;quot;) refresh
+                        span(class=&amp;quot;glyphicon glyphicon-leaf&amp;quot;, aria-hidden=&amp;quot;true&amp;quot;)
+                    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;airhumoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
+
+                section
+                    h2 Soil Moisture / Light
+
+                    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;moistlightoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
+
+    //- script(src=&#39;//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js&#39;)
+    //- script(src=&#39;//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js&#39;)
+    script(src=&#39;//ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js&#39;)
+    script(src=&amp;quot;//d3js.org/d3.v3.min.js&amp;quot; charset=&amp;quot;utf-8&amp;quot;)
+    script(src=&#39;/scripts/moment.min.js&#39;)
+    script(src=&#39;/scripts/line-chart.min.js&#39;)
+    script(src=&#39;/scripts/app.js&#39;)
+    script(src=&#39;/scripts/controllers.js&#39;)
+    script(src=&amp;quot;scripts/head.min.js&amp;quot;)
+    script(src=&amp;quot;scripts/reveal.js&amp;quot;)
+
+    script(type=&#39;text/javascript&#39;).
+
+        // Full list of configuration options available at:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+            loop: true,
+
+            transition: &#39;convex&#39;, // none/fade/slide/convex/concave/zoom
+
+            // Optional reveal.js plugins
+            dependencies: [
+                // { src: &#39;lib/js/classList.js&#39;, condition: function() { return !document.body.classList; } },
+                // { src: &#39;plugin/markdown/marked.js&#39;, condition: function() { return !!document.querySelector( &#39;[data-markdown]&#39; ); } },
+                // { src: &#39;plugin/markdown/markdown.js&#39;, condition: function() { return !!document.querySelector( &#39;[data-markdown]&#39; ); } },
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;					// { src: &#39;plugin/zoom-js/zoom.js&#39;, async: true },
+					// { src: &#39;plugin/notes/notes.js&#39;, async: true }
+				]
+			});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Bam!  I have something pretty.&lt;/p&gt;
+
+&lt;h2 id=&#34;summary:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;I feel like I&amp;rsquo;ve made a lightyear jump from where I was in just a couple weeks time.  This is quite encouraging.  Now my interface is almost at 100% of where I wanted it to be.  Next step will be to update the live preview page to include guages or some sort of visualization mechanism.  Once that&amp;rsquo;s done, I&amp;rsquo;m going to get back into the physical world and work on cooler things such as adding solar power, making a custom PCB, building an enclosure, and implementing an automated watering mechanism.&lt;/p&gt;
+
+&lt;h2 id=&#34;helpful-resources:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Helpful Resources&lt;/h2&gt;
+
+&lt;p&gt;I used quite a few resources during this phase of the project, so I figured it would be helpful to link them here for other people trying to do the same thing, sort of like a bibliography.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.w3schools.com/angular/default.asp&#34;&gt;Angular tutorial at w3schools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/timruffles/chat-event-source&#34;&gt;Wrapping EventSource for Angular&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://lab.hakim.se/reveal-js/&#34;&gt;HTML5 presentations using reveal.js&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/a/8189268/2406040&#34;&gt;Slicing a list into N equal size pieces (Javascript)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/Smoothing#Smoothing_algorithms&#34;&gt;Data smoothing algorithms&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Tom-Alexander/regression-js&#34;&gt;Polynomial (and other) regressions in Javascript (library)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>GardenSpark: Part Two - Putting It in the Cloud</title>
+      <link>http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/</link>
+      <pubDate>Thu, 11 Sep 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/</guid>
+      <description>
+
+&lt;pre&gt;
+This project is undergoing a revamp.  Stay tuned for updates!
+&lt;/pre&gt;
+
+&lt;h2 id=&#34;intro:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;This is the second part of my project hacking together a home plant/garden monitoring system using the &lt;a href=&#34;https://www.spark.io/&#34;&gt;Spark Core&lt;/a&gt;, sensors, web technologies, and wizardry.  The first part involved making a prototype of Spark attached to a few sensors, then using the Spark itself to stream the sensor data to &lt;a href=&#34;https://plot.ly/&#34;&gt;plotly&lt;/a&gt;.  For my next step I wanted to put an entity in the cloud to consume the data from the Spark, store it away in a database, offer a web interface to access that stored data, as well as handle streaming that data to plotly.&lt;/p&gt;
+
+&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;repo=gardenspark&amp;type=fork&amp;size=large&#34; height=&#34;30&#34; width=&#34;100&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:100px; height: 30px;&#34; allowTransparency=&#34;true&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;type=follow&amp;size=large&#34; height=&#34;30&#34; width=&#34;240&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:240px; height: 30px;&#34; allowTransparency=&#34;false&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;iframe width=&#34;800&#34; height=&#34;600&#34; frameborder=&#34;0&#34; seamless=&#34;seamless&#34; scrolling=&#34;no&#34; src=&#34;https://plot.ly/~serdmanczyk/19/800/600&#34;&gt;&lt;/iframe&gt;
+
+&lt;h2 id=&#34;sending-the-data:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Sending the Data&lt;/h2&gt;
+
+&lt;p&gt;The first step was to alter the Spark sketch to send the data to an intermediary server rather than just to plotly.  I considered a couple options for delivering data such as through TCP in a proprietary format or packaged in HTTP POST requests as JSON.  I eventually decided to use the Spark firmware&amp;rsquo;s ability to &lt;a href=&#34;http://docs.spark.io/firmware/#spark-publish&#34;&gt;publish events&lt;/a&gt; to Spark&amp;rsquo;s cloud servers which can easily be &lt;a href=&#34;http://docs.spark.io/api/#reading-data-from-a-core-events&#34;&gt;subscribed to&lt;/a&gt; by HTTP via &lt;a href=&#34;http://dev.w3.org/html5/eventsource/&#34;&gt;server sent events&lt;/a&gt;.  Being integrated into the Spark firmware, this was simple to setup, and the connection from the core to the Spark cloud is very reliable.  This also decoupled by server code from being connected to the core, making testing simpler.  My main sketch code is now even simpler:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#include &amp;quot;math.h&amp;quot;
+#include &amp;quot;defines.h&amp;quot;
+#include &amp;quot;DHT.h&amp;quot;
+#include &amp;quot;Adafruit_TSL2561_U.h&amp;quot;
+
+unsigned long timesync = 0;
+unsigned long lastloop = 0;
+
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
+
+void setup() {
+    tsl.enableAutoRange(true);            /* Auto-gain ... switches automatically between 1x and 16x */
+    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
+    tsl.begin();
+    dht.begin();
+
+    pinMode(MOISTPIN, INPUT);
+    pinMode(TEMPPIN, INPUT);
+
+    timesync = millis();
+}
+
+void loop() {
+    unsigned long now = millis();
+
+    if ((now - lastloop) &amp;gt; TEN_SECONDS){
+        sensors_event_t event;
+        char data[42];
+        double AirTemp = 0.0;
+        double SoilTemp = 0.0;
+        double Humidity = 0.0;
+        double Light = 0.0;
+        double Moisture = 0;
+
+        tsl.getEvent(&amp;amp;event);
+        Light = (double)event.light;
+        AirTemp = (double)dht.readTemperature();
+        Humidity = (double)dht.readHumidity();
+        Moisture = ((double)map(analogRead(MOISTPIN), 0, 4096, 0, 330) / 100);  // convert to voltage
+        SoilTemp = ((double)analogRead(TEMPPIN) * ANALOGKELVINCONVERSION) + KELVINCELSIUSCONVERSION;
+
+        sprintf(data, &amp;quot;[%03.03f,%03.03f,%03.03f,%03.03f,%03.03f]&amp;quot;, AirTemp, SoilTemp, Humidity, Moisture, Light);
+        Spark.publish(&amp;quot;Readings&amp;quot;, data, 300, PRIVATE);
+
+        lastloop = now;
+    }else if ((now - timesync) &amp;gt; HALF_A_DAY){
+        Spark.syncTime();
+        timesync = now;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;setting-up-the-server-using-nodejs:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Setting Up the Server Using Nodejs&lt;/h2&gt;
+
+&lt;p&gt;As an impetus to learn, and to see what all the hype was about, I decided to use Nodejs to power the server side for this project, for it&amp;rsquo;s ease in getting up and running and for its appeal to IoT (internet of things) applications&lt;/p&gt;
+
+&lt;p&gt;I found it very helpful to take an aside and read some material on the basic workings of Javascript before trying to do too much with Nodejs.  I found this book: &lt;a href=&#34;http://eloquentjavascript.net/&#34;&gt;Eloquent Javascript&lt;/a&gt; a great primer that helped integrate my knowledge based on programming in C to how programming works in Javascript-land.&lt;/p&gt;
+
+&lt;p&gt;For hosting, my &lt;a href=&#34;https://www.openshift.com/&#34;&gt;OpenShift&lt;/a&gt; account had one more free gear available.  Creating a server with a MongoDB database was as simple as running a few commands from the command line using &lt;a href=&#34;https://www.openshift.com/blogs/using-rhc-to-manage-paas-apps&#34;&gt;rhc&lt;/a&gt;, updates are managed automatically using git, and all imported node modules are managed by OpenShift using the same &lt;a href=&#34;https://www.npmjs.org/doc/files/package.json.html&#34;&gt;package.json file&lt;/a&gt; npm uses.  Pretty forking easy.&lt;/p&gt;
+
+&lt;h2 id=&#34;consuming-server-sent-events:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Consuming Server Sent Events&lt;/h2&gt;
+
+&lt;p&gt;The first order of business in my server application was get it connected to the data from the Spark.  Subscribing to the events is as simple as &lt;a href=&#34;http://techblog.hybris.com/2014/05/02/consuming-spark-core-sse-events-via-node-js/&#34;&gt;sending an HTTP request and leaving the connection open&lt;/a&gt;.  However, with my application running for days at a time, I was running into trouble with the connection closing every twelve hours or so (not surpisingly).  Instead of taking a lot of time to homebake a solution, I searched through the &lt;a href=&#34;https://www.npmjs.org/&#34;&gt;npm repository&lt;/a&gt; to find an implementation of html5&amp;rsquo;s &lt;a href=&#34;https://www.npmjs.org/package/eventsource&#34;&gt;EventSource&lt;/a&gt; that&amp;rsquo;s been working very well at reconnecting in the event of errors.  Here&amp;rsquo;s a snipper of my implementation:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;SparkCloud.prototype.init = function init(done){
+    var self = this,
+        url = &amp;quot;https://api.spark.io/v1/devices/&amp;quot; + self.config.DeviceId + &amp;quot;/events&amp;quot;,
+        evsSettings = {
+           rejectUnauthorized: false,
+           headers:{
+              &amp;quot;Transfer-Encoding&amp;quot;:&amp;quot;Chunked&amp;quot;,
+              Authorization: &amp;quot;Bearer &amp;quot;+ self.config.AccessToken
+           }
+        };
+
+    var es = new EventSource(url,evsSettings);
+    es.addEventListener(&#39;Readings&#39;, function ParseEvent(event) {
+        var sparkObj = JSON.parse(event.data),
+            Readings = JSON.parse(sparkObj.data),
+            SparkData = {
+                &amp;quot;TimeStamp&amp;quot;: sparkObj.published_at,
+                &amp;quot;Air Temperature&amp;quot;: Readings[0],
+                &amp;quot;Soil Temperature&amp;quot;: Readings[1],
+                &amp;quot;Humidity&amp;quot;: Readings[2],
+                &amp;quot;Soil Moisture&amp;quot;: Readings[3],
+                &amp;quot;Light&amp;quot;: Readings[4]
+            };
+
+        self.emit(&#39;data&#39;, SparkData)
+    }, false);
+
+    es.onerror = function(){
+        console.log(&amp;quot;Error with EventSource connection with SparkCloud&amp;quot;);
+    };
+
+    self.es = es;
+    done();
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&amp;lsquo;SparkCloud,&amp;rsquo; in the context of the code above, is my own object that inherits from &lt;a href=&#34;http://www.sitepoint.com/nodejs-events-and-eventemitter/&#34;&gt;EventEmitter&lt;/a&gt;.  It gathers data from Spark&amp;rsquo;s stream in the background and emits an object to the rest of my application when data from my core becomes available.&lt;/p&gt;
+
+&lt;p&gt;In the future, Spark intends to add the to feature register an address for their servers to POST the data to via HTTP when events are published.  When this comes available I may implement it at it makes for a better model, but SSE is working in the mean time.&lt;/p&gt;
+
+&lt;h2 id=&#34;saving-to-a-database:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Saving to a database&lt;/h2&gt;
+
+&lt;p&gt;Now that I had my server sending the data, I wanted to save it.  Streaming to plotly is pretty cool, but after you&amp;rsquo;ve expanded beyond your maximum points on your plot you start losing data.  When it comes to plant data, only the past few hours of data is pretty boring, my goal is to see days/weeks/months of data with summaries, bells, and whistles.&lt;/p&gt;
+
+&lt;p&gt;The node-mongodb-native module is recommended but I decided to use the mongojs module because it makes the code easier to read and implement.  A brief overview of the two is given on the &lt;a href=&#34;https://www.openshift.com/blogs/getting-started-with-mongodb-on-nodejs-on-openshift&#34;&gt;OpenShift blog&lt;/a&gt;.  To start I only needed three methods.  One to add new data, to get the most recent entry, and to get entries from a start date to an end date.  Not too complicated, here&amp;rsquo;s the entire module:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;quot;use strict&amp;quot;
+var mongojs = require(&#39;mongojs&#39;),
+    connection_string = &#39;127.0.0.1:27017/gardenspark&#39;;
+
+// if OPENSHIFT env variables are present, use the available connection info:
+if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
+    connection_string = process.env.OPENSHIFT_MONGODB_DB_USERNAME + &amp;quot;:&amp;quot; +
+      process.env.OPENSHIFT_MONGODB_DB_PASSWORD + &amp;quot;@&amp;quot; +
+      process.env.OPENSHIFT_MONGODB_DB_HOST + &#39;:&#39; +
+      process.env.OPENSHIFT_MONGODB_DB_PORT + &#39;/&#39; +
+      process.env.OPENSHIFT_APP_NAME;
+};
+
+var db = mongojs(connection_string, [&#39;readings&#39;]),
+    readings = db.readings;
+
+readings.ensureIndex({TimeStamp:1});
+
+exports.insert = function insert(Data){
+    console.log(&amp;quot;saved data: &amp;quot; + Data.TimeStamp);
+    readings.insert(Data, {safe:true}, function(err, objects){
+        if (err) {console.warn(err.message);}
+    });
+
+    delete Data._id;
+};
+
+exports.getReadings = function getReadings(start, end, callback){
+    function validDate(dateStr, def){
+        return (Date(dateStr) !== &amp;quot;Invalid Date&amp;quot;) ? new Date(dateStr) : new Date(def);
+    };
+
+    var query = {
+            TimeStamp:{
+                $gt:(validDate(start, 0).toISOString()),
+                $lt:(validDate(end, Date.now()).toISOString())
+            }
+        },
+        results = [];
+
+    readings.find(query,{_id:false})
+        .forEach(function(err,doc){
+            if (!doc) {
+                return callback(results);
+            };
+            results.push(doc);
+        });
+};
+
+exports.getLatest = function getLatest(callback){
+    var latest = {};
+
+    readings.find({},{_id:false})
+        .sort({TimeStamp:-1})
+        .limit(1)
+        .forEach(function(err,doc){
+            if (!doc) {
+                callback(latest);
+            };
+
+            latest = doc;
+        });
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;sending-to-plotly:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Sending to plotly&lt;/h2&gt;
+
+&lt;p&gt;For streaming to plotly, I simply adapted code from their &lt;a href=&#34;https://github.com/plotly/plotly-nodejs/tree/master/examples&#34;&gt;streaming example&lt;/a&gt;, to my application, with some modifications for specifying plot names and tokens in a separate file, and adding a heartbeast function and pass a plotting function to a callback from my initialization.  It&amp;rsquo;s noticeably more amicable streaming the data from nodejs to plotly rather than from the Spark.  Hopefully this pieces of the server code will be short lived as my planned next step is to switch from using plotly to drawing the plots myself with my own code.&lt;/p&gt;
+
+&lt;h2 id=&#34;caching-readings-for-plotly:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Caching readings for plotly&lt;/h2&gt;
+
+&lt;p&gt;As another feature I wanted to have the ability to modify the interval at which the application will send data to plotly.  With data being sent from the Spark every 10 seconds the plot will fill rather quickly, and rather than needing to do a git add/commit/push/etc. to update the OpenShift app every time I want to update the interval, using a REST call seemed a lot more convenient.&lt;/p&gt;
+
+&lt;p&gt;With the interval to plot possibly longer or shorter than the interval data is being received, just plotting the most recent value received wouldn&amp;rsquo;t accurately represent the data over that time period.  Instead, I made a module that would cache the average of the readings received over the plotting period.  After the interval from the last plot had elapsed, it would send the average to plotly instead.  Here&amp;rsquo;s a snippet of the moving average piece:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;DataCache.prototype.append = function append(data){
+    var self = this,
+        c = this.data.count;
+
+    for (var key in data){
+        if (key === &amp;quot;TimeStamp&amp;quot;){
+            continue;
+        };
+        if (key in self.data){
+            var o = self.data[key],
+                n = data[key];
+
+            self.data[key] = o + ((n-o)/(c+1));
+        }else{
+            self.data[key] = data[key];
+        }
+    };
+    self.data.count++;
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This obviously doesn&amp;rsquo;t handle all error conditions, so isn&amp;rsquo;t a fully robust, but handles well in my app where I have full control.  Then for modifying the interval I simply made another method for the DataCache object.  The interval is stored as a member.  When the interval length is modified, the interval variable is cleared and modified.  Every time the interval is triggered, the object will emit the averaged data (if any) to any listeners.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;DataCache.prototype.setEmitInterval = function setEmitInterval(ms){
+    var self = this;
+
+    self.timeout = ms;
+    if (self.interval !== undefined){
+        clearInterval(self.interval);
+    };
+
+    self.interval = setInterval(function(){
+        if (self.data.count &amp;gt; 0){
+            self.emit(&#39;interval&#39;, self.get());
+        };
+    }, self.timeout);
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;hosting-an-interface:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Hosting an interface&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/web_interface_preview.png&#34; alt=&#34;web interface&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It seems there&amp;rsquo;s quite the variety of frameworks for rendering web interfaces for Nodejs.  I stuck with the what seemed the most basic: &lt;a href=&#34;http://expressjs.com/&#34;&gt;express&lt;/a&gt;.  All I wanted was a simple home page that displays the latest reading alongside the current interval time.  Besides that, I wanted to be able to request data between specified time intervals in either a web page or, if the content type header is specified, as JSON for the use in APIs (such as a plotting utility).  I made sure to default the page for displaying readings to the 50 most recent readings, and not to return all data unless explicitly requested.  Using jade templates made rendering the pages from simple javascript objects a breeze.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;app.get(&#39;/&#39;, function(req,res){
+    db.getLatest(function(data){
+        if (req.headers[&#39;content-type&#39;] === &#39;application/json&#39;){
+            res.send(JSON.stringify(data));
+        }else{
+            data.TimeStamp = (new Date(data.TimeStamp));
+            var rs = \_.map(data, function(v,k,l){
+                    return {name:k,value:v};
+                });
+            res.render(&#39;index&#39;,{
+                title:name,
+                readings:rs,
+                interval:cache.timeout.toString()
+            });
+        };
+
+    });
+});
+
+app.get(&#39;/readings&#39;, function(req, res){
+        var n = Date.now(),
+            all = (req.query.all ? true : false),
+            startDate = (req.query.start || 0),
+            endDate = (req.query.end || n);
+
+    if (startDate === 0 &amp;amp;&amp;amp; endDate === n &amp;amp;&amp;amp; !all){
+        endDate = Date.now();
+        startDate = endDate - 300000; // Five minutes ago
+    }else if (all){
+        startDate = 0;
+        endDate = Date.now();
+    };
+
+    db.getReadings(startDate, endDate, function(results) {
+        if (req.headers[&#39;content-type&#39;] === &#39;application/json&#39;) {
+            res.send(JSON.stringify(results));
+        }else{
+            var ret = {
+                title:name,
+                readings:results || []
+            };
+            res.render(&#39;readings&#39;, ret);
+        };
+    });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a preview of the readings interface:
+&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/readings_preview.png&#34; alt=&#34;readings interface&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Check it out!  The server is live, so head on over: &lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/&#34;&gt;gardenspark-evargreen.rhcloud.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Check out the &lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/readings&#34;&gt;readings page&lt;/a&gt;, and an example of getting readings over &lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/readings?start=2014-09-11T16:00:00.000Z&amp;amp;end=2014-09-11T17:00:00.000Z&#34;&gt;an interval&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;summary:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a basic diagram of the system as it is now: x&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/gardenspark_serverdiagram.png&#34; alt=&#34;System Overview&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Thanks to Nodejs&amp;rsquo; architecture, with callbacks and event emitters, it was particularly efficient to implement this architecture in an easy to read and snappy fashion without an excessive amount of get-up-and-go time.  Nodejs will definitely be a handy tool for other personal projects I take up.  Now, with a web interface, it&amp;rsquo;s been easy to check up on my system and verify readings have been occurring properly.  I can now even use it for the practical purpose of seeing if I need to water my plant, if it gets too much sunlight during a particular part of the day, if an A/C vent is hitting it the plant too hard, etc.  Exciting stuff!&lt;/p&gt;
+
+&lt;p&gt;For the next part of this project I&amp;rsquo;m going to deviate into the less familiar realm (for myself at least) of graphics and interface design and attempt to implement the &lt;a href=&#34;http://d3js.org/&#34;&gt;D3&lt;/a&gt; library to host the plots themselves via my web interface.  Hopefully this will enable more responsive charts as well as the ability to visualize the data more intuitively.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

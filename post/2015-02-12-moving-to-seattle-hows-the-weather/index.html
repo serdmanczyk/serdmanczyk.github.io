@@ -1,0 +1,638 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Steven J. Erdmanczyk Jr.">
+		<meta name="description" content="Obligatory software soap box">
+		<meta name="generator" content="Hugo 0.15" />
+		<title>Moving to Seattle, How&#39;s the Weather? (graphs!) &middot; Erdmanczyk.io</title>
+		<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/monosocialiconsfont.css">
+		
+		<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Erdmanczyk.io" />
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://serdmanczyk.github.io/about'>About</a>
+	
+
+	
+	<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Moving to Seattle, How&#39;s the Weather? (graphs!)</h1>
+                    <h2 class="headline">February 25, 2015</h2>
+                     
+                        <div id="toc" class="well col-md-4 col-sm-6">
+                            
+                        </div>
+                      
+                </header>
+                <section id="post-body">
+                    <p>My wife and I recently relocated from Charlotte, NC to Seattle, WA and so far we&rsquo;ve loved it!</p>
+
+<p>One of the most common things people talk about when you mention moving to the Pacific Northwest is the weather, particularly the kind that results in being wet.  The weather here is obviously different, but in my short time here  it hasn&rsquo;t seemed <em>that</em> different.  Being the scientific type, I went straight to finding objective data to make heads or tails of my impression so far.</p>
+
+<p>First step was to find some hard weather data.  I wanted historical weather data by date and city, preferably for free.  I was able to find that via <a href="http://www.wunderground.com/weather/api/d/docs?MR=1">Weather Underground&rsquo;s API</a> .  I hacked together a quick python script to grab data for the dates I needed.</p>
+
+<pre><code>import requests
+import json
+from datetime import datetime,timedelta
+import re
+import time
+import os
+import sys
+import arrow
+
+APIKEY = '__REDACTED__'
+
+def urliter():
+	Locations = [
+		('NC', 'Charlotte'),
+		('WA', 'Seattle')
+	]
+
+	def DateIter(start, end):
+	    start = arrow.get(start)
+	    end = arrow.get(end)
+
+	    for day in arrow.Arrow.span_range('day', start, end):
+	        yield day[0]
+
+	for location in Locations:
+		for day in DateIter('2014-11-12', '2015-02-24'):
+			url = 'http://api.wunderground.com/api/{key}/history_{year:04d}{month:02d}{day:02d}/q/{state}/{city}.json'.format(**{
+				'key':APIKEY,
+				'year':day.year,
+				'month':day.month,
+				'day':day.day,
+				'state':location[0],
+				'city':location[1],
+			})
+
+			directory = location[1]
+
+			filename = '{year:04d}{month:02d}{day:02d}.json'.format(**{
+				'year':day.year,
+				'month':day.month,
+				'day':day.day
+			})
+
+			yield (
+				directory,
+				filename,
+				url
+			)
+
+for rq in urliter():
+	directory,filename,url = rq
+
+	time.sleep(7)
+	print(&quot;get:&quot;, url)
+	respobj = requests.get(url).json()
+	
+	dirpath = os.path.abspath(directory)
+	if not os.path.exists(dirpath):
+		os.makedirs(dirpath)
+
+	filepath = os.path.join(dirpath,filename)
+	print(&quot;save:&quot;, filepath)
+	with open(filepath, &quot;w&quot;) as opf:
+	    json.dump(respobj, opf, indent=3, sort_keys=True)
+
+</code></pre>
+
+<p>That effectively grabbed and organized all the data, and conformed to the rate limit (10 requests / minute).  The next step I took was storing it all in a query-able format, so I turned to my old friend MongoDB.</p>
+
+<pre><code>import json
+import os
+from math import sqrt,pow
+import sys
+from pymongo import MongoClient
+import arrow
+
+def fileloader(directory):
+    adir = os.path.abspath(directory)
+    for dirpath, dirnames, filenames in os.walk(adir):
+        for filename in filenames:
+            filepath = os.path.join(dirpath, filename)
+            _,etx = os.path.splitext(filepath)
+            if etx == &quot;.json&quot;:
+                with open(filepath) as opf:
+                    yield filepath, json.load(opf)
+
+locations = (
+    (&quot;Seattle&quot;, &quot;WA&quot;),
+    (&quot;Charlotte&quot;, &quot;NC&quot;)
+)
+
+client = MongoClient()
+weatherdata = client.weatherdata
+
+summaries_db = weatherdata.summaries
+observations_db = weatherdata.observations
+
+for loc in locations:
+    city,state = loc
+    for filepath,datapoint in fileloader(city):
+        summary = datapoint['history']['dailysummary'][0]
+
+        isodate = &quot;{year}-{mon}-{mday}T{hour}:{min}:00.000&quot;.format(**summary[&quot;date&quot;])
+        del summary[&quot;date&quot;]
+
+        summary.update({
+            &quot;city&quot; : city,
+            &quot;state&quot; : state,
+            &quot;isodate&quot; : arrow.get(isodate).datetime,
+        })
+
+        sum_id = summaries_db.insert(summary)
+        # print(&quot;summary&quot;, rec_id)
+
+        observations = datapoint['history']['observations']
+        obs_ids = []
+        for observation in observations:
+            isodt = &quot;{year}-{mon}-{mday}T{hour}:{min}:00.000&quot;.format(**observation[&quot;utcdate&quot;])
+            del observation[&quot;date&quot;]
+            del observation[&quot;utcdate&quot;]
+            observation.update({
+                &quot;city&quot; : city,
+                &quot;state&quot; : state,
+                &quot;isodatetime&quot; : arrow.get(isodt).datetime
+            })
+
+            obs_id = observations_db.insert(observation)
+            obs_ids.append(obs_id)
+        print city, &quot;:&quot;, summary['isodate']
+
+</code></pre>
+
+<p>Having it stored in MongoDB made it quick and convenient to query the data and pick apart how to interpret the data into something useful.  I was primarily seeking to represent the general distribution of temperatures, humidities, and intensity/types of precipitation between the two cities.  Eventually, I threw together a script to grab all of that data and throw it into plots using <a href="https://plot.ly/python/">plotly&rsquo;s python API</a>.</p>
+
+<pre><code>from pymongo import MongoClient
+import plotly.plotly as py
+from plotly.graph_objs import *
+import json
+
+client = MongoClient()
+weatherdata = client.weatherdata
+observations_db = weatherdata.observations
+summaries_db = weatherdata.summaries
+
+filters = {
+    '_id':False,
+    'isodatetime':False,
+    'isodate':False,
+}
+
+charlotte = observations_db.find({
+    'city':'Charlotte'
+},filters)
+
+seattle = observations_db.find({
+    'city':'Seattle'
+},filters)
+
+# print(json.dumps(list(sorted(set([c['conds'] for c in charlotte])))))
+
+def getvals(dataset, params):
+    output = tuple([] for _ in params)
+
+    for point in dataset:
+        for i,param in enumerate(params):
+            key,filt,typ = param
+            val = point[key]
+            if filt(val):
+                output[i].append(typ(val))
+
+    return (output if (len(output) &gt; 1) else output[0])
+
+validtemp = lambda val:val != &quot;-9999&quot;
+validhum = lambda val:val != &quot;N/A&quot;
+validcond = lambda val:val != &quot;Unknown&quot;
+
+params = (
+    ('tempi', validtemp, float),
+    ('hum', validhum, float),
+    ('conds', validcond, str)
+)
+
+clt_temps,clt_hums,clt_conds = getvals(charlotte, params)
+sea_temps,sea_hums,sea_conds = getvals(seattle, params)
+
+name = 'Charlotte vs. Seattle Temperature'
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_temps,
+                name = 'Charlotte',
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_temps,
+                name = 'Seattle',
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+name = 'Charlotte vs. Seattle Humidity'
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_hums,
+                name = 'Charlotte',
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_hums,
+                name = 'Seattle',
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+intensities = [
+  &quot;Heavy Thunderstorms and Rain&quot;,
+  &quot;Thunderstorms and Rain&quot;,
+  &quot;Heavy Rain&quot;, &quot;Ice Pellets&quot;, &quot;Light Ice Pellets&quot;,
+  &quot;Light Freezing Rain&quot;, &quot;Rain&quot;, &quot;Light Rain&quot;,
+  &quot;Light Snow&quot;, &quot;Light Freezing Fog&quot;,
+  &quot;Drizzle&quot;, &quot;Light Drizzle&quot;, &quot;Mist&quot;,
+  &quot;Overcast&quot;, &quot;Fog&quot;, &quot;Haze&quot;,
+  &quot;Mostly Cloudy&quot;, &quot;Partly Cloudy&quot;,
+  &quot;Scattered Clouds&quot;, &quot;Clear&quot;
+]
+
+def countintensities(dataset):
+    counts = {}
+    for cond in dataset:
+        counts[cond] = ((counts[cond]+1) if counts.get(cond) else 1)
+
+    countgetter = lambda val:(counts[val] if val in counts else 0)
+    return list(map(countgetter, intensities))
+
+name = 'Charlotte vs. Seattle Weather Rain Intensity'
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Bar(
+                x = intensities,
+                y = countintensities(clt_conds),
+                name = 'Charlotte'
+            ),
+            Bar(
+                x = intensities,
+                y = countintensities(sea_conds),
+                name = 'Seattle'
+            )
+        ]),
+        layout = Layout(
+            barmode='group',
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+charlotte = summaries_db.find({
+    'city':'Charlotte'
+},filters)
+
+seattle = summaries_db.find({
+    'city':'Seattle'
+},filters)
+
+validprecip = lambda val:val != &quot;T&quot;
+
+params = (
+    ('precipi', validprecip, float),
+)
+
+clt_precip = getvals(charlotte, params)
+sea_precip = getvals(seattle, params)
+
+name = 'Charlotte vs. Seattle Precipitation'
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_precip,
+                name = 'Charlotte',
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_precip,
+                name = 'Seattle',
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+</code></pre>
+
+<p>Note that weather condition intensity is organized completely based on my own subjective interpretation.
+{: .notice}</p>
+
+<p>The above script gave me the following plots:</p>
+
+<p><img src="/images/movseaweather/charlotte_vs_seattle_humidity.png" alt="CharSeaHums" />
+<img src="/images/movseaweather/charlotte_vs_seattle_temperature.png" alt="CharSeaTemps" />
+<img src="/images/movseaweather/charlotte_vs_seattle_precipitation.png" alt="CharSeaPrecip" />
+<img src="/images/movseaweather/charlotte_vs_seattle_weather_rain_intensity.png" alt="CharSeaConds" /></p>
+
+<p>All data “Powered by Weather Underground” <a href="http://wunderground.com/"><img height="45" width="193" src="/images/movseaweather/wundergroundLogo_4c_horz.png"></a> as <a href="http://www.wunderground.com/weather/api/d/terms.html">per API usage requirements</a>.
+{: .notice}</p>
+
+<p>The plots pretty much showed me what I expected, that the weather here is milder, more consistent, and though it rains more, when it rains it&rsquo;s usually lighter and more constant than it is in Charlotte (where apparently it can&rsquo;t rain without absolutely pouring).</p>
+
+<p>But there was another thing I noticed after moving here that isn&rsquo;t mentioned as much.  Having arrived in November I immediately noticed the sun setting nearly an hour earlier, a result of the higher latitude.  I also became curious of how sunrise and sunset times differed for the cities throughout the year.  Calculating sunrise and sunset times only requires performing some <a href="http://en.wikipedia.org/wiki/Sunrise_equation">mathematical computations</a> based on longitude and latitude.  But since I don&rsquo;t have all the time in the world I thought it much easier to google an existing module rather than re-write it from scratch, and came up with the fantastic <a href="http://pythonhosted.org//astral/">astral module</a>.  Using this I threw up a quick script to plot sunrise, sunset, and hours of sunlight:</p>
+
+<pre><code>import arrow
+from astral import Astral
+import plotly.plotly as py
+from plotly.graph_objs import *
+import sys
+import math
+from dateutil import tz
+import pprint
+
+pp = pprint.PrettyPrinter(indent=3)
+
+a = Astral()
+a.solar_depression = 'civil' 
+
+start = arrow.get(&quot;2014-01-01&quot;)
+end = arrow.get(&quot;2014-12-31&quot;)
+
+types = ['sunlight', 'sunrise', 'sunset']
+cities = {
+    'Charlotte' : {key:[] for key in types},
+    'Seattle' : {key:[] for key in types}
+}
+
+dates = [day[0] for day in arrow.Arrow.span_range('day', start, end)]
+totals = {city:0 for city in cities}
+
+def floathours(dto):
+    return dto.hour + (dto.minute / 60.0) + (dto.second / 3600.0)
+
+for location in cities:
+    city = a[location]
+    for day in dates:
+        sun = city.sun(date=day, local=True)
+        sunrise = floathours(arrow.get(sun['dawn']))
+        sunset = floathours(arrow.get(sun['sunset']))
+        hours_sunlight = sunset - sunrise
+
+        cities[location]['sunrise'].append(sunrise)
+        cities[location]['sunset'].append(sunset)
+        cities[location]['sunlight'].append(hours_sunlight)
+        totals[location] = totals[location] + hours_sunlight
+
+d = []
+for stype in types:
+    for city in cities:
+        d.append(
+            Scatter(
+                name=&quot;{city} - {type}&quot;.format(**{
+                    &quot;city&quot;:city,
+                    &quot;type&quot;:stype
+                }),
+                x=dates,
+                y=cities[city][stype]
+            )
+        )
+
+data = Data(d)
+
+layout = Layout(
+    title='Charlotte vs. Seattle Sunlight',
+    yaxis=YAxis(
+        title='Hours (24)',
+        domain = [0,24]
+    )
+)
+
+plot_url = py.plot(data, layout=layout, filename='Charlotte vs. Seattle Sunlight')
+print(plot_url)
+
+print('Charlotte: ', totals['Charlotte'])
+print('Seattle: ', totals['Seattle'])
+</code></pre>
+
+<p>Which created this plot:</p>
+
+<iframe width="640" height="480" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~serdmanczyk/224/charlotte-vs-seattle-sunlight/?width=640&height=480" ></iframe>
+
+<p>The orange lines represent Seattle, and the blue lines represent Charlotte.  The lines on top represent sunset times, bottom the sunrise times, and in the middle the total hours of sunlight across the whole year.  So it can be seen that daylight differences in Seattle are slightly more drastic, but with a result of more total sunlight hours throughout the year.</p>
+
+<p>Besides the sunlight analysis, all of this is just superficial comparisons.  This was just for kicks and gave me an excuse to mess with weather data.  I&rsquo;ve heard in a few conversations with locals that this winter in Seattle has been substantially sunnier than past years.  <a href="http://cliffmass.blogspot.com/2015/02/the-origin-of-this-winters-weather.html?m=1">Professor of Atmospheric Sciences Cliff Mass&rsquo; blog</a> actually explains the odd weather affecting the US Pacific Northwest and Northeast really well from the perspective of someone who is actually a professional on the subject.  He makes a strong case the weather patterns are due to natural variation and not global warming (while still acknowledging global warming as a pressing issue).</p>
+
+<p>One thing is for sure, I can&rsquo;t wait for summer here where the days will be long, the air will be dry, and the heat won&rsquo;t commonly go over 70 degrees.  I will not miss the humid heat of the Southeast.  Also, you can&rsquo;t beat the view here:</p>
+
+<p><blockquote class="instagram-media" data-instgrm-captioned data-instgrm-version="4" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:658px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:8px;"> <div style=" background:#F8F8F8; line-height:0; margin-top:40px; padding:50% 0; text-align:center; width:100%;"> <div style=" background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAMAAAApWqozAAAAGFBMVEUiIiI9PT0eHh4gIB4hIBkcHBwcHBwcHBydr+JQAAAACHRSTlMABA4YHyQsM5jtaMwAAADfSURBVDjL7ZVBEgMhCAQBAf//42xcNbpAqakcM0ftUmFAAIBE81IqBJdS3lS6zs3bIpB9WED3YYXFPmHRfT8sgyrCP1x8uEUxLMzNWElFOYCV6mHWWwMzdPEKHlhLw7NWJqkHc4uIZphavDzA2JPzUDsBZziNae2S6owH8xPmX8G7zzgKEOPUoYHvGz1TBCxMkd3kwNVbU0gKHkx+iZILf77IofhrY1nYFnB/lQPb79drWOyJVa/DAvg9B/rLB4cC+Nqgdz/TvBbBnr6GBReqn/nRmDgaQEej7WhonozjF+Y2I/fZou/qAAAAAElFTkSuQmCC); display:block; height:44px; margin:0 auto -44px; position:relative; top:-22px; width:44px;"></div></div> <p style=" margin:8px 0 0 0; padding:0 4px;"> <a href="https://instagram.com/p/x2wF7glzkI/" style=" color:#000; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none; word-wrap:break-word;" target="_top">Rainier is glowing.</a></p> <p style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;">A photo posted by Steven Erdmanczyk (@serdmanczyk) on <time style=" font-family:Arial,sans-serif; font-size:14px; line-height:17px;" datetime="2015-01-15T01:04:34+00:00">Jan 14, 2015 at 5:04pm PST</time></p></div></blockquote>
+<script async defer src="//platform.instagram.com/en_US/embeds.js"></script></p>
+
+<p>Well, hope you enjoyed my shitty weather blog.  If you&rsquo;re local to Seattle and happened here, hit me up!  I&rsquo;m interested in meeting up with more developers/makers/engineers in the area (or y&rsquo;know, other cool people too).</p>
+
+<p>With the post I hope to get back in the swing of blogging.  I plan to pick up again on the GardenSpark project soon.  I also have plans for an automated pet feeder projects in the works!</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                
+                        <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Steven J. Erdmanczyk Jr.</span>
+                            <span>Software Developer</span>
+                        </div>
+                    
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2015-02-12-moving-to-seattle-hows-the-weather%2f - Moving%20to%20Seattle%2c%20How%27s%20the%20Weather%3f%20%28graphs%21%29 "><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'serdmanczyk';
+    var disqus_identifier = 'http:\/\/serdmanczyk.github.io\/post\/2015-02-12-moving-to-seattle-hows-the-weather\/';
+    var disqus_title = 'Moving to Seattle, How\x27s the Weather? (graphs!)';
+    var disqus_url = 'http:\/\/serdmanczyk.github.io\/post\/2015-02-12-moving-to-seattle-hows-the-weather\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/">Python Oberserver Metaclass<aside class="dates">Mar 10</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/">GardenSpark: Part Three - Make the Internet Pretty<aside class="dates">Apr 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/">GardenSpark: Part Two - Putting It in the Cloud<aside class="dates">Sep 11</aside></a>
+        </li>
+        
+   
+    
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/">GardenSpark: Part One - Prototype / stream to plotly<aside class="dates">Jul 22</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/BlogStarts/">Developer Blog Begins<aside class="dates">May 29</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    
+        
+<div id="social">
+    
+    <a class="symbol" href="https://www.github.com/serdmanczyk">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://plus.google.com/u/0/&#43;StevenErdmanczykJr/posts">
+        circlegoogleplus
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="http://stackoverflow.com/users/2406040/serdmanczyk">
+        circlestackoverflow
+    </a>
+    
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2016 Steven J. Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+    </body>
+</html>

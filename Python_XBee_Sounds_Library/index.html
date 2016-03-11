@@ -1,0 +1,397 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Steven J. Erdmanczyk Jr.">
+		<meta name="description" content="Obligatory software soap box">
+		<meta name="generator" content="Hugo 0.15" />
+		<title>Notes and Chords using Python &middot; Erdmanczyk.io</title>
+		<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/monosocialiconsfont.css">
+		
+		<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Erdmanczyk.io" />
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://serdmanczyk.github.io/about'>About</a>
+	
+
+	
+	<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Notes and Chords using Python</h1>
+                    <h2 class="headline">June 11, 2015</h2>
+                     
+                        <div id="toc" class="well col-md-4 col-sm-6">
+                            
+                        </div>
+                      
+                </header>
+                <section id="post-body">
+                    <p>Life events: my wife and I will be closing on a house in a couple days.  Yay!</p>
+
+<p>Things have moved quick since moving here to Seattle and I&rsquo;ve realized I haven&rsquo;t been as good about posting on this blog.  Just to get content on here, I figured I would share a recent small project I&rsquo;ve been working on.</p>
+
+<p>In what time I can spare I&rsquo;ve working on an education course for a hackerspace / STEAM education group here in Seattle.  I wanted to model the course after my Masters Thesis work, so one idea was getting youth engaged with using wireless communications.  One tool I thought would aid in engaging youth would be if they could easily program Arduino/XBee boards to play music, even chords on a remote machine.  This also aids given the interrelation of sound and radio communications having wave properties.  The basic idea is that the kids would program Arduino (or similar) microcontrollers to send messages via XBee that are translated on a central computer into music notes.</p>
+
+<p>I found plenty of existing examples of generating sine waves using numpy, and turning that data into notes with pyaudio.</p>
+
+<p>These examples didn&rsquo;t suite my situation because they all used blocking calls to play audio.  You issue the command to play a note and can&rsquo;t issue another until the note was finished.  I wanted to stream audio, and update the stream if a new note was entered.  This required a bit more reading into the pyaudio API.  Since this was a bit of effort for me, I figured I would share for others.</p>
+
+<p>This is just a starting framework that turns a computer keyboard into a music generating keyboard.  Currently it just assigns notes at random, or sequentially (see commented line 29).  Once a key is pressed, it continues to play the same note.  If all notes are assigned, random notes are given to new keys.</p>
+
+
+#!/usr/bin/python
+# coding=utf-8
+
+import numpy
+import random
+import math
+import copy
+import pyaudio
+from Tkinter import *
+
+class NoteGen(object):
+    def __init__(self, notes=range(30,70)):
+        self.choices = list(map(self._note, notes))
+        self.possibilities = copy.copy(self.choices)
+        self.mapping = {}
+
+    def __call__(self, key, duration=float("inf"), amplitude=1):
+        note = self._get(key, duration, amplitude)
+        if not note:
+            note = self._map(key, duration, amplitude)
+        return note
+
+    def _map(self, key, duration, amplitude):
+        if not self.possibilities:
+            self.mapping[key] = random.choice(self.choices)
+            return Note(self.mapping[key], duration, amplitude)
+
+        n = self.possibilities[0]
+        # n = random.choice(self.possibilities)
+        self.possibilities.remove(n)
+        self.mapping[key] = n
+        return Note(n, duration, amplitude)
+
+    def _get(self, key, duration, amplitude):
+        if key in self.mapping:
+            return Note(self.mapping[key], duration, amplitude)
+
+    def _note(self, n):
+        return math.pow(2, (float(n)-49) / 12) * 440
+
+
+class Note(object):
+    names = [
+        "A",
+        "A#/Bf",
+        "B",
+        "C",
+        "C#/Df",
+        "D",
+        "D#/Ef",
+        "E",
+        "F",
+        "F#/Gf",
+        "G",
+        "G#/Af"
+    ]
+
+    def __init__(self, frequency=440, duration=float("inf"), amplitude=1, rate=44100):
+        self.frequency = frequency
+        self.total_frames = duration * rate
+        self.frame_offset = 0
+        self.rate = rate
+        self.amplitude = amplitude
+
+    def __call__(self, frames):
+        if self.done:
+            return numpy.zeros(frames, float)
+
+        factor = float(self.frequency) * ((math.pi * 2) / self.rate)
+        
+        length = (frames if frames < self.remaining else self.remaining)
+        sin = numpy.sin((numpy.arange(length) + self.frame_offset) * factor) * self.amplitude
+        if frames > self.remaining:
+            sin = numpy.concatenate([sin, numpy.zeros(frames - self.remaining, float)])
+
+        self.frame_offset += frames
+        return sin
+
+    def __lt__(self, other):
+        return self.frequency < other.frequency
+
+    def __eq__(self, other):
+        return self.frequency == other.frequency
+    
+    @property
+    def remaining(self):
+        return self.total_frames - self.frame_offset
+    
+    @property
+    def done(self):
+        return self.frame_offset >= self.total_frames
+
+    @property
+    def name(self):
+        keynum = int((12 * math.log((self.frequency / 440), 2))  +  48) % 12
+        return self.names[keynum]
+
+class Chord(object):
+    def __init__(self):
+        self.notes = []
+
+    def __call__(self, duration):
+        if not len(self.notes):
+            return numpy.zeros(duration, float)
+
+        gen = lambda note:note(duration)
+        output = sum(map(gen, self.notes))
+        self.clean()
+        return output
+
+    def add_note(self, note):
+        if not isinstance(note, Note):
+            raise ValueError("Must be of type Note")
+
+        self.notes.append(note)
+
+    def remove_note(self, note):
+        if not isinstance(note, Note):
+            return
+
+        if note in self.notes:
+            self.notes.remove(note)
+
+    def clean(self):
+        for note in self.notes:
+            if note.done:
+                self.notes.remove(note)
+
+
+if __name__ == "__main__":
+    p = pyaudio.PyAudio()
+    chord = Chord()
+    gen = NoteGen()
+
+    def callback(in_data, frame_count, time_info, status):
+        wave = chord(frame_count)
+        data = wave.astype(numpy.float32).tostring()
+        return (data, pyaudio.paContinue)
+
+    stream = p.open(
+        format=pyaudio.paFloat32,
+        channels=1,
+        rate=44100,
+        output=True,
+        stream_callback=callback
+    )
+
+    stream.start_stream()
+
+    def keydown(event):
+        k = gen(event.char, 1)
+        chord.add_note(k)
+        print [(n.name, n.frequency) for n in chord.notes]
+
+    def keyup(event):
+        pass
+        # k = gen(event.char)
+        # chord.remove_note(k)
+        # print [n.name for n in chord.notes]
+
+
+    root = Tk()
+    frame = Frame(root, width=100, height=100)
+    frame.bind_all("<KeyPress>", keydown)
+    frame.bind_all("<KeyRelease>", keyup)
+    frame.pack()
+
+    root.mainloop()
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+
+<p>This is also available on Github as a <a href="https://gist.github.com/serdmanczyk/5a9389d80db94440cf15">gist</a>.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                
+                        <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Steven J. Erdmanczyk Jr.</span>
+                            <span>Software Developer</span>
+                        </div>
+                    
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fPython_XBee_Sounds_Library%2f - Notes%20and%20Chords%20using%20Python "><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'serdmanczyk';
+    var disqus_identifier = 'http:\/\/serdmanczyk.github.io\/Python_XBee_Sounds_Library\/';
+    var disqus_title = 'Notes and Chords using Python';
+    var disqus_url = 'http:\/\/serdmanczyk.github.io\/Python_XBee_Sounds_Library\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/">Python Oberserver Metaclass<aside class="dates">Mar 10</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/">GardenSpark: Part Three - Make the Internet Pretty<aside class="dates">Apr 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/">GardenSpark: Part Two - Putting It in the Cloud<aside class="dates">Sep 11</aside></a>
+        </li>
+        
+   
+    
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/">GardenSpark: Part One - Prototype / stream to plotly<aside class="dates">Jul 22</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/BlogStarts/">Developer Blog Begins<aside class="dates">May 29</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    
+        
+<div id="social">
+    
+    <a class="symbol" href="https://www.github.com/serdmanczyk">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://plus.google.com/u/0/&#43;StevenErdmanczykJr/posts">
+        circlegoogleplus
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="http://stackoverflow.com/users/2406040/serdmanczyk">
+        circlestackoverflow
+    </a>
+    
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2016 Steven J. Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+    </body>
+</html>

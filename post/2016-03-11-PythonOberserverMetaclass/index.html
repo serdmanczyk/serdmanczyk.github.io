@@ -1,0 +1,327 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Steven J. Erdmanczyk Jr.">
+		<meta name="description" content="Obligatory software soap box">
+		<meta name="generator" content="Hugo 0.15" />
+		<title>Python Oberserver Metaclass &middot; Erdmanczyk.io</title>
+		<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/monosocialiconsfont.css">
+		
+		<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Erdmanczyk.io" />
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://serdmanczyk.github.io/about'>About</a>
+	
+
+	
+	<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Python Oberserver Metaclass</h1>
+                    <h2 class="headline">March 10, 2016</h2>
+                     
+                        <div id="toc" class="well col-md-4 col-sm-6">
+                            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#why:eaf9853e2ff62465491e8f49c533cf3b">Why?</a></li>
+<li><a href="#what-s-happening:eaf9853e2ff62465491e8f49c533cf3b">What&rsquo;s happening?</a></li>
+</ul></li>
+</ul>
+</nav>
+                        </div>
+                      
+                </header>
+                <section id="post-body">
+                    
+
+<h2 id="why:eaf9853e2ff62465491e8f49c533cf3b">Why?</h2>
+
+<p>Looking back and grimacing at my Master&rsquo;s thesis code written in the halcyon days of graduate school when I had just started learning Python, I thought it would be a rewarding process to try and re-write it using better coding practices.</p>
+
+<p>I was wrong.</p>
+
+<p>At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.  So I decided to scrap and let the dead horse have its peace.</p>
+
+<p>One thing I got out of the endeavor, though, was I crafted a nifty way to implement an observer class in Python using meta-programming techniques.</p>
+
+<p>If you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/gofpatterns.aspx">gang of four</a>, you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/Observer.aspx">observer</a> pattern.  The basic principle is objects can subscribe to other objects and when a particular event happens an object can notify its subscribers.</p>
+
+<p>The thing about gang of four patterns is given different idioms some of the patterns don&rsquo;t translate into all languages; it&rsquo;s like trying to put a square peg into a round hole.  This was a good way to practice and learn meta-programming, but not something you would use directly in the real world.</p>
+
+<p>Regardless I thought it worth sharing.</p>
+
+
+"""
+    Implements the observer patter via a metaclass
+"""
+import inspect
+
+def __receive__(self, name, *args, **kwargs):
+    """
+    Method attached to class on class creation used to pass
+    messages to assigned methods.
+    """
+    if name in self.observers:
+        argspec = self.observers[name]['argspec']
+        inargs = {arg:kwargs[arg] for arg in argspec if arg in kwargs}
+        self.observers[name]['func'](self, *args, **inargs)
+
+class Observer(type):
+    """
+    Observer metaclass.  All inheriting classes will be able to
+    assigne methods to observer particular events via the @observes
+    decorator.  When a message is received via 
+    instance.receive("message_name", **parameters) the associated function
+    will be called with the arguments in **parameters that match the functions
+    argspec
+    """
+    def __call__(cls, *args, **kwargs):
+        if not hasattr(cls, 'observers'):
+            cls.receive = __receive__
+            observers = {}
+            for attr in vars(cls).values():
+                if hasattr(attr, '__observes__'):
+                    spec = inspect.getargspec(attr).args
+                    argspec = [arg for arg in spec if arg != 'self']
+                    observers[attr.__observes__] = {'func': attr, 'argspec': argspec}
+            cls.observers = observers
+        return super(Observer, cls).__call__(*args, **kwargs)
+
+def observes(event):
+    """
+    Used to annotate a function with the event it observers.
+    The annotation is lost before class is fully composed, but
+    is held long enough for the metaclass to intercept and 
+    derive the classes observer mapping
+    """
+    def wrapper(func):
+        func.__observes__ = event
+        return func
+    return wrapper
+
+class Friend(metaclass=Observer):
+    """
+    A simple observer class example
+    """
+    def __init__(self):
+        self.greetings_received = []
+        self.consolations = []
+
+    @observes("greeting")
+    def acnkowledge(self, message="hi"):
+        self.greetings_received.append(message)
+
+    @observes("consoling")
+    def greaving(self, consolation="it'll be alright", affirmation="pat on the back"):
+        self.consolations.append((consolation, affirmation))
+
+if __name__ == "__main__":
+    ted = Friend()
+
+    ted.receive("greeting", **{"message": "s'up", "postscript": "homie"})
+    ted.receive("consoling", **{"consolation": "chin up mate"})
+    ted.receive("consoling", **{"consolation": "thing'll get better", "affirmation": "hug"})
+    
+    print(ted.greetings_received)
+    print(ted.consolations)
+
+
+<h2 id="what-s-happening:eaf9853e2ff62465491e8f49c533cf3b">What&rsquo;s happening?</h2>
+
+<p>The functions decorated by <code>observers</code> are given an attribute marking what
+they observe.</p>
+
+<p>Since <code>Friend</code>&rsquo;s metaclass is <code>Observer</code> the <code>Observer</code> <code>__call__</code> method intercepts the class creation before <code>Friend</code>&rsquo;s <code>__init__</code> method.</p>
+
+<p>The <code>__call__</code> method on <code>Observer</code> finds all functions marked as observers and stores them in a dictionary alongside their parameter specs.  It then adds a function <code>receive</code> which is the observers receive method used to communicate messages to it.</p>
+
+<p><code>__call__</code> calls <code>Super</code> with the modified <code>cls</code>, which invokes <code>Friend</code>&rsquo;s <code>__init__</code> method, continuing our normal program.</p>
+
+<p>Anytime receive is called, it&rsquo;s passed a parameter of message type, and a **splat of the message into function arguments.  The <code>receive</code> method intelligently maps the message arguments to the functions arg spec, and invokes the mapped receiving function.</p>
+
+<p>In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class is my parser for XBee messages would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.</p>
+
+<p>One fallacy with this method is that <em>ALL</em> instances of <code>Friend</code> will receive messages, rather than just the one you notified of the message.  Correcting this calls on more code, reducing its elegance, creating more of a point that this is probably the wrong way to fix whatever solution this was meant to solve.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                
+                        <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Steven J. Erdmanczyk Jr.</span>
+                            <span>Software Developer</span>
+                        </div>
+                    
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-03-11-PythonOberserverMetaclass%2f - Python%20Oberserver%20Metaclass "><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'serdmanczyk';
+    var disqus_identifier = 'http:\/\/serdmanczyk.github.io\/post\/2016-03-11-PythonOberserverMetaclass\/';
+    var disqus_title = 'Python Oberserver Metaclass';
+    var disqus_url = 'http:\/\/serdmanczyk.github.io\/post\/2016-03-11-PythonOberserverMetaclass\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/">Python Oberserver Metaclass<aside class="dates">Mar 10</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/">GardenSpark: Part Three - Make the Internet Pretty<aside class="dates">Apr 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/">GardenSpark: Part Two - Putting It in the Cloud<aside class="dates">Sep 11</aside></a>
+        </li>
+        
+   
+    
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/">GardenSpark: Part One - Prototype / stream to plotly<aside class="dates">Jul 22</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/BlogStarts/">Developer Blog Begins<aside class="dates">May 29</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    
+        
+<div id="social">
+    
+    <a class="symbol" href="https://www.github.com/serdmanczyk">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://plus.google.com/u/0/&#43;StevenErdmanczykJr/posts">
+        circlegoogleplus
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="http://stackoverflow.com/users/2406040/serdmanczyk">
+        circlestackoverflow
+    </a>
+    
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2016 Steven J. Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+    </body>
+</html>

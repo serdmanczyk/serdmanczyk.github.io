@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Thesis on Erdmanczyk.io</title>
+    <link>http://serdmanczyk.github.io/tags/thesis/</link>
+    <description>Recent content in Thesis on Erdmanczyk.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 28 May 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://serdmanczyk.github.io/tags/thesis/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Master&#39;s Thesis</title>
+      <link>http://serdmanczyk.github.io/MSEEThesis/</link>
+      <pubDate>Wed, 28 May 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/MSEEThesis/</guid>
+      <description>
+
+&lt;h2 id=&#34;intro:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;I’ve decided to begin blogging my various endeavors in software development and electrical engineering hackery. To kick it off, I’m writing a post describing the work I did for my Masters of Science in Electrical Engineering thesis. This post will start it off with a brief introduction/overview, then I’ll cover individual aspects of the project.&lt;/p&gt;
+
+&lt;p&gt;You can read my &lt;a href=&#34;http://webpages.uncc.edu/~jmconrad/GradStudents/Thesis_Erdmanczyk.pdf&#34;&gt;full thesis&lt;/a&gt; via my advisor’s website, and all source code is available to view at &lt;a href=&#34;https://github.com/serdmanczyk/masters-thesis/&#34;&gt;github.com/serdmanczyk/masters-thesis/&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/syspic.jpg&#34; alt=&#34;Snapshot of computer and all Sakura boards, all outfitted with XBee radios&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The title of my thesis was “Adaptive Deployment of Mobile Sensor Nodes.” Unfortunately, like many academic paper titles, that comes off a bit vague. More specifically, my thesis involved researching a method for the dynamic deployment and maintenance of of mobile robots to act as a ‘wireless tether’ of repeaters for radio communications between a deployed robot and its base station in restrictive environments.&lt;/p&gt;
+
+&lt;p&gt;That’s quite a mouthful, but in reality it’s actually pretty simple. Let’s consider an example use scenario:&lt;/p&gt;
+
+&lt;p&gt;Consider you’re deploying mobile robots into a tunnel, collapsed building, or some other environment where radio communications may become restricted due to interference from obstacles. There’s various reasons you may want to do this: data gathering, equipment maintenance, locating disaster survivors, etc.. You need a way to repeat your signal to the deployed robot, and simply beefing up your transmitter strength won’t work. You could try manually placing radio repeaters, but that’s not feasible in dynamic scenarios. Instead, you could deploy robots that can intelligently move themselves in positions akin to better signal strength as well as recover their ‘tether’ in the case a node is damaged or destroyed. Applications like this were the aim of my thesis.&lt;/p&gt;
+
+&lt;p&gt;Designing a system for these situations sounds super cool, and what I completed with my thesis would make a good bottom layer for one of these example applications. Unfortunately I was just one person, was completing my thesis alongside working full-time, had limited access to materials from my universities lab due to time/distance constraints, as well as had a limited personal budget, so obviously my thesis did not involve me designing and implement a full system of actual moving robots that can rescue you from a collapsed building.&lt;/p&gt;
+
+&lt;p&gt;What I did do, was designed a piece of such a system and physically simulate it using my laptop and a few embedded boards. Other pieces required for a full system would include the parts for path navigation, collision avoidance, robot localization, pattern recognition, etc.&lt;/p&gt;
+
+&lt;p&gt;My resulting application broke down into three hardware pieces performing three general tasks. The hardware pieces were:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A base station run via Python. In my case a laptop, but adaptable to anything that runs python (e.g. Raspberry Pi)&lt;/li&gt;
+&lt;li&gt;A tether of mobile nodes programmed in C++, implemented with &lt;a href=&#34;http://sakuraboard.net/gr-sakura_en.html&#34;&gt;Renesas Sakura&lt;/a&gt; boards (provided by my advisor), but easily adaptable to an Arduino device&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/point-multipoint-rfmodules/xbee-series1-module&#34;&gt;XBee 802.15.4&lt;/a&gt; radios for handling wireless communications&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The three general tasks were:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The base station would dynamically deploy nodes as needed when the most recently deployed node exceeded range&lt;/li&gt;
+&lt;li&gt;Deployed nodes would maintain distance between each other in order to maintain maximal signal strength&lt;/li&gt;
+&lt;li&gt;In the case a node was lost, the system of nodes would maneuver and re-connect in order to heal the wireless communications tether&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I unfortunately did not get access to sufficient equipment to make the mobile nodes autonomously mobile, and instead had to simulate movement by having the Sakura boards light LEDs indicating their desired direction and then move the boards by hand. However, in my code I did provision for the output of a pulse-width-modulated signal to control a servo or DC motors.&lt;/p&gt;
+
+&lt;p&gt;That concludes the basic, top-level overview, now let&amp;rsquo;s delve into how I handled the networking layer in my application.&lt;/p&gt;
+
+&lt;h2 id=&#34;networking:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Networking&lt;/h2&gt;
+
+&lt;!-- EMBED: http://instagram.com/p/gZgK3NFzgv/ --&gt;
+
+&lt;iframe src=&#34;//instagram.com/p/gZgK3NFzgv/embed/&#34; width=&#34;612&#34; height=&#34;710&#34; frameborder=&#34;0&#34; scrolling=&#34;no&#34; allowtransparency=&#34;true&#34;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;The XBee 802.15.4 nodes are called as such because they implement the low-level &lt;a href=&#34;http://en.wikipedia.org/wiki/IEEE_802.15.4&#34;&gt;802.15.4 protocol&lt;/a&gt;. This is a protocol designed for low-powered device networking, primarily embedded applications, that gives slower speeds but with lower power requirements. The 802.15.4 protocol provides accommodations for layers one and two of the &lt;a href=&#34;http://en.wikipedia.org/wiki/OSI_model&#34;&gt;OSI model&lt;/a&gt;. On layer one they handle converting the digital output to radio waves as well as direct sequence spread spectrum (DSSS) modulation to avoid radio interference. On layer two it provides Media Access Control techniques such as carrier sense multiple access with collision avoidance (CSMA/CA) to prevent radios attempting to access the communications medium at the same time. What 802.15.4 does not provide is networking, so it was up to my application to handle OSI layer three and up.&lt;/p&gt;
+
+&lt;p&gt;There’s various ways to configure the XBee nodes to communicate, I won’t expound on them here. In short, I chose to use the XBee API mode to handle communicating with the radios because of the flexibility, speed, and control it offered. I chose not to use Full Function Device / Reduced Function Device functionality, or even ZigBee, to handle networking for a slew of reasons I won’t waste space divulging into here. I’ll just say they were either too power hungry, had limitations too great, or just didn’t fit.&lt;/p&gt;
+
+&lt;p&gt;With XBee API mode, all messages sent and received from the radio needed to be packed in a frame format. In particular the transmission request frame would contain the following information:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The destination node address&lt;/li&gt;
+&lt;li&gt;A frame ID (used to track transmission success)&lt;/li&gt;
+&lt;li&gt;Whether or not the radio should return a ‘success’ packet if transmission succeeds&lt;/li&gt;
+&lt;li&gt;The message itself&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The received packet would contain the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Source address&lt;/li&gt;
+&lt;li&gt;Received signal strength indicator (RSSI) measured on message detection&lt;/li&gt;
+&lt;li&gt;An optional byte to denote if message is a broadcast message&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This provided all the ingredients I needed to handle networking in-app and on-the-fly. The RSSI from the received packets is particularly interesting, as it allows the application to keep record of signal strength with nearby neighbors without additional overhead. Another good reason to use API mode, that I’ll delve into in the next part.&lt;/p&gt;
+
+&lt;p&gt;In networking, it’s common for devices in charge of routing to manage a table containing information and routes to known addresses. In the case of my application, networking is pretty simple: either a packet is going towards the base station or away from the base station. This kept routing tables down to two addresses: the neighbor to the front and the neighbor to the back. Of course, the base station would keep check on all nodes deployed, but would only communicate to the nearest node. For deployed nodes, the front and back neighbor are assigned by the base station on deployment.&lt;/p&gt;
+
+&lt;p&gt;So, I have a way to address which nodes to talk to, and I have a way to route messages to all other nodes in the system. Done, right? Well, of course I had more problems.&lt;/p&gt;
+
+&lt;p&gt;As is the nature of networking, errors will occur. Packets will be lost, so I needed a way to track specifically which packets and attempt to retry. Luckily the optional bits in the transmission frame allowed my app to track which messages had succeeded or not. If a message failed, that radio would pass a message back with a frame ID, and I would use the frame ID to retrieve the message from a short-term cache and retry. If it failed too many times, I abandoned and deleted it. This provided layer two feedback and error handling.&lt;/p&gt;
+
+&lt;p&gt;Still, there was some trouble with multi-hop messages being lost, so the next step was to have nodes send an explicit acknowledge message for messages meant to traverse several nodes. If no acknowledge from the destination node within a specified time frame, I would retry the message, and abandon after too many retries as by then the message had probably aged.&lt;/p&gt;
+
+&lt;p&gt;So, that’s a basic overview of how I built a simple, low-level, two-way networking piece in my application. This was probably the hardest part, as this was my first time working with wireless communication and doing any explicit networking without additional software or protocol libraries. I’m welcome to any feedback on what I may not have done well enough! So to review I handled networking in my application by:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Taking full control of destination and received addresses using XBee API mode&lt;/li&gt;
+&lt;li&gt;Keeping a routing table in deployed nodes of the neighboring nodes to the front and back. Inwards traffic went backwards, outwards traffic went forwards.&lt;/li&gt;
+&lt;li&gt;Handling errors by retry-ing packets, abandoning after too many retries.&lt;/li&gt;
+&lt;li&gt;Handling lost multi-hop packets via application level acknowledgement messages: retrying after a timeout, abandoning after too many retries.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This system got packet success up to a good 95+% in scenarios with good signal strength.&lt;/p&gt;
+
+&lt;p&gt;Now that networking is covered, our next layer to cover is using this to communicate RSSI among all of the nodes and using that to evaluate communications strength amongst the system.&lt;/p&gt;
+
+&lt;h2 id=&#34;rss-rssi-and-syncing-measurements:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
+
+&lt;p&gt;So, what is RSS? RSS is an acronym for &lt;a href=&#34;http://en.wikipedia.org/wiki/Signal_strength&#34;&gt;Received Signal Strength&lt;/a&gt; which is a metric used to represent how strong a radio signal is when a message is received on a listening device. In lower powered applications such as with embedded radios, it can commonly be measured as the log base 10 of the ratio of the received signal power to 1 milliwatt, aka &lt;a href=&#34;http://www.rapidtables.com/electric/dBm.htm&#34;&gt;Decibel-milliwatt&lt;/a&gt; (dBm).&lt;/p&gt;
+
+&lt;p&gt;RSS was my chosen metric in my application because of its ease of availability via the XBee communication’s API mode. By monitoring the RSS of nearby nodes I could directly observe the perceived signal strength and tie it into controlling the nodes to achieve better communications strength.  This also allowed the application to automatically account for when nodes enter areas that obstruct signal strength, something that would be difficult to detect if the it attempted to control based on a distance or mapping based approach.&lt;/p&gt;
+
+&lt;p&gt;With XBee API mode, monitoring the RSS from received messages was easy. The difficulty is, the other node’s perceived RSS may be different from our current node’s RSS due to factors such as environmental interference or other radio’s interfering signals. Acting on just our own measurement may cause our node to move out of our neighboring node’s effective range.&lt;/p&gt;
+
+&lt;p&gt;To account for this, I had each node keep track of RSS to its neighbor nodes on each received packet. Every second, nodes would transfer their most recent record of perceived RSS to its neighboring node. Each would keep a running average of the 10 most recently received RSS measurements, both based on perceived strength and the neighbor’s reported strength. The node would act on whichever running average was weaker. The below illustration depicts this process in a friendlier visual manner.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/RSSSync.png&#34; alt=&#34;Node RSS sync process&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Simple, right? So what about the base station? How is the base station to monitor RSS of all nodes to provide system feedback when it only communicates with the nearest node? To provide this functionality, I implemented a message to be sent from the furthest node. The first message contains the the node’s perceived RSS to its neighbor, its address, as well as the RSS reported to it. The message is passed backwards down the chain, aggregating data concerning each node’s connections and addresses as it goes. When it finally arrives at the base station, it contains information about each node’s signal strength in the chain for that snapshot in time. This process is depicted in the image below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/RSSReport.png&#34; alt=&#34;RSS report to base station process&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ll point out a couple important potential criticisms. Using RSS does have some deficiency as it only represents measured signal strength, but DOES NOT represent the signal-to-noise ratio during message reception. Unfortunately, time and system constraints prevented me from facilitating the measurement of SNR, but it would be a critical piece of a deliverable system. Also, keeping a running average of the RSS is subject to some aggregation of errors, and a better option may be a running mean or some more complex filtering method.&lt;/p&gt;
+
+&lt;p&gt;So that’s how I handled monitoring and syncing signal strength between nodes in my application’s system. This functionality is critical as one of the primary objectives in the system is to maintain distance between nodes in order to maximize communication’s strength. In my  into the primary logical functions of my system: deploying nodes as needed, maintaining distance between nodes, and healing the tether when nodes go down.&lt;/p&gt;
+
+&lt;h2 id=&#34;node-deployment:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Node Deployment&lt;/h2&gt;
+
+&lt;p&gt;When it came to the system’s responsibilities of deployment, distance management, and recovery I had to make a choice with each of how I would split that responsibility among the system parts. Should the logic for deployment be a distributed protocol among the nodes? What about healing and distance management, is that something nodes should defer to the base station? In the case of deployment, the choice of centralizing the logic to the base station was an easy one.&lt;/p&gt;
+
+&lt;p&gt;The process I chose to handle deployment is quite simple.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Start-up process
+
+&lt;ul&gt;
+&lt;li&gt;On the Node:
+
+&lt;ol&gt;
+&lt;li&gt;After initialization, send broadcast announcing presence on one second interval&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;li&gt;On the Base Station:
+
+&lt;ol&gt;
+&lt;li&gt;After initialization, listen for broadcasts from new nodes&lt;/li&gt;
+&lt;li&gt;When a broadcast is heard, add node to internal list&lt;/li&gt;
+&lt;li&gt;After a specified start-up interval begin deploying nodes&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Initial deployment:
+
+&lt;ul&gt;
+&lt;li&gt;Base Station:
+
+&lt;ol&gt;
+&lt;li&gt;Send message to first node assigning rear neighbor address as base station’s address&lt;/li&gt;
+&lt;li&gt;Send deployment message (node stops broadcasting)&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/InitialDeployment.png&#34; alt=&#34;Initial Deployment Visualization&#34; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Continuous deployment:
+
+&lt;ul&gt;
+&lt;li&gt;Base Station:
+
+&lt;ol&gt;
+&lt;li&gt;On an interval, check measured RSS to most recently deployed(nearest) node&lt;/li&gt;
+&lt;li&gt;If RSS drops below a set threshold (determined from testing/calculations), deploy next node:&lt;/li&gt;
+&lt;li&gt;Send message to recently deployed node assigning rear address as next node to be deployed&lt;/li&gt;
+&lt;li&gt;Send message to newly deployed node assigning front address as recently deployed node, and rear address as base station&lt;/li&gt;
+&lt;li&gt;Send ‘deploy’ message to newly deployed node&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/ContinuousDeployment.png&#34; alt=&#34;Continuous Deployment Visualization&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Of course, each assignment and deployment message is checked for an acknowledgement from the destination; if there is no acknowledgement the process bails. Further steps would be to add additional error checking on this process.&lt;/p&gt;
+
+&lt;!-- https://www.youtube.com/watch?v=KX1XcLeSdSU --&gt;
+
+&lt;iframe width=&#34;560&#34; height=&#34;315&#34; src=&#34;//www.youtube.com/embed/KX1XcLeSdSU&#34; frameborder=&#34;0&#34; allowfullscreen&gt;&lt;/iframe&gt;
+
+&lt;p&gt;That sums up the deployment process, which is the simplest of the three system tasks. Now let&amp;rsquo;s go over the distance maintenance algorithm.&lt;/p&gt;
+
+&lt;h2 id=&#34;distance-maintenance:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Distance Maintenance&lt;/h2&gt;
+
+&lt;p&gt;I chose to make the distance maintenance algorithm a distributed one. The phrase ‘distributed algorithm’ tends to invoke thoughts of complexity. Implementing a distributed algorithm may require additional code to handle concurrency, error correction, message passing, etc. however in the case of my system, distributed means that I could avoid that complexity as well as increase the speed of response.&lt;/p&gt;
+
+&lt;p&gt;My final method was actually rather simple and relied on emergent behavior.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Distance Maintenance Process:
+
+&lt;ol&gt;
+&lt;li&gt;Continually move forward&lt;/li&gt;
+&lt;li&gt;If RSS to rear is too low, slow down&lt;/li&gt;
+&lt;li&gt;If RSS to rear is exceptionally low, stop&lt;/li&gt;
+&lt;li&gt;If RSS to front is too high, stop&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/DistanceMaintenance.png&#34; alt=&#34;Psuedo-code and diagram&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Thus the steps to implement are considerably simple. By making each nodes take these actions, the result is the tether acting as sort of a ‘spring.’ If a node moves forward, it effectively ‘pushes’ the node in front of it forwards as well. Each node will ‘pull’ the node to the front back towards it if it goes to far. If you’ve ever read up on &lt;a href=&#34;http://en.wikipedia.org/wiki/Boids&#34;&gt;Boids&lt;/a&gt;, you’ll find this similar. I wasn&amp;rsquo;t directly inspired by the work on Boids, but I suppose you could say I was indirectly inspired because I had heard of similar things in a TED talk (which I cannot remember the name of).&lt;/p&gt;
+
+&lt;p&gt;To compare, if I had decided to centrally control distance, it would require the base station to perform a computation on what it knows of signal strengths in the tether. Because of the work I described in part three, the base station does have this information, though it may be slightly outdated when the base station would get around to computing. The base station would also need to send at least one message down the chain to notify each node of its needed control output. This adds layers of latency and possible errors in the process, whereas by having each node process individually it doesn&amp;rsquo;t require any additional messages and causes immediate changes in control output.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, as I mentioned earlier, I never was able to acquire materials to make the nodes truly mobile, so I had to simulate movement by lighting LEDs and moving the nodes with my hands. I did write code for an output to servo motors. Maybe sometime in the future I will acquire a series of Arduino’s just to see this step, because it would be really cool to watch this be performed autonomously.&lt;/p&gt;
+
+&lt;!-- https://www.youtube.com/watch?v=kft7dlmPVRk --&gt;
+
+&lt;iframe width=&#34;560&#34; height=&#34;315&#34; src=&#34;//www.youtube.com/embed/kft7dlmPVRk&#34; frameborder=&#34;0&#34; allowfullscreen&gt;&lt;/iframe&gt;
+
+&lt;p&gt;So that covers how I implemented a simple, distributed, emergent algorithm to allow the mobile nodes in the system of my thesis to control their distance to each other. Now let&amp;rsquo;s look at the final and most difficult piece: handling recovery when nodes area lost.&lt;/p&gt;
+
+&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
+
+&lt;p&gt;If a node is lost, the nodes need not just to intelligently reconnect, they most likely also need to maneuver to be back in range of a healthy node. Once again there came the choice of whether to handle this distributively or centrally, and I once again chose the former.&lt;/p&gt;
+
+&lt;p&gt;Any node in the system is expecting to hear from its neighbor to the front or rear at least once on every one second interval, so I made each node assume it had lost contact with a neighbor if it hadn&amp;rsquo;t heard anything in a small multiple of that time frame. If the neighbor was deemed lost the scenario is as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;If lost neighbor to rear:
+
+&lt;ol&gt;
+&lt;li&gt;Begin to move backwards to approach remaining tether&lt;/li&gt;
+&lt;li&gt;Begin sending ‘lost broadcast’ message announcing it’s lost its rear neighbor&lt;/li&gt;
+&lt;li&gt;Upon reception of acknowledgement to lost broadcast, set new neighbor as neighbor to rear&lt;/li&gt;
+&lt;li&gt;Resume standard operation&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;li&gt;If lost neighbor to front:
+
+&lt;ol&gt;
+&lt;li&gt;Send notification to base station (debug purposes)&lt;/li&gt;
+&lt;li&gt;Continue to move forward as normal (will approach chain in front)&lt;/li&gt;
+&lt;li&gt;Listen for ‘lost broadcast’&lt;/li&gt;
+&lt;li&gt;Upon reception of ‘lost broadcast’ send acknowledgement, set sender as front neighbor&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/msthesis/LostRecovery.png&#34; alt=&#34;Lost Node Recovery Diagram&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So, with the other steps handled the way they are, handling a lost node is actually kept rather simple. The only interruption to normal movement is the node to the front of the lost node moving backwards to recover the tether, all nodes in front of that node will move backwards to follow when RSS drops (see part five). Just as distance maintenance is handled by emergent behavior as the result of a few simple steps, so is healing the tether.&lt;/p&gt;
+
+&lt;!-- https://www.youtube.com/watch?v=btbE84ngXd8 --&gt;
+
+&lt;iframe width=&#34;560&#34; height=&#34;315&#34; src=&#34;//www.youtube.com/embed/btbE84ngXd8&#34; frameborder=&#34;0&#34; allowfullscreen&gt;&lt;/iframe&gt;
+
+&lt;p&gt;“What about the base station?” you may ask. Won’t it continue to think that the tether includes the lost node because it deployed them in a certain order? Fortunately, no. If you’ll remember from part three, the base station receives a report from the furthest node every second containing aggregated data about each connection in the chain. If at any point the order of nodes doesn&amp;rsquo;t match the base station’s record, it will update the record to match current data.&lt;/p&gt;
+
+&lt;p&gt;That gives a general overview of how my application handles situations where a node is lost. Once again not too complicated given the other layers are designed well.&lt;/p&gt;
+
+&lt;h2 id=&#34;summary:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;Thus concludes the &amp;lsquo;blog-ification&amp;rsquo; of the work I did on my thesis.  I spared intricate details on coding and such, because that would drag on longer than I would wish for what I wanted to get across.  I will give a post soon on the basics of using API mode with XBees using Python and Arduino that will include code from this project.  Hopefully the general overview of how I implemented a system of mobile nodes/a base station to provide an automated wireless communications tether can be helpful to others with a similar project and/or may have just been entertaining to read.&lt;/p&gt;
+
+&lt;p&gt;In summary the stages of work I did on my thesis were:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Networking - message routing and error handling&lt;/li&gt;
+&lt;li&gt;Syncing RSS (signal strength) among nodes and base station.&lt;/li&gt;
+&lt;li&gt;Automatically deploying new nodes from the base station&lt;/li&gt;
+&lt;li&gt;Maintaining distance between nodes for optimal commmunications strength&lt;/li&gt;
+&lt;li&gt;Healing the tether when a node is lost&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;A seemingly complicated task at first, made simple by splitting it up into parts and iteratively hacking away step-by-step.  Hope you enjoyed reading!&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

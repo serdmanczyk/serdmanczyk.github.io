@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Arduino on Erdmanczyk.io</title>
+    <link>http://serdmanczyk.github.io/tags/arduino/</link>
+    <description>Recent content in Arduino on Erdmanczyk.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 01 Jun 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://serdmanczyk.github.io/tags/arduino/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>XBee API Mode Tutorial Using Python and Arduino</title>
+      <link>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</link>
+      <pubDate>Sun, 01 Jun 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</guid>
+      <description>
+
+&lt;p&gt;&lt;pre&gt;
+Disclaimer:  This is meant to be a tutorial.
+Primarily this is intended to educate with basic XBee
+API mode setup, and how the XBee frame format works.
+If you&amp;rsquo;re looking for a library, I recommend for &lt;a href=&#34;https://pypi.python.org/pypi/XBee&#34;&gt;XBee&lt;/a&gt; for
+Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#34;&gt;xbee-arduino&lt;/a&gt; for&amp;hellip; yeah.
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;introduction:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;This post is a tutorial, with example code, covering how to communicate using XBee 802.15.4 (Series 1) radios in API mode using Python and Arduino.  I decided to write these tutorials because I couldn&amp;rsquo;t find a substantial amount of simple examples when I decided to use XBee&amp;rsquo;s in API mode while working on my Masters thesis.  It&amp;rsquo;s my hopes this tutorial can help other people working on applications similar to mine get off the ground and running faster.&lt;/p&gt;
+
+&lt;p&gt;Some knowledge of serial/UART communication mechanics, Python, and Arduino will be helpful for this tutorial but not absolutely required.  It&amp;rsquo;s hopeful that this tutorial can aid in your learning if you&amp;rsquo;re also picking these up as you go.  All example code is available at the &lt;a href=&#34;https://github.com/serdmanczyk/XBee_802.15.4_APIModeTutorial&#34; class=&#34;btn btn-success&#34;&gt;GitHub Repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;This tutorial does assume you are familiar with Digi X-CTU and Arduino software.  You will be instructed what to do in X-CTU and Arduino (e.g. &amp;ldquo;compile&amp;rdquo;, &amp;ldquo;change these settings&amp;rdquo;), but will not be instructed how to do it (e.g. &amp;ldquo;push the blue button&amp;rdquo;, &amp;ldquo;go to menu File-&amp;gt;&amp;rdquo;)&lt;/p&gt;
+
+&lt;h2 id=&#34;requisite-hardware:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Hardware&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;2 XBee 802.15.4 Series 1 radios&lt;/li&gt;
+&lt;li&gt;1 XBee 3.3v-5v adapter / break-out board&lt;/li&gt;
+&lt;li&gt;1 XBee USB adapter&lt;/li&gt;
+&lt;li&gt;1 Arduino board (This tutorial was written with an &lt;a href=&#34;https://www.sparkfun.com/products/11021&#34;&gt;Uno&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;1 Breadboard and jumper wires&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I recommend the &lt;a href=&#34;http://amzn.com/B00B6SF2C6&#34;&gt;Parallax XBee Wireless Pack&lt;/a&gt;, but there are also several other options on &lt;a href=&#34;https://www.sparkfun.com&#34;&gt;SparkFun&lt;/a&gt;, &lt;a href=&#34;https://www.adafruit.com&#34;&gt;Adafruit&lt;/a&gt;, &lt;a href=&#34;http://www.makershed.com/SearchResults.asp?Search=xbee&#34;&gt;Maker Shed&lt;/a&gt; and other hobby electronics stores.  Many of them are very similar to the pieces used in this post.&lt;/p&gt;
+
+&lt;h2 id=&#34;requisite-software:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Software&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/xctu&#34;&gt;Digi X-CTU&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.ftdichip.com/FTDrivers.htm&#34;&gt;FTDI Drivers&lt;/a&gt; (for USB to Serial communications)&lt;/li&gt;
+&lt;li&gt;Python &lt;a href=&#34;https://www.python.org/download/releases/2.7.7/&#34;&gt;2.7&lt;/a&gt; or &lt;a href=&#34;https://www.python.org/download/releases/3.3.5&#34;&gt;3.3&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://pyserial.sourceforge.net/&#34;&gt;PySerial library&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://arduino.cc/en/main/software&#34;&gt;Arduino Software&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;why-xbee-802-15-4:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
+
+&lt;p&gt;XBee radios are handy in embedded applications because they enable wireless communications with relatively low power compared to Wi-Fi, bluetooth, or cellular technologies at the cost of slower speed.  XBee 802.15.4 (Series 1) provides simple OSI layer one and two functionality on the module.  Zigbee radios (XBee Series 2) provide an additional networking layer that can handle cool things like automatic mesh networking, however, Zigbee mesh networks are limited to a maximum of 10 nodes.  Zigbee radios can also operate in API mode, frame packaging is the same, and the frames used for Zigbee are very similar.  This tutorial covers XBee 80.15.4 because their frames are simpler for beginners and are all we need to cover the basics.&lt;/p&gt;
+
+&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
+
+&lt;p&gt;Using API mode to communicate has a few advantages compared to other XBee configuration options:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;No need for timely switching in/out of command mode to change configuration options&lt;/li&gt;
+&lt;li&gt;Message destination addresses can be specified on the fly&lt;/li&gt;
+&lt;li&gt;Received message frames come packaged with an RSSI (Received Signal Strength Indicator) byte&lt;/li&gt;
+&lt;li&gt;Feedback is provided on message transmission success when enabled&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In API mode, all incoming and outgoing messages are required to be packaged in frames.  The picture below summarizes a few of the basic frame types based on descriptions in the &lt;a href=&#34;http://ftp1.digi.com/support/documentation/90000982_N.pdf&#34;&gt;XBee 802.15.4 product manual&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/XBeeFramesOverview.png&#34; alt=&#34;API Frames Summary&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Each frame has a minimum of the the following:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Start delimiter byte &lt;code&gt;0x7E&lt;/code&gt; &lt;em&gt;&amp;ldquo;there is a frame here&amp;rdquo;&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;Most Significant Byte (MSB) &lt;em&gt;&amp;ldquo;the start byte is at: &amp;ldquo;&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;Least Significant Byte (LSB) &lt;em&gt;&amp;ldquo;the end byte is at: &amp;ldquo;&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;API identifier (cmdID) &lt;em&gt;&amp;ldquo;the content looks like: &amp;ldquo;&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;Frame data (including additional bytes specific to API message type)&lt;/li&gt;
+&lt;li&gt;Checksum byte &lt;em&gt;&amp;ldquo;all contents compress to: &amp;ldquo;&lt;/em&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The start delimiter simply denotes the beginning of a frame.  The MSB and LSB are used to indicate the length of the data in the frame.  The length of the frame is the number of bytes after the LSB, not including the checksum byte.  The MSB is always 0x00, so the LSB will be equivalent to the length.  Every frame will have an API identifier specifying what type of frame is being sent (this tutorial will cover the 16-bit address transmit and receive message types).  After the API identifier comes any additional bytes required by the specified frame type. After that is the actual frame data (in the case of a transmit and receive frame, the data to transmit/received).  The checksum byte is used to verify the integrity of the contents.  The checksum is calculate using the following process:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Sum value of each byte after LSB&lt;/li&gt;
+&lt;li&gt;Preserve only the lower 8 bits (AND with &lt;code&gt;0xFF&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Subtract the value from 255&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This enables simple verification of received frames because the lower 8 bits of the sum of all bytes after the LSB (including the checksum) will be equal to 255 or &lt;code&gt;0xFF&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After formatting the previous parts, a final step is necessary if you&amp;rsquo;re using API mode with escaped characters.  When escaping is enabled, any bytes (excluding the start delimiter) that contain reserved characters (&lt;code&gt;0x7E&lt;/code&gt;, &lt;code&gt;0x7D&lt;/code&gt;, &lt;code&gt;0x11&lt;/code&gt;, and &lt;code&gt;0x13&lt;/code&gt;) must be escaped so that the XBee will not interpret them as control characters.  This may seem like extra overhead, but escaped mode simplifies message reception so that you can count on any &lt;code&gt;0x7E&lt;/code&gt; byte to only indicate a start delimiter (or an ignorable error).  This removes the need to program for more edge cases and simplifies code.&lt;/p&gt;
+
+&lt;p&gt;To escape a message, anywhere in the message (including the MSB, LSB, and checksum bytes) a reserved character appears, it should be replaced with an &lt;code&gt;0x7D&lt;/code&gt; escape character followed by the original character XOR&amp;rsquo;ed with &lt;code&gt;0x20&lt;/code&gt;.  For example the bytes &lt;code&gt;00 11 23&lt;/code&gt; after escaping would become &lt;code&gt;00 7D 31 23&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;So, in a nutshell, the process for formatting an API frame is:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Calculate the full length of the message (minus start delimiter and checksum) and insert it as the LSB&lt;/li&gt;
+&lt;li&gt;Calculate and insert any bytes necessary for the API frame type&lt;/li&gt;
+&lt;li&gt;Calculate the checksum and place it at the end of the frame&lt;/li&gt;
+&lt;li&gt;Escape any reserved characters (including MSB, LSB, and checksum)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;That covers the basics of API frames / the boring part.  Now let&amp;rsquo;s actually have some fun.&lt;/p&gt;
+
+&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
+
+&lt;p&gt;For all parts of this tutorial we&amp;rsquo;ll have two XBee radios with different settings.  To make things easier we&amp;rsquo;ll give them names.  For the rest of this tutorial &amp;ldquo;Atreyu&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our computer and &amp;ldquo;Falcor&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our Arduino.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/Setup_Diagram.png&#34; alt=&#34;Setup Diagram&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We will start with both XBee&amp;rsquo;s in transparent mode.  Atreyu will connect to the X-CTU console on our computer, and Falcor will be wired in passthrough mode so that it will reflect any messages sent to it directly back to Atreyu.&lt;/p&gt;
+
+&lt;p&gt;First we need to configure the proper parameters on the radios so they will talk to each other.  For both radios, use X-CTU to load the default parameters, and then configure/write the following settings:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;|                   Settings for Atreyu                |
+| Name                            | Value              |
+|:-----------------------------   | -----------------: |
+| `MY` (16-bit source address)    | `0`                |
+| `DH` (Destination Address High) | `0`                |
+| `DL` (Destination Address Low)  | `1`                |
+| `AP` (API Enable)               | `API Disabled [0]` |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;|                   Settings for Falcor                  |
+| Name                            | Value                |
+|:-----------------------------   | -------------------: |
+| `MY`                            | `1`                  |
+| `DH`                            | `0`                  |
+| `DL`                            | `0`                  |
+| `AP`                            | `API Disabled [0]`   |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Leave Atreyu connected to the computer with the X-CTU software.  Insert Falcor into your 3.3v-5v adapter/break-out board and connect the following pins from the break-out board:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Connect the DIN pin to DOUT (passthrough)&lt;/li&gt;
+&lt;li&gt;Connect 5v and GND to a 5v power source&lt;/li&gt;
+&lt;li&gt;That&amp;rsquo;s it!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you like, you can use the Arduino as an overly fanciful power supply.  We will be using it in Part Three, so this way we&amp;rsquo;ll only need to modify one wire when we start communicating with the Arduino.  Connect the Arduino to power (computer USB, or DC-in from wall or a battery) and it will provide enough current through the 5v pin to power the XBee.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/XBeePassThroughGraphic.png&#34; alt=&#34;XBee Pass-Through Mode Connection&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The illustration shows a SparkFun XBee explorer module because it is what is available in &lt;a href=&#34;http://fritzing.org/home/&#34;&gt;fritzing&lt;/a&gt;.  The pin layout is identical to the module in the Parallax kit.
+{: .notice}&lt;/p&gt;
+
+&lt;p&gt;If you&amp;rsquo;ve set this up correctly, you should now be able to connect to Atreyu with the X-CTU console and start typing text and see it returned like below (Blue text is sent, Red is received).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/HelloWorld_Passive.png&#34; alt=&#34;Passive Hello World&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Congratulations!  You&amp;rsquo;ve successfully setup and communicated with the XBee&amp;rsquo;s in transparent mode.  Now we&amp;rsquo;re ready to switch Atreyu into API mode and start communicating using Python in part two.&lt;/p&gt;
+
+&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
+
+&lt;p&gt;Now that we have things setup and we&amp;rsquo;ve verified they can communicate, we can switch our first XBee into API mode and begin sending messages with it via Python. Re-configure the following parameter on Atreyu to enable API mode.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;|        Settings for Atreyu        |
+| Name    | Value                   |
+| :-----  | -------------------:    |
+| `AP`    | `API enabled w/PPP [2]` |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To test in X-CTU, you can create a packet with following Hex contents: &lt;code&gt;7E 00 10 01 00 FF FF 01 48 65 6C 6C 6F 20 57 6F 72 6C 64 E3&lt;/code&gt; (You can copy and paste).  You should be able to send the example packet in the X-CTU console and get a response (still being reflected from Falcor) identical to the second image.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/APIHelloWorldPacket.png&#34; alt=&#34;API Hello World Packet&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/APIHelloWorldResponse.png&#34; alt=&#34;API Hello World Response&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Congratulations!  You&amp;rsquo;ve sent your first message with XBee API mode.  Now let&amp;rsquo;s send a package using Python.&lt;/p&gt;
+
+&lt;p&gt;Go ahead and clone the GitHub repository for this tutorial if you haven&amp;rsquo;t already.  Also, make sure you have installed PySerial as well.  Now navigate to the Python folder.  You will need to modify line 5 in main.py to match the port your XBee resides on.  Now if you navigate with a command prompt to this folder and run main.py your command prompt output should look like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ C:/.../main.py
+Tx: 7e 00 10 01 00 ff ff 01 48 65 6c 6c 6f 20 57 6f 72 6c 64 e3
+Rx: 7e 00 10 81 00 01 24 00 48 65 6c 6c 6f 20 57 6f 72 6c 64 3d
+Msg: Hello World
+Tx: 7e 00 7d 31 01 00 ff ff 01 7d 5e 7d 5d 7d 31 7d 33 5b 01 01 01 01 01 01 01 7d 5e
+Rx: 7e 00 7d 31 81 00 01 24 00 7d 5e 7d 5d 7d 31 7d 33 5b 01 01 01 01 01 01 01 d8
+Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You did it!  What exactly did we do?  Let&amp;rsquo;s start examining the code by looking at the body of main.py.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    xbee = XBee.XBee(&amp;quot;COM3&amp;quot;)  # Your serial port name here
+
+    # A simple string message
+    sent = xbee.SendStr(&amp;quot;Hello World&amp;quot;)
+    sleep(0.25)
+    Msg = xbee.Receive()
+    if Msg:
+        content = Msg[7:-1].decode(&#39;ascii&#39;)
+        print(&amp;quot;Msg: &amp;quot; + content)
+
+    # A message that requires escaping
+    xbee.Send(bytearray.fromhex(&amp;quot;7e 7d 11 13 5b 01 01 01 01 01 01 01&amp;quot;))
+    sleep(0.25)
+    Msg = xbee.Receive()
+    if Msg:
+        content = Msg[7:-1]
+        print(&amp;quot;Msg: &amp;quot; + xbee.format(content))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As can be seen, we sent and received two messages.  The first messages contents were simply &amp;ldquo;Hello World&amp;rdquo; in ascii encoding.  The second message is a bit more obscure, it is formatted to demonstrate API mode character escaping which we&amp;rsquo;ll get more into soon.  Now, let&amp;rsquo;s get into the pieces that are the heart of this tutorial.  Lets start with the XBee &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class XBee():
+    ...
+    def __init__(self, serialport, baudrate=9600):
+        self.serial = serial.Serial(port=serialport, baudrate=baudrate)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All the class constructor does is initialize the serial port.  You can read more on PySerial options in the &lt;a href=&#34;http://pyserial.sourceforge.net/pyserial_api.html&#34;&gt;PySerial API documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now lets look at the interesting stuff, starting with the SendStr() method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
+        return self.Send(msg.encode(&#39;utf-8&#39;), addr, options, frameid)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;SendStr()&lt;/code&gt; simply decodes the message into a bytes object using UTF-8 encoding and passes it to the &lt;code&gt;Send()&lt;/code&gt; method.  If you&amp;rsquo;re only using characters from the ascii set they will only require one byte per character.&lt;/p&gt;
+
+&lt;p&gt;What is a bytes object?  A bytes object is basically an array of integers with values between 0-255, so literally: bytes. You can read up more on bytes and bytearrays in the &lt;a href=&#34;https://docs.python.org/3.1/library/stdtypes.html#bytes-methods&#34;&gt;Python documentation&lt;/a&gt; and &lt;a href=&#34;http://dabeaz.blogspot.com/2010/01/few-useful-bytearray-tricks.html&#34;&gt;this helpful blog post&lt;/a&gt;.  Bytes and bytearray objects are the required inputs for the PySerial library.  A bytearray is basically the same as a bytes object, except mutable.  Now lets look at the &lt;code&gt;Send()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def Send(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
+        if not msg:
+            return 0
+
+        hexs = &#39;7E 00 {:02X} 01 {:02X} {:02X} {:02X} {:02X}&#39;.format(
+            len(msg) + 5,           # LSB (length)
+            frameid,
+            (addr &amp;amp; 0xFF00) &amp;gt;&amp;gt; 8,   # Destination address high byte
+            addr &amp;amp; 0xFF,            # Destination address low byte
+            options
+        )
+
+        frame = bytearray.fromhex(hexs)
+        #  Append message content
+        frame.extend(msg)
+
+        # Calculate checksum byte
+        frame.append(0xFF - (sum(frame[3:]) &amp;amp; 0xFF))
+
+        # Escape any bytes containing reserved characters
+        frame = self.Escape(frame)
+
+        print(&amp;quot;Tx: &amp;quot; + self.format(frame))
+        return self.serial.write(frame)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;Send()&lt;/code&gt; accepts &amp;lsquo;msg&amp;rsquo; as its first parameter, which is expected to be a bytes or bytearray object.  Optionally you can specify an address, options, or a frameid but the defaults are to broadcast, disable acknowledgments, and have no frameid.&lt;/p&gt;
+
+&lt;p&gt;The first thing the &lt;code&gt;Send()&lt;/code&gt; method does is initialize a transmit request frame in a bytearray object.  It first formats a string that contains the desired hex characters using string formatting operations.  This isn&amp;rsquo;t the most efficient way, but it makes things more readable.  Then the bytearray &lt;code&gt;fromhex()&lt;/code&gt; method will decode the string into a bytearray object e.g. &lt;code&gt;bytearray.fromhex()&lt;/code&gt; with the strings &lt;code&gt;&amp;quot;7E 00&amp;quot;&lt;/code&gt;, &lt;code&gt;&amp;quot;7E00&amp;quot;&lt;/code&gt;, &lt;code&gt;&amp;quot; 7e00&amp;quot;&lt;/code&gt;, and &lt;code&gt;&amp;quot;7e00 &amp;quot;&lt;/code&gt; will all create a bytearray object with bytes &lt;code&gt;[0x7E, 0x00]&lt;/code&gt;.  We use this method to input our LSB, frameid, address, and options bytes (MSB is always zero).  Our LSB is equivelant to the length of our frame between the LSB and checksum or rather the length of the message contents plus 5 bytes: the API type, frameid, address, and options bytes required for a transmission request frame.&lt;/p&gt;
+
+&lt;p&gt;Next the function extends the frame to contain our message.  Then the checksum is calculate and appended to the end.  Now that our frame is formatted, we escape any reserved characters after the start delimiter using the &lt;code&gt;Escape()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def Escape(self, msg):
+        escaped = bytearray()
+        reserved = bytearray(b&amp;quot;\x7E\x7D\x11\x13&amp;quot;)
+
+        escaped.append(msg[0])
+        for m in msg[1:]:
+            if m in reserved:
+                escaped.append(0x7D)
+                escaped.append(m ^ 0x20)
+            else:
+                escaped.append(m)
+
+        return escaped
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After escaping, the message is ready to send!  The &lt;code&gt;Send()&lt;/code&gt; function prints the formatted frame for debug using the &lt;code&gt;format()&lt;/code&gt; function, and then passes it to the serial port with the PySerial &lt;code&gt;write()&lt;/code&gt; method.  The &lt;code&gt;format()&lt;/code&gt; function is just a simple function to convert a byte object into a more readable string for debug output.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def format(self, msg):
+        return &amp;quot; &amp;quot;.join(&amp;quot;{:02x}&amp;quot;.format(b) for b in msg)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a breakdown of the contents of the formatted frames for the two messages in main.py:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Msg: Hello World ------------------------------------------------------------------------------
+                                                                Checksum |
+                                        -  &amp;quot;hello world&amp;quot; in Ascii -      |
+                             Options |                                   |
+                      Address LSB |  |                                   |
+                   Address MSB |  |  |                                   |
+                   Frame ID |  |  |  |                                   |
+              Tx Request |  |  |  |  |                                   |
+                  LSB |  |  |  |  |  |                                   |
+               MSB |  |  |  |  |  |  |                                   |
+start delimiter |  |  |  |  |  |  |  |                                   |
+                |  |  |  |  |  |  |  |                                   |
+                7e 00 10 01 00 ff ff 01 48 65 6c 6c 6f 20 57 6f 72 6c 64 e3
+
+
+Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01 ------------------------------------------------------
+                                                                           Escaped Checksum |
+                                Options |                                                   |
+                         Address LSB |  |                                                   |
+                      Address MSB |  |  |                                                   |
+                      Frame ID |  |  |  |                                                   |
+                 Tx Request |  |  |  |  |                                                   |
+          LSB Escaped |     |  |  |  |  |                                                   |
+               MSB |  |     |  |  |  |  |                                                   |
+start delimiter |  |  |     |  |  |  |  |                                                   |
+                7e 00 7d 31 01 00 ff ff 01 7d 5e 7d 5d 7d 31 7d 33 5b 01 01 01 01 01 01 01 7d 5e
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So you can see, the second message is specially designed so the LSB and checksum bytes in the formatted frame require escaping, just to demonstrate that necessity (and that it works).&lt;/p&gt;
+
+&lt;p&gt;That&amp;rsquo;s it for sending a message.  The next step is to receive the message.  This gets a bit more complicated.  When you receive through serial, it&amp;rsquo;s not guaranteed that the entire message will come through at once.  You also may get the beginning of another message.  It&amp;rsquo;s important to receive as much as possible in a call, parse out any messages, and hold onto any remaining bytes until the next time your program attempts to receive.  This is done in the example code &lt;code&gt;Receive()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def Receive(self):
+        remaining = self.serial.inWaiting()
+        while remaining:
+            chunk = self.serial.read(remaining)
+            remaining -= len(chunk)
+            self.RxBuff.extend(chunk)
+
+        msgs = self.RxBuff.split(bytes(b&#39;\x7E&#39;))
+        for msg in msgs[:-1]:
+            self.Validate(msg)
+
+        self.RxBuff = (bytearray() if self.Validate(msgs[-1]) else msgs[-1])
+
+        if self.RxMessages:
+            return self.RxMessages.popleft()
+        else:
+            return None
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The code first receives any data available on the serial port.  Thanks to python, we can easily &amp;lsquo;split&amp;rsquo; the buffer around the &lt;code&gt;0x7E&lt;/code&gt; start delimiter into a list of bytearrays then iterate through them.  Each call to &lt;code&gt;Validate()&lt;/code&gt; will append the message to the &lt;code&gt;RxMessages&lt;/code&gt; if the message validates.  If the last message doesn&amp;rsquo;t validate, it may be the beginning of a new message, so the method holds onto it until the next call.&lt;/p&gt;
+
+&lt;p&gt;With this code, if you send data and call &lt;code&gt;Receive()&lt;/code&gt; immediately, the response message will not be ready in the serial buffer yet.  Python code runs much faster than the 9600 baud rate at which the serial port is operating.  Because of this it&amp;rsquo;s necessary to pause at least the minimum amount of time it takes the message to transmit, the source to process/respond, and the radio to receive/send the message back to our program.  This is why main.py sleeps for &lt;sup&gt;1&lt;/sup&gt;&amp;frasl;&lt;sub&gt;4&lt;/sub&gt; second after sending.  In production code it may be more reasonable to use callbacks or threading, but that&amp;rsquo;s beyond the scope of this tutorial; we&amp;rsquo;ll keeping it simple.  Still, there is an alternate version of XBee.py with threads and thread-safe Queues for message reception in the repository if you&amp;rsquo;re interested.
+{: .notice}&lt;/p&gt;
+
+&lt;p&gt;For each start delimiter found in the receive buffer, the &lt;code&gt;validate()&lt;/code&gt; method is called.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def Validate(self, msg):
+        # 9 bytes is Minimum length to be a valid Rx frame
+        #  LSB, MSB, Type, Source Address(2), RSSI,
+        #  Options, 1 byte data, checksum
+        if (len(msg) - msg.count(bytes(b&#39;0x7D&#39;))) &amp;lt; 9:
+            return False
+
+        # All bytes in message must be unescaped before validating content
+        frame = self.Unescape(msg)
+
+        LSB = frame[1]
+        # Frame (minus checksum) must contain at least length equal to LSB
+        if LSB &amp;gt; (len(frame[2:]) - 1):
+            return False
+
+        # Validate checksum
+        if (sum(frame[2:3+LSB]) &amp;amp; 0xFF) != 0xFF:
+            return False
+
+        print(&amp;quot;Rx: &amp;quot; + self.format(bytearray(b&#39;\x7E&#39;) + msg))
+        self.RxMessages.append(frame)
+        return True
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first thing the &lt;code&gt;Validate()&lt;/code&gt; method does is double check the message array (minus any escapes) is at least the size required for a message.  The next thing it does is undo any escape characters with the &lt;code&gt;Unescape()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    def Unescape(self, msg):
+        if msg[-1] == 0x7D:
+            # Last byte indicates an escape, can&#39;t unescape that
+            return None
+
+        out = bytearray()
+        skip = False
+        for i in range(len(msg)):
+            if skip:
+                skip = False
+                continue
+
+            if msg[i] == 0x7D:
+                out.append(msg[i+1] ^ 0x20)
+                skip = True
+            else:
+                out.append(msg[i])
+
+        return out
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We need to do this before the next steps to read the LSB and checksum bytes.  Then the &lt;code&gt;Validate()&lt;/code&gt; method double checks the current frame length is at least the size indicated by the LSB.  If it is, the last step in validation is to verify the checksum by summing all characters from the LSB up to the checksum and making sure the lower byte is equal to &lt;code&gt;0xFF&lt;/code&gt;.  If all this checks out, we have a valid message!  The message is now printed for debug output and placed in the &lt;code&gt;RxMessages&lt;/code&gt; list member variable.&lt;/p&gt;
+
+&lt;p&gt;That concludes all the example pieces to do basic message sending and receiving in API mode using Python.  Next, we&amp;rsquo;ll switch worlds into C++ code to handle message reception on an Arduino.&lt;/p&gt;
+
+&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
+
+&lt;p&gt;Now we&amp;rsquo;ll need to re-connect Falcor to our computer briefly to reset the following parameters in X-CTU:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;|        Settings for Falcor        |
+| Name    | Value                   |
+| :-----  | -------------------:    |
+| `AP`    | `API enabled w/PPP [2]` |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now return Falcor to the 3.3v-5v breakout board but don&amp;rsquo;t wire it yet.&lt;/p&gt;
+
+&lt;p&gt;Before wiring the Arduino to the XBee, we&amp;rsquo;ll need to load our software onto the board.  The Arduino software should recognize the Arduino.ini file, once loaded simply compile and load the program onto your board.  Once it&amp;rsquo;s programmed, disconnect the Arduino and wire the XBee to it like so:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Connect DOUT (3 from top left) to port 12 on Arduino&lt;/li&gt;
+&lt;li&gt;Connect DIN (4 from top left) to port 13 on Arduino&lt;/li&gt;
+&lt;li&gt;Leave 5v and GND connect as before (if you used Arudino as power source, otherwise, connect them to Arduino 5v,GND)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/xbeetut/XBeeArduinoGraphic.png&#34; alt=&#34;Passive Hello World&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;re using pins 12, 13 as our Rx, Tx pins respectively using the SoftwareSerial library.  This frees up the default Tx,Rx pins to send debug data to our computer if you like.  This also allows you to communicate while plugged into your computer port, otherwise the Arduino serial would be occupied by the connection to your computer.  In realistic applications you would want to use a hardware serial port with its own UART.&lt;/p&gt;
+
+&lt;p&gt;Assuming everything is plugged in, you can go back to your console from Part Two and run main.py again.  You should get an output that looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ C:/.../main.py
+Tx: 7e 00 10 01 00 ff ff 01 48 65 6c 6c 6f 20 57 6f 72 6c 64 e3
+Rx: 7e 00 1a 81 00 01 18 00 79 6f 75 20 73 65 6e 74 3a 20 48 65 6c 6c 6f 20 57 6f 72 6c 64 b8
+Msg: you sent: Hello World
+Tx: 7e 00 7d 31 01 00 ff ff 01 7d 5e 7d 5d 7d 31 7d 33 5b 01 01 01 01 01 01 FIFO 01 7d 5e
+Rx: 7e 00 1b 81 00 01 1a 00 79 6f 75 20 73 65 6e 74 3a 20 7d 5e 7d 5d 7d 31 7d 33 5b 01 01 01 01 01 01 01 51
+Msg: 79 6f 75 20 73 65 6e 74 3a 20 7e 7d 11 13 5b 01 01 01 01 01 01 01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You&amp;rsquo;ll notice it&amp;rsquo;s the same content as earlier, except now our returned messages have &amp;ldquo;you sent: &amp;ldquo; appended to the front.  The Arduino is now receiving, editing, and then returning our messages.&lt;/p&gt;
+
+&lt;p&gt;So there it is, you&amp;rsquo;ve now sent and received data in API mode with Python and Arduino.  New doors will open and bells will ring as you celebrate this wondrous day.  I&amp;rsquo;ll let you call your parents and tell them, but when you&amp;rsquo;re done let&amp;rsquo;s review the code.&lt;/p&gt;
+
+&lt;p&gt;As before, we&amp;rsquo;ll begin with our main code in Arduino.ino.  First the setup:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;XBee xbee;
+Queue RxQ;
+SoftwareSerial sserial(12,13);
+
+void setup(void)
+{
+    sserial.begin(9600);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We instantiate an instance of the XBee, Queue, and SoftwareSerial classes.  We&amp;rsquo;ll go more into detail on the XBee class soon.  The Queue is a C++ implementation of a standard FIFO queue for the unsigned char data type, with a couple home-brewed helper methods to aid in this application.  If that sounds unfamiliar, google &amp;ldquo;FIFO queue&amp;rdquo; and read up on them, it&amp;rsquo;s a handy data structure.  One of the most basic.  We&amp;rsquo;ll use the queue as our receive buffer.  The only code in our &lt;code&gt;setup()&lt;/code&gt; method is to start off our serial connection at 9600 baud.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void loop(void)
+{
+    delay(5);
+    int queueLen = 0;
+    int delPos = 0;
+
+    while (sserial.available() &amp;gt; 0){
+        unsigned char in = (unsigned char)sserial.read();
+        if (!RxQ.Enqueue(in)){
+            break;
+        }
+    }
+
+    queueLen = RxQ.Size();
+    for (int i=0;i&amp;lt;queueLen;i++){
+        if (RxQ.Peek(i) == 0x7E){
+            unsigned char checkBuff[Q_SIZE];
+            unsigned char msgBuff[Q_SIZE];
+            int checkLen = 0;
+            int msgLen = 0;
+
+            checkLen = RxQ.Copy(checkBuff, i);
+            msgLen = xbee.Receive(checkBuff, checkLen, msgBuff);
+            if (msgLen &amp;gt; 0){
+                unsigned char outMsg[Q_SIZE];
+                unsigned char outFrame[Q_SIZE];
+                int frameLen = 0;
+                int addr = ((int)msgBuff[4] &amp;lt;&amp;lt; 8) + (int)msgBuff[5];
+
+                // 10 is length of &amp;quot;you sent: &amp;quot;
+                memcpy(outMsg, &amp;quot;you sent: &amp;quot;, 10);
+                // len - (9 bytes of frame not in message content)
+                memcpy(&amp;amp;outMsg[10], &amp;amp;msgBuff[8], msgLen-9);
+
+                // 10 + (-9) = 1 more byte in new content than in previous message
+                frameLen = xbee.Send(outMsg, msgLen+1, outFrame, addr);
+                sserial.write(outFrame, frameLen);
+                i += msgLen;
+                delPos = i;
+            }else{
+                if (i&amp;gt;0){
+                    delPos = i-1;
+                }
+            }
+        }
+    }
+
+    RxQ.Clear(delPos);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That&amp;rsquo;s a lot to take in real quick, but don&amp;rsquo;t be too intimidated.  This is what is going on in the &lt;code&gt;loop()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;A small 5ms delay, to give the serial time to do work.&lt;/li&gt;
+&lt;li&gt;Check the serial buffer for content.  If any is available, read it into the queue.&lt;/li&gt;
+&lt;li&gt;Parse through the queue for a start delimiter.&lt;/li&gt;
+&lt;li&gt;If a delimiter is found, check if the content after the delimiter is a proper message using &lt;code&gt;XBee.Receive()&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;If the content is valid, create a new message to send.&lt;/li&gt;
+&lt;li&gt;New message is &amp;ldquo;you sent: &amp;ldquo; + content of received message.  Message is created using &lt;code&gt;XBee.Send()&lt;/code&gt; using address parsed from incoming frame, then sent using the &lt;code&gt;write()&lt;/code&gt; call to SoftwareSerial.&lt;/li&gt;
+&lt;li&gt;After parsing is done the delPos variable stores off the last location of possible good/unused data in the queue, it is used to clear any unneeded contents.  We may not have received the full portion of a message yet, so we&amp;rsquo;ll hold on to any we may still want.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The code makes liberal use of buffers to keep code &amp;lsquo;simpler&amp;rsquo; as lengths vary between the data in the queue, the read message and output messages.  Algorithmically there&amp;rsquo;s definitely more efficient ways to do this, but that would be hell to read for a tutorial.  Something more eye friendly could possibly be written with other Arduino libraries such as String, but as a guy used to using C in embedded applications I stuck to what I know.  Maybe an optimization for a future version :).&lt;/p&gt;
+
+&lt;p&gt;Now, let&amp;rsquo;s once again get to the guts of our code.  All of the main parts should look very familiar.  It&amp;rsquo;s basically carbon copies of the Python methods, except with C-friendly data structures.  I won&amp;rsquo;t add too much wordiness to the tutorial by re-explaining how things work, so I&amp;rsquo;ll just put the code here to peruse.  But just for a quick re-hash:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Receive()&lt;/code&gt; validates content to ensure it is a proper message&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;unescape()&lt;/code&gt; parses out escaped characters to their original content&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Send()&lt;/code&gt; Takes input content and places it into a Tx request frame (the calling method is expected to send it)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;escape()&lt;/code&gt; takes an input buffer and escapes any reserved characters.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All XBee methods count on the calling class to provide the input and output buffers.  For all buffer sizes we&amp;rsquo;re using the Q_SIZE defined in our Queue class, since that&amp;rsquo;s the max data we&amp;rsquo;ll encounter.  The size is set to 220, a comfortable size larger than the max XBee message size of 100.  This, of course, assumes you may only receive max one 100 byte frame at a time.  This size is safe for simple applications such as this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;int XBee::Receive(unsigned char *inBuff, int len, unsigned char *outBuff){
+    int unescapeLen = 0;
+    unsigned char checksum = 0;
+    unsigned char LSB = 0;
+
+    if (inBuff[0] != 0x7E)
+        return 0;
+
+    if (len &amp;lt; 10)
+        return 0;
+
+    unescapeLen = unescape(inBuff, len, outBuff);
+
+    // Check we have at least the amount of bytes indicated by LSB
+    LSB = outBuff[2];
+    if (LSB &amp;gt; (unescapeLen - 4))
+        return 0;
+
+    // Calculate our checksum
+    // (char will overflow, no need to AND for lower bytes)
+    for (int i=3; i&amp;lt;LSB+4; i++){
+        checksum += outBuff[i];
+    }
+
+    if (checksum != 0xFF)
+        return 0;
+
+    return LSB+4;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;int XBee::unescape(unsigned char *input, int inLen, unsigned char *output){
+    int pos = 1;
+    bool skip = false;
+    unsigned char curr = 0;
+
+    output[0] = input[0];
+    for (int i=1; i&amp;lt;inLen; i++) {
+        if (skip){
+            skip = false;
+            continue;
+        }
+
+        if (input[i] == 0x7D){
+            curr = input[i+1] ^ 0x20;
+            skip = true;
+        }else{
+            curr = input[i];
+        }
+
+        output[pos] = curr;
+        pos++;
+    }
+
+    return pos;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;int XBee::Send(unsigned char *msg, int len, unsigned char *outBuff, int addr){
+    unsigned char buf[100];
+    int escapedLen = 0;
+    unsigned char checksum = 0;
+
+    buf[0] = 0x7E;
+    buf[1] = 0x00;
+    // LSB = content + 5 (content length + API type + frameid + addr(2) + options)
+    buf[2] = (unsigned char)(len + 5);
+    buf[3] = 0x01;  // transmit request
+    buf[4] = 0x00;  // Frame ID
+    buf[5] = (unsigned char)((addr &amp;amp; 0xFF00) &amp;gt;&amp;gt; 8);
+    buf[6] = (unsigned char)(addr &amp;amp; 0xFF);
+    buf[7] = 0x01;  // Disable acknowledge
+    memcpy(&amp;amp;buf[8], msg, len);
+
+    for (int i=3;i&amp;lt;len+8;i++){
+        checksum += buf[i];
+    }
+
+    // Total length = LSB + 9 (LSB value + MSB + LSB + start delimiter + checksum)
+    buf[len+8] = 0xFF - checksum;
+    escapedLen = escape(buf, len+9, outBuff);
+
+    return escapedLen;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;int XBee::escape(unsigned char *input, int inLen, unsigned char *output){
+    int pos = 1;
+
+    output[0] = input[0];
+    for (int i=1; i&amp;lt;inLen; i++){
+        switch(input[i]){
+            case 0x7D:
+            case 0x7E:
+            case 0x11:
+            case 0x13:
+                output[pos++] = 0x7D;
+                output[pos++] = input[i] ^ 0x20;
+                break;
+            default:
+                output[pos++] = input[i];
+                break;
+      }
+   }
+
+   return pos;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That sums up all the main parts of the XBee example code.&lt;/p&gt;
+
+&lt;h2 id=&#34;review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Review&lt;/h2&gt;
+
+&lt;p&gt;That covers a basic example of programming for XBee 802.15.4 radios configured in API mode.  I found API mode very helpful when programming for my Masters thesis, which you should check out the &lt;a href=&#34;https://github.com/serdmanczyk/masters-thesis&#34;&gt;source code for&lt;/a&gt; if you would like to see an example of receiving, parsing, and sending many different API frame types in an actual application.  Hopefully this tutorial and example code enable you to get off the ground running with your application, or better understand some feature of Python, Arduino, XBee, serial communications, etc.  If you&amp;rsquo;ve encounter any trouble running the examples, or have any questions / comments / concerns please post them in the comments so others with similar problems can see too :).&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

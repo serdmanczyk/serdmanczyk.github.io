@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Charlotte on Erdmanczyk.io</title>
+    <link>http://serdmanczyk.github.io/tags/charlotte/</link>
+    <description>Recent content in Charlotte on Erdmanczyk.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 25 Feb 2015 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://serdmanczyk.github.io/tags/charlotte/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Moving to Seattle, How&#39;s the Weather? (graphs!)</title>
+      <link>http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/</link>
+      <pubDate>Wed, 25 Feb 2015 00:00:00 +0000</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/</guid>
+      <description>&lt;p&gt;My wife and I recently relocated from Charlotte, NC to Seattle, WA and so far we&amp;rsquo;ve loved it!&lt;/p&gt;
+
+&lt;p&gt;One of the most common things people talk about when you mention moving to the Pacific Northwest is the weather, particularly the kind that results in being wet.  The weather here is obviously different, but in my short time here  it hasn&amp;rsquo;t seemed &lt;em&gt;that&lt;/em&gt; different.  Being the scientific type, I went straight to finding objective data to make heads or tails of my impression so far.&lt;/p&gt;
+
+&lt;p&gt;First step was to find some hard weather data.  I wanted historical weather data by date and city, preferably for free.  I was able to find that via &lt;a href=&#34;http://www.wunderground.com/weather/api/d/docs?MR=1&#34;&gt;Weather Underground&amp;rsquo;s API&lt;/a&gt; .  I hacked together a quick python script to grab data for the dates I needed.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import requests
+import json
+from datetime import datetime,timedelta
+import re
+import time
+import os
+import sys
+import arrow
+
+APIKEY = &#39;__REDACTED__&#39;
+
+def urliter():
+	Locations = [
+		(&#39;NC&#39;, &#39;Charlotte&#39;),
+		(&#39;WA&#39;, &#39;Seattle&#39;)
+	]
+
+	def DateIter(start, end):
+	    start = arrow.get(start)
+	    end = arrow.get(end)
+
+	    for day in arrow.Arrow.span_range(&#39;day&#39;, start, end):
+	        yield day[0]
+
+	for location in Locations:
+		for day in DateIter(&#39;2014-11-12&#39;, &#39;2015-02-24&#39;):
+			url = &#39;http://api.wunderground.com/api/{key}/history_{year:04d}{month:02d}{day:02d}/q/{state}/{city}.json&#39;.format(**{
+				&#39;key&#39;:APIKEY,
+				&#39;year&#39;:day.year,
+				&#39;month&#39;:day.month,
+				&#39;day&#39;:day.day,
+				&#39;state&#39;:location[0],
+				&#39;city&#39;:location[1],
+			})
+
+			directory = location[1]
+
+			filename = &#39;{year:04d}{month:02d}{day:02d}.json&#39;.format(**{
+				&#39;year&#39;:day.year,
+				&#39;month&#39;:day.month,
+				&#39;day&#39;:day.day
+			})
+
+			yield (
+				directory,
+				filename,
+				url
+			)
+
+for rq in urliter():
+	directory,filename,url = rq
+
+	time.sleep(7)
+	print(&amp;quot;get:&amp;quot;, url)
+	respobj = requests.get(url).json()
+	
+	dirpath = os.path.abspath(directory)
+	if not os.path.exists(dirpath):
+		os.makedirs(dirpath)
+
+	filepath = os.path.join(dirpath,filename)
+	print(&amp;quot;save:&amp;quot;, filepath)
+	with open(filepath, &amp;quot;w&amp;quot;) as opf:
+	    json.dump(respobj, opf, indent=3, sort_keys=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That effectively grabbed and organized all the data, and conformed to the rate limit (10 requests / minute).  The next step I took was storing it all in a query-able format, so I turned to my old friend MongoDB.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import json
+import os
+from math import sqrt,pow
+import sys
+from pymongo import MongoClient
+import arrow
+
+def fileloader(directory):
+    adir = os.path.abspath(directory)
+    for dirpath, dirnames, filenames in os.walk(adir):
+        for filename in filenames:
+            filepath = os.path.join(dirpath, filename)
+            _,etx = os.path.splitext(filepath)
+            if etx == &amp;quot;.json&amp;quot;:
+                with open(filepath) as opf:
+                    yield filepath, json.load(opf)
+
+locations = (
+    (&amp;quot;Seattle&amp;quot;, &amp;quot;WA&amp;quot;),
+    (&amp;quot;Charlotte&amp;quot;, &amp;quot;NC&amp;quot;)
+)
+
+client = MongoClient()
+weatherdata = client.weatherdata
+
+summaries_db = weatherdata.summaries
+observations_db = weatherdata.observations
+
+for loc in locations:
+    city,state = loc
+    for filepath,datapoint in fileloader(city):
+        summary = datapoint[&#39;history&#39;][&#39;dailysummary&#39;][0]
+
+        isodate = &amp;quot;{year}-{mon}-{mday}T{hour}:{min}:00.000&amp;quot;.format(**summary[&amp;quot;date&amp;quot;])
+        del summary[&amp;quot;date&amp;quot;]
+
+        summary.update({
+            &amp;quot;city&amp;quot; : city,
+            &amp;quot;state&amp;quot; : state,
+            &amp;quot;isodate&amp;quot; : arrow.get(isodate).datetime,
+        })
+
+        sum_id = summaries_db.insert(summary)
+        # print(&amp;quot;summary&amp;quot;, rec_id)
+
+        observations = datapoint[&#39;history&#39;][&#39;observations&#39;]
+        obs_ids = []
+        for observation in observations:
+            isodt = &amp;quot;{year}-{mon}-{mday}T{hour}:{min}:00.000&amp;quot;.format(**observation[&amp;quot;utcdate&amp;quot;])
+            del observation[&amp;quot;date&amp;quot;]
+            del observation[&amp;quot;utcdate&amp;quot;]
+            observation.update({
+                &amp;quot;city&amp;quot; : city,
+                &amp;quot;state&amp;quot; : state,
+                &amp;quot;isodatetime&amp;quot; : arrow.get(isodt).datetime
+            })
+
+            obs_id = observations_db.insert(observation)
+            obs_ids.append(obs_id)
+        print city, &amp;quot;:&amp;quot;, summary[&#39;isodate&#39;]
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Having it stored in MongoDB made it quick and convenient to query the data and pick apart how to interpret the data into something useful.  I was primarily seeking to represent the general distribution of temperatures, humidities, and intensity/types of precipitation between the two cities.  Eventually, I threw together a script to grab all of that data and throw it into plots using &lt;a href=&#34;https://plot.ly/python/&#34;&gt;plotly&amp;rsquo;s python API&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;from pymongo import MongoClient
+import plotly.plotly as py
+from plotly.graph_objs import *
+import json
+
+client = MongoClient()
+weatherdata = client.weatherdata
+observations_db = weatherdata.observations
+summaries_db = weatherdata.summaries
+
+filters = {
+    &#39;_id&#39;:False,
+    &#39;isodatetime&#39;:False,
+    &#39;isodate&#39;:False,
+}
+
+charlotte = observations_db.find({
+    &#39;city&#39;:&#39;Charlotte&#39;
+},filters)
+
+seattle = observations_db.find({
+    &#39;city&#39;:&#39;Seattle&#39;
+},filters)
+
+# print(json.dumps(list(sorted(set([c[&#39;conds&#39;] for c in charlotte])))))
+
+def getvals(dataset, params):
+    output = tuple([] for _ in params)
+
+    for point in dataset:
+        for i,param in enumerate(params):
+            key,filt,typ = param
+            val = point[key]
+            if filt(val):
+                output[i].append(typ(val))
+
+    return (output if (len(output) &amp;gt; 1) else output[0])
+
+validtemp = lambda val:val != &amp;quot;-9999&amp;quot;
+validhum = lambda val:val != &amp;quot;N/A&amp;quot;
+validcond = lambda val:val != &amp;quot;Unknown&amp;quot;
+
+params = (
+    (&#39;tempi&#39;, validtemp, float),
+    (&#39;hum&#39;, validhum, float),
+    (&#39;conds&#39;, validcond, str)
+)
+
+clt_temps,clt_hums,clt_conds = getvals(charlotte, params)
+sea_temps,sea_hums,sea_conds = getvals(seattle, params)
+
+name = &#39;Charlotte vs. Seattle Temperature&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_temps,
+                name = &#39;Charlotte&#39;,
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_temps,
+                name = &#39;Seattle&#39;,
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+name = &#39;Charlotte vs. Seattle Humidity&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_hums,
+                name = &#39;Charlotte&#39;,
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_hums,
+                name = &#39;Seattle&#39;,
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+intensities = [
+  &amp;quot;Heavy Thunderstorms and Rain&amp;quot;,
+  &amp;quot;Thunderstorms and Rain&amp;quot;,
+  &amp;quot;Heavy Rain&amp;quot;, &amp;quot;Ice Pellets&amp;quot;, &amp;quot;Light Ice Pellets&amp;quot;,
+  &amp;quot;Light Freezing Rain&amp;quot;, &amp;quot;Rain&amp;quot;, &amp;quot;Light Rain&amp;quot;,
+  &amp;quot;Light Snow&amp;quot;, &amp;quot;Light Freezing Fog&amp;quot;,
+  &amp;quot;Drizzle&amp;quot;, &amp;quot;Light Drizzle&amp;quot;, &amp;quot;Mist&amp;quot;,
+  &amp;quot;Overcast&amp;quot;, &amp;quot;Fog&amp;quot;, &amp;quot;Haze&amp;quot;,
+  &amp;quot;Mostly Cloudy&amp;quot;, &amp;quot;Partly Cloudy&amp;quot;,
+  &amp;quot;Scattered Clouds&amp;quot;, &amp;quot;Clear&amp;quot;
+]
+
+def countintensities(dataset):
+    counts = {}
+    for cond in dataset:
+        counts[cond] = ((counts[cond]+1) if counts.get(cond) else 1)
+
+    countgetter = lambda val:(counts[val] if val in counts else 0)
+    return list(map(countgetter, intensities))
+
+name = &#39;Charlotte vs. Seattle Weather Rain Intensity&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Bar(
+                x = intensities,
+                y = countintensities(clt_conds),
+                name = &#39;Charlotte&#39;
+            ),
+            Bar(
+                x = intensities,
+                y = countintensities(sea_conds),
+                name = &#39;Seattle&#39;
+            )
+        ]),
+        layout = Layout(
+            barmode=&#39;group&#39;,
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+charlotte = summaries_db.find({
+    &#39;city&#39;:&#39;Charlotte&#39;
+},filters)
+
+seattle = summaries_db.find({
+    &#39;city&#39;:&#39;Seattle&#39;
+},filters)
+
+validprecip = lambda val:val != &amp;quot;T&amp;quot;
+
+params = (
+    (&#39;precipi&#39;, validprecip, float),
+)
+
+clt_precip = getvals(charlotte, params)
+sea_precip = getvals(seattle, params)
+
+name = &#39;Charlotte vs. Seattle Precipitation&#39;
+plot_url = py.plot(
+    Figure(
+        data = Data([
+            Box(
+                y = clt_precip,
+                name = &#39;Charlotte&#39;,
+                jitter = 0.3
+            ),
+            Box(
+                y = sea_precip,
+                name = &#39;Seattle&#39;,
+                jitter = 0.3
+            )
+        ]),
+        layout = Layout(
+            title = name
+        )
+    ),
+    filename = name
+)
+print(plot_url)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that weather condition intensity is organized completely based on my own subjective interpretation.
+{: .notice}&lt;/p&gt;
+
+&lt;p&gt;The above script gave me the following plots:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_humidity.png&#34; alt=&#34;CharSeaHums&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_temperature.png&#34; alt=&#34;CharSeaTemps&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_precipitation.png&#34; alt=&#34;CharSeaPrecip&#34; /&gt;
+&lt;img src=&#34;http://serdmanczyk.github.io/images/movseaweather/charlotte_vs_seattle_weather_rain_intensity.png&#34; alt=&#34;CharSeaConds&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;All data “Powered by Weather Underground” &lt;a href=&#34;http://wunderground.com/&#34;&gt;&lt;img height=&#34;45&#34; width=&#34;193&#34; src=&#34;http://serdmanczyk.github.io/images/movseaweather/wundergroundLogo_4c_horz.png&#34;&gt;&lt;/a&gt; as &lt;a href=&#34;http://www.wunderground.com/weather/api/d/terms.html&#34;&gt;per API usage requirements&lt;/a&gt;.
+{: .notice}&lt;/p&gt;
+
+&lt;p&gt;The plots pretty much showed me what I expected, that the weather here is milder, more consistent, and though it rains more, when it rains it&amp;rsquo;s usually lighter and more constant than it is in Charlotte (where apparently it can&amp;rsquo;t rain without absolutely pouring).&lt;/p&gt;
+
+&lt;p&gt;But there was another thing I noticed after moving here that isn&amp;rsquo;t mentioned as much.  Having arrived in November I immediately noticed the sun setting nearly an hour earlier, a result of the higher latitude.  I also became curious of how sunrise and sunset times differed for the cities throughout the year.  Calculating sunrise and sunset times only requires performing some &lt;a href=&#34;http://en.wikipedia.org/wiki/Sunrise_equation&#34;&gt;mathematical computations&lt;/a&gt; based on longitude and latitude.  But since I don&amp;rsquo;t have all the time in the world I thought it much easier to google an existing module rather than re-write it from scratch, and came up with the fantastic &lt;a href=&#34;http://pythonhosted.org//astral/&#34;&gt;astral module&lt;/a&gt;.  Using this I threw up a quick script to plot sunrise, sunset, and hours of sunlight:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import arrow
+from astral import Astral
+import plotly.plotly as py
+from plotly.graph_objs import *
+import sys
+import math
+from dateutil import tz
+import pprint
+
+pp = pprint.PrettyPrinter(indent=3)
+
+a = Astral()
+a.solar_depression = &#39;civil&#39; 
+
+start = arrow.get(&amp;quot;2014-01-01&amp;quot;)
+end = arrow.get(&amp;quot;2014-12-31&amp;quot;)
+
+types = [&#39;sunlight&#39;, &#39;sunrise&#39;, &#39;sunset&#39;]
+cities = {
+    &#39;Charlotte&#39; : {key:[] for key in types},
+    &#39;Seattle&#39; : {key:[] for key in types}
+}
+
+dates = [day[0] for day in arrow.Arrow.span_range(&#39;day&#39;, start, end)]
+totals = {city:0 for city in cities}
+
+def floathours(dto):
+    return dto.hour + (dto.minute / 60.0) + (dto.second / 3600.0)
+
+for location in cities:
+    city = a[location]
+    for day in dates:
+        sun = city.sun(date=day, local=True)
+        sunrise = floathours(arrow.get(sun[&#39;dawn&#39;]))
+        sunset = floathours(arrow.get(sun[&#39;sunset&#39;]))
+        hours_sunlight = sunset - sunrise
+
+        cities[location][&#39;sunrise&#39;].append(sunrise)
+        cities[location][&#39;sunset&#39;].append(sunset)
+        cities[location][&#39;sunlight&#39;].append(hours_sunlight)
+        totals[location] = totals[location] + hours_sunlight
+
+d = []
+for stype in types:
+    for city in cities:
+        d.append(
+            Scatter(
+                name=&amp;quot;{city} - {type}&amp;quot;.format(**{
+                    &amp;quot;city&amp;quot;:city,
+                    &amp;quot;type&amp;quot;:stype
+                }),
+                x=dates,
+                y=cities[city][stype]
+            )
+        )
+
+data = Data(d)
+
+layout = Layout(
+    title=&#39;Charlotte vs. Seattle Sunlight&#39;,
+    yaxis=YAxis(
+        title=&#39;Hours (24)&#39;,
+        domain = [0,24]
+    )
+)
+
+plot_url = py.plot(data, layout=layout, filename=&#39;Charlotte vs. Seattle Sunlight&#39;)
+print(plot_url)
+
+print(&#39;Charlotte: &#39;, totals[&#39;Charlotte&#39;])
+print(&#39;Seattle: &#39;, totals[&#39;Seattle&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Which created this plot:&lt;/p&gt;
+
+&lt;iframe width=&#34;640&#34; height=&#34;480&#34; frameborder=&#34;0&#34; seamless=&#34;seamless&#34; scrolling=&#34;no&#34; src=&#34;https://plot.ly/~serdmanczyk/224/charlotte-vs-seattle-sunlight/?width=640&amp;height=480&#34; &gt;&lt;/iframe&gt;
+
+&lt;p&gt;The orange lines represent Seattle, and the blue lines represent Charlotte.  The lines on top represent sunset times, bottom the sunrise times, and in the middle the total hours of sunlight across the whole year.  So it can be seen that daylight differences in Seattle are slightly more drastic, but with a result of more total sunlight hours throughout the year.&lt;/p&gt;
+
+&lt;p&gt;Besides the sunlight analysis, all of this is just superficial comparisons.  This was just for kicks and gave me an excuse to mess with weather data.  I&amp;rsquo;ve heard in a few conversations with locals that this winter in Seattle has been substantially sunnier than past years.  &lt;a href=&#34;http://cliffmass.blogspot.com/2015/02/the-origin-of-this-winters-weather.html?m=1&#34;&gt;Professor of Atmospheric Sciences Cliff Mass&amp;rsquo; blog&lt;/a&gt; actually explains the odd weather affecting the US Pacific Northwest and Northeast really well from the perspective of someone who is actually a professional on the subject.  He makes a strong case the weather patterns are due to natural variation and not global warming (while still acknowledging global warming as a pressing issue).&lt;/p&gt;
+
+&lt;p&gt;One thing is for sure, I can&amp;rsquo;t wait for summer here where the days will be long, the air will be dry, and the heat won&amp;rsquo;t commonly go over 70 degrees.  I will not miss the humid heat of the Southeast.  Also, you can&amp;rsquo;t beat the view here:&lt;/p&gt;
+
+&lt;p&gt;&lt;blockquote class=&#34;instagram-media&#34; data-instgrm-captioned data-instgrm-version=&#34;4&#34; style=&#34; background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:658px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);&#34;&gt;&lt;div style=&#34;padding:8px;&#34;&gt; &lt;div style=&#34; background:#F8F8F8; line-height:0; margin-top:40px; padding:50% 0; text-align:center; width:100%;&#34;&gt; &lt;div style=&#34; background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAMAAAApWqozAAAAGFBMVEUiIiI9PT0eHh4gIB4hIBkcHBwcHBwcHBydr+JQAAAACHRSTlMABA4YHyQsM5jtaMwAAADfSURBVDjL7ZVBEgMhCAQBAf//42xcNbpAqakcM0ftUmFAAIBE81IqBJdS3lS6zs3bIpB9WED3YYXFPmHRfT8sgyrCP1x8uEUxLMzNWElFOYCV6mHWWwMzdPEKHlhLw7NWJqkHc4uIZphavDzA2JPzUDsBZziNae2S6owH8xPmX8G7zzgKEOPUoYHvGz1TBCxMkd3kwNVbU0gKHkx+iZILf77IofhrY1nYFnB/lQPb79drWOyJVa/DAvg9B/rLB4cC+Nqgdz/TvBbBnr6GBReqn/nRmDgaQEej7WhonozjF+Y2I/fZou/qAAAAAElFTkSuQmCC); display:block; height:44px; margin:0 auto -44px; position:relative; top:-22px; width:44px;&#34;&gt;&lt;/div&gt;&lt;/div&gt; &lt;p style=&#34; margin:8px 0 0 0; padding:0 4px;&#34;&gt; &lt;a href=&#34;https://instagram.com/p/x2wF7glzkI/&#34; style=&#34; color:#000; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none; word-wrap:break-word;&#34; target=&#34;_top&#34;&gt;Rainier is glowing.&lt;/a&gt;&lt;/p&gt; &lt;p style=&#34; color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;&#34;&gt;A photo posted by Steven Erdmanczyk (@serdmanczyk) on &lt;time style=&#34; font-family:Arial,sans-serif; font-size:14px; line-height:17px;&#34; datetime=&#34;2015-01-15T01:04:34+00:00&#34;&gt;Jan 14, 2015 at 5:04pm PST&lt;/time&gt;&lt;/p&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;script async defer src=&#34;//platform.instagram.com/en_US/embeds.js&#34;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Well, hope you enjoyed my shitty weather blog.  If you&amp;rsquo;re local to Seattle and happened here, hit me up!  I&amp;rsquo;m interested in meeting up with more developers/makers/engineers in the area (or y&amp;rsquo;know, other cool people too).&lt;/p&gt;
+
+&lt;p&gt;With the post I hope to get back in the swing of blogging.  I plan to pick up again on the GardenSpark project soon.  I also have plans for an automated pet feeder projects in the works!&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

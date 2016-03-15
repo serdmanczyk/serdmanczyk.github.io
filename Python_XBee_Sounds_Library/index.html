@@ -57,179 +57,179 @@
 
 <p>This is just a starting framework that turns a computer keyboard into a music generating keyboard.  Currently it just assigns notes at random, or sequentially (see commented line 29).  Once a key is pressed, it continues to play the same note.  If all notes are assigned, random notes are given to new keys.</p>
 
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">#!/usr/bin/python</span>
+<span style="color: #75715e"># coding=utf-8</span>
 
-#!/usr/bin/python
-# coding=utf-8
+<span style="color: #f92672">import</span> <span style="color: #f8f8f2">numpy</span>
+<span style="color: #f92672">import</span> <span style="color: #f8f8f2">random</span>
+<span style="color: #f92672">import</span> <span style="color: #f8f8f2">math</span>
+<span style="color: #f92672">import</span> <span style="color: #f8f8f2">copy</span>
+<span style="color: #f92672">import</span> <span style="color: #f8f8f2">pyaudio</span>
+<span style="color: #f92672">from</span> <span style="color: #f8f8f2">Tkinter</span> <span style="color: #f92672">import</span> <span style="color: #f92672">*</span>
 
-import numpy
-import random
-import math
-import copy
-import pyaudio
-from Tkinter import *
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">NoteGen</span><span style="color: #f8f8f2">(object):</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">notes</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">range(</span><span style="color: #ae81ff">30</span><span style="color: #f8f8f2">,</span><span style="color: #ae81ff">70</span><span style="color: #f8f8f2">)):</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">choices</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(map(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">_note,</span> <span style="color: #f8f8f2">notes))</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">possibilities</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">copy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">copy(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">choices)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mapping</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{}</span>
 
-class NoteGen(object):
-    def __init__(self, notes=range(30,70)):
-        self.choices = list(map(self._note, notes))
-        self.possibilities = copy.copy(self.choices)
-        self.mapping = {}
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__call__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">key,</span> <span style="color: #f8f8f2">duration</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">float(</span><span style="color: #e6db74">&quot;inf&quot;</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">amplitude</span><span style="color: #f92672">=</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">):</span>
+        <span style="color: #f8f8f2">note</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">_get(key,</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude)</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">note:</span>
+            <span style="color: #f8f8f2">note</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">_map(key,</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude)</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">note</span>
 
-    def __call__(self, key, duration=float("inf"), amplitude=1):
-        note = self._get(key, duration, amplitude)
-        if not note:
-            note = self._map(key, duration, amplitude)
-        return note
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">_map</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">key,</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">possibilities:</span>
+            <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mapping[key]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">random</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">choice(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">choices)</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Note(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mapping[key],</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude)</span>
 
-    def _map(self, key, duration, amplitude):
-        if not self.possibilities:
-            self.mapping[key] = random.choice(self.choices)
-            return Note(self.mapping[key], duration, amplitude)
+        <span style="color: #f8f8f2">n</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">possibilities[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
+        <span style="color: #75715e"># n = random.choice(self.possibilities)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">possibilities</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remove(n)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mapping[key]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">n</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Note(n,</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude)</span>
 
-        n = self.possibilities[0]
-        # n = random.choice(self.possibilities)
-        self.possibilities.remove(n)
-        self.mapping[key] = n
-        return Note(n, duration, amplitude)
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">_get</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">key,</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">key</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mapping:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Note(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mapping[key],</span> <span style="color: #f8f8f2">duration,</span> <span style="color: #f8f8f2">amplitude)</span>
 
-    def _get(self, key, duration, amplitude):
-        if key in self.mapping:
-            return Note(self.mapping[key], duration, amplitude)
-
-    def _note(self, n):
-        return math.pow(2, (float(n)-49) / 12) * 440
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">_note</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">n):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">math</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pow(</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(float(n)</span><span style="color: #f92672">-</span><span style="color: #ae81ff">49</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">/</span> <span style="color: #ae81ff">12</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">*</span> <span style="color: #ae81ff">440</span>
 
 
-class Note(object):
-    names = [
-        "A",
-        "A#/Bf",
-        "B",
-        "C",
-        "C#/Df",
-        "D",
-        "D#/Ef",
-        "E",
-        "F",
-        "F#/Gf",
-        "G",
-        "G#/Af"
-    ]
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Note</span><span style="color: #f8f8f2">(object):</span>
+    <span style="color: #f8f8f2">names</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[</span>
+        <span style="color: #e6db74">&quot;A&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;A#/Bf&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;B&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;C&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;C#/Df&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;D&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;D#/Ef&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;E&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;F&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;F#/Gf&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;G&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;G#/Af&quot;</span>
+    <span style="color: #f8f8f2">]</span>
 
-    def __init__(self, frequency=440, duration=float("inf"), amplitude=1, rate=44100):
-        self.frequency = frequency
-        self.total_frames = duration * rate
-        self.frame_offset = 0
-        self.rate = rate
-        self.amplitude = amplitude
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">frequency</span><span style="color: #f92672">=</span><span style="color: #ae81ff">440</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">duration</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">float(</span><span style="color: #e6db74">&quot;inf&quot;</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">amplitude</span><span style="color: #f92672">=</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">rate</span><span style="color: #f92672">=</span><span style="color: #ae81ff">44100</span><span style="color: #f8f8f2">):</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">frequency</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">total_frames</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">duration</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">rate</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frame_offset</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">rate</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">rate</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">amplitude</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">amplitude</span>
 
-    def __call__(self, frames):
-        if self.done:
-            return numpy.zeros(frames, float)
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__call__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">frames):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">done:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">zeros(frames,</span> <span style="color: #f8f8f2">float)</span>
 
-        factor = float(self.frequency) * ((math.pi * 2) / self.rate)
+        <span style="color: #f8f8f2">factor</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">float(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency)</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">((math</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pi</span> <span style="color: #f92672">*</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">/</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">rate)</span>
         
-        length = (frames if frames < self.remaining else self.remaining)
-        sin = numpy.sin((numpy.arange(length) + self.frame_offset) * factor) * self.amplitude
-        if frames > self.remaining:
-            sin = numpy.concatenate([sin, numpy.zeros(frames - self.remaining, float)])
+        <span style="color: #f8f8f2">length</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">(frames</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">frames</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remaining</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remaining)</span>
+        <span style="color: #f8f8f2">sin</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">sin((numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">arange(length)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frame_offset)</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">factor)</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">amplitude</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">frames</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remaining:</span>
+            <span style="color: #f8f8f2">sin</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">concatenate([sin,</span> <span style="color: #f8f8f2">numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">zeros(frames</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remaining,</span> <span style="color: #f8f8f2">float)])</span>
 
-        self.frame_offset += frames
-        return sin
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frame_offset</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">frames</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">sin</span>
 
-    def __lt__(self, other):
-        return self.frequency < other.frequency
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__lt__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">other):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">other</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency</span>
 
-    def __eq__(self, other):
-        return self.frequency == other.frequency
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__eq__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">other):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">other</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency</span>
     
-    @property
-    def remaining(self):
-        return self.total_frames - self.frame_offset
+    <span style="color: #a6e22e">@property</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">remaining</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">total_frames</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frame_offset</span>
     
-    @property
-    def done(self):
-        return self.frame_offset >= self.total_frames
+    <span style="color: #a6e22e">@property</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">done</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frame_offset</span> <span style="color: #f92672">&gt;=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">total_frames</span>
 
-    @property
-    def name(self):
-        keynum = int((12 * math.log((self.frequency / 440), 2))  +  48) % 12
-        return self.names[keynum]
+    <span style="color: #a6e22e">@property</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #f8f8f2">keynum</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">int((</span><span style="color: #ae81ff">12</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">math</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">log((self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency</span> <span style="color: #f92672">/</span> <span style="color: #ae81ff">440</span><span style="color: #f8f8f2">),</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">))</span>  <span style="color: #f92672">+</span>  <span style="color: #ae81ff">48</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">%</span> <span style="color: #ae81ff">12</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">names[keynum]</span>
 
-class Chord(object):
-    def __init__(self):
-        self.notes = []
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Chord</span><span style="color: #f8f8f2">(object):</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
 
-    def __call__(self, duration):
-        if not len(self.notes):
-            return numpy.zeros(duration, float)
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__call__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">duration):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">len(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes):</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">zeros(duration,</span> <span style="color: #f8f8f2">float)</span>
 
-        gen = lambda note:note(duration)
-        output = sum(map(gen, self.notes))
-        self.clean()
-        return output
+        <span style="color: #f8f8f2">gen</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">lambda</span> <span style="color: #f8f8f2">note:note(duration)</span>
+        <span style="color: #f8f8f2">output</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">sum(map(gen,</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes))</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">clean()</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">output</span>
 
-    def add_note(self, note):
-        if not isinstance(note, Note):
-            raise ValueError("Must be of type Note")
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">add_note</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">note):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">isinstance(note,</span> <span style="color: #f8f8f2">Note):</span>
+            <span style="color: #66d9ef">raise</span> <span style="color: #a6e22e">ValueError</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;Must be of type Note&quot;</span><span style="color: #f8f8f2">)</span>
 
-        self.notes.append(note)
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(note)</span>
 
-    def remove_note(self, note):
-        if not isinstance(note, Note):
-            return
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">remove_note</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">note):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">isinstance(note,</span> <span style="color: #f8f8f2">Note):</span>
+            <span style="color: #66d9ef">return</span>
 
-        if note in self.notes:
-            self.notes.remove(note)
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">note</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes:</span>
+            <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remove(note)</span>
 
-    def clean(self):
-        for note in self.notes:
-            if note.done:
-                self.notes.remove(note)
-
-
-if __name__ == "__main__":
-    p = pyaudio.PyAudio()
-    chord = Chord()
-    gen = NoteGen()
-
-    def callback(in_data, frame_count, time_info, status):
-        wave = chord(frame_count)
-        data = wave.astype(numpy.float32).tostring()
-        return (data, pyaudio.paContinue)
-
-    stream = p.open(
-        format=pyaudio.paFloat32,
-        channels=1,
-        rate=44100,
-        output=True,
-        stream_callback=callback
-    )
-
-    stream.start_stream()
-
-    def keydown(event):
-        k = gen(event.char, 1)
-        chord.add_note(k)
-        print [(n.name, n.frequency) for n in chord.notes]
-
-    def keyup(event):
-        pass
-        # k = gen(event.char)
-        # chord.remove_note(k)
-        # print [n.name for n in chord.notes]
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">clean</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">note</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes:</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">note</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">done:</span>
+                <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">remove(note)</span>
 
 
-    root = Tk()
-    frame = Frame(root, width=100, height=100)
-    frame.bind_all("<KeyPress>", keydown)
-    frame.bind_all("<KeyRelease>", keyup)
-    frame.pack()
+<span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">__name__</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&quot;__main__&quot;</span><span style="color: #f8f8f2">:</span>
+    <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">pyaudio</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">PyAudio()</span>
+    <span style="color: #f8f8f2">chord</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Chord()</span>
+    <span style="color: #f8f8f2">gen</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NoteGen()</span>
 
-    root.mainloop()
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">callback</span><span style="color: #f8f8f2">(in_data,</span> <span style="color: #f8f8f2">frame_count,</span> <span style="color: #f8f8f2">time_info,</span> <span style="color: #f8f8f2">status):</span>
+        <span style="color: #f8f8f2">wave</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">chord(frame_count)</span>
+        <span style="color: #f8f8f2">data</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">wave</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">astype(numpy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">float32)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">tostring()</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">(data,</span> <span style="color: #f8f8f2">pyaudio</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">paContinue)</span>
 
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    <span style="color: #f8f8f2">stream</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">open(</span>
+        <span style="color: #f8f8f2">format</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">pyaudio</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">paFloat32,</span>
+        <span style="color: #f8f8f2">channels</span><span style="color: #f92672">=</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #f8f8f2">rate</span><span style="color: #f92672">=</span><span style="color: #ae81ff">44100</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #f8f8f2">output</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">True,</span>
+        <span style="color: #f8f8f2">stream_callback</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">callback</span>
+    <span style="color: #f8f8f2">)</span>
+
+    <span style="color: #f8f8f2">stream</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">start_stream()</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">keydown</span><span style="color: #f8f8f2">(event):</span>
+        <span style="color: #f8f8f2">k</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">gen(event</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">char,</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">chord</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">add_note(k)</span>
+        <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">[(n</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">name,</span> <span style="color: #f8f8f2">n</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">frequency)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">chord</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">notes]</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">keyup</span><span style="color: #f8f8f2">(event):</span>
+        <span style="color: #66d9ef">pass</span>
+        <span style="color: #75715e"># k = gen(event.char)</span>
+        <span style="color: #75715e"># chord.remove_note(k)</span>
+        <span style="color: #75715e"># print [n.name for n in chord.notes]</span>
+
+
+    <span style="color: #f8f8f2">root</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Tk()</span>
+    <span style="color: #f8f8f2">frame</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Frame(root,</span> <span style="color: #f8f8f2">width</span><span style="color: #f92672">=</span><span style="color: #ae81ff">100</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">height</span><span style="color: #f92672">=</span><span style="color: #ae81ff">100</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #f8f8f2">frame</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">bind_all(</span><span style="color: #e6db74">&quot;&lt;KeyPress&gt;&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">keydown)</span>
+    <span style="color: #f8f8f2">frame</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">bind_all(</span><span style="color: #e6db74">&quot;&lt;KeyRelease&gt;&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">keyup)</span>
+    <span style="color: #f8f8f2">frame</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pack()</span>
+
+    <span style="color: #f8f8f2">root</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mainloop()</span>
+
+    <span style="color: #f8f8f2">stream</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">stop_stream()</span>
+    <span style="color: #f8f8f2">stream</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">close()</span>
+    <span style="color: #f8f8f2">p</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">terminate()</span>
+</pre></div>
 
 
 <p>This is also available on Github as a <a href="https://gist.github.com/serdmanczyk/5a9389d80db94440cf15">gist</a>.</p>

@@ -46,6 +46,7 @@
 <ul>
 <li><a href="#why:eaf9853e2ff62465491e8f49c533cf3b">Why?</a></li>
 <li><a href="#what-s-happening:eaf9853e2ff62465491e8f49c533cf3b">What&rsquo;s happening?</a></li>
+<li><a href="#a-square-peg-in-a-round-hole:eaf9853e2ff62465491e8f49c533cf3b">A Square Peg in a Round Hole</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -61,15 +62,15 @@
 
 <p>I was wrong.</p>
 
-<p>At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.  So I decided to scrap and let the dead horse have its peace.</p>
+<p>At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.  So I decided to scrap and let the dead horse lay.</p>
 
 <p>One thing I got out of the endeavor, though, was I crafted a nifty way to implement an observer class in Python using meta-programming techniques.</p>
 
-<p>If you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/gofpatterns.aspx">gang of four</a>, you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/Observer.aspx">observer</a> pattern.  The basic principle is objects can subscribe to other objects and when a particular event happens an object can notify its subscribers.</p>
+<p>If you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/gofpatterns.aspx">gang of four</a>, you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/Observer.aspx">observer</a> pattern.  The basic principle is objects can subscribe to other object&rsquo;s events and when a particular event happens an object can notify its subscribers.</p>
 
-<p>The thing about gang of four patterns is given different idioms some of the patterns don&rsquo;t translate into all languages; it&rsquo;s like trying to put a square peg into a round hole.  This was a good way to practice and learn meta-programming, but not something you would use directly in the real world.</p>
+<p>The thing about gang of four patterns is given different idioms between languages some of the patterns don&rsquo;t translate as gracefully into all languages, or at the least, wouldn&rsquo;t be implemented the same way.  This was a fun endeavor, but I wouldn&rsquo;t reccomend it in the real world.</p>
 
-<p>Regardless I thought it worth sharing.</p>
+<p>Regardless, because meta-programming is interesting and fun I thought this endeavour worth sharing at least as another example of Python meta-class mechanics.</p>
 
 
 """
@@ -154,15 +155,17 @@ they observe.</p>
 
 <p>Since <code>Friend</code>&rsquo;s metaclass is <code>Observer</code> the <code>Observer</code> <code>__call__</code> method intercepts the class creation before <code>Friend</code>&rsquo;s <code>__init__</code> method.</p>
 
-<p>The <code>__call__</code> method on <code>Observer</code> finds all functions marked as observers and stores them in a dictionary alongside their parameter specs.  It then adds a function <code>receive</code> which is the observers receive method used to communicate messages to it.</p>
+<p>The <code>__call__</code> method on <code>Observer</code> finds all functions marked as observers and stores them in a dictionary alongside their parameter specs and adds this dictionary as an attribute to the class.  It then adds a function <code>receive</code> which is the observers receive method used by communicating classes and function to pass messages.</p>
 
 <p><code>__call__</code> calls <code>Super</code> with the modified <code>cls</code>, which invokes <code>Friend</code>&rsquo;s <code>__init__</code> method, continuing our normal program.</p>
 
-<p>Anytime receive is called, it&rsquo;s passed a parameter of message type, and a **splat of the message into function arguments.  The <code>receive</code> method intelligently maps the message arguments to the functions arg spec, and invokes the mapped receiving function.</p>
+<p>Anytime receive is called, it&rsquo;s passed a parameter of message type (as string), and a **splat of the message into function arguments.  The <code>receive</code> method intelligently maps the message arguments to the functions arg spec, and invokes the mapped receiving function.</p>
 
-<p>In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class is my parser for XBee messages would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.</p>
+<p>In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class was my parser for XBee messages in my thesis code would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.</p>
 
-<p>One fallacy with this method is that <em>ALL</em> instances of <code>Friend</code> will receive messages, rather than just the one you notified of the message.  Correcting this calls on more code, reducing its elegance, creating more of a point that this is probably the wrong way to fix whatever solution this was meant to solve.</p>
+<h2 id="a-square-peg-in-a-round-hole:eaf9853e2ff62465491e8f49c533cf3b">A Square Peg in a Round Hole</h2>
+
+<p>One fallacy with this method is that <em>only the first</em> instance of <code>Friend</code> will receive messages since <code>__call__</code> only builds the observing function map on creation of the class, so latter instance&rsquo;s won&rsquo;t get their functions mapped.  There are a couple of solutions to mitigate this, but they call on more code and more rabbit holes to dig down.  At this point I felt the problem further vindicated my hunch that trying to create a generalized meta-class for the observer pattern in Python was fitting a square peg in a round hole.  Nonetheless, it was a fun opportunity to mess with meta-classes and get a better idea of what uses they have.</p>
 
                 </section>
             </article>

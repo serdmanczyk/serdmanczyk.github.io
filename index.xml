@@ -23,15 +23,15 @@
 
 &lt;p&gt;I was wrong.&lt;/p&gt;
 
-&lt;p&gt;At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.  So I decided to scrap and let the dead horse have its peace.&lt;/p&gt;
+&lt;p&gt;At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.  So I decided to scrap and let the dead horse lay.&lt;/p&gt;
 
 &lt;p&gt;One thing I got out of the endeavor, though, was I crafted a nifty way to implement an observer class in Python using meta-programming techniques.&lt;/p&gt;
 
-&lt;p&gt;If you&amp;rsquo;re familiar with the &lt;a href=&#34;http://www.blackwasp.co.uk/gofpatterns.aspx&#34;&gt;gang of four&lt;/a&gt;, you&amp;rsquo;re familiar with the &lt;a href=&#34;http://www.blackwasp.co.uk/Observer.aspx&#34;&gt;observer&lt;/a&gt; pattern.  The basic principle is objects can subscribe to other objects and when a particular event happens an object can notify its subscribers.&lt;/p&gt;
+&lt;p&gt;If you&amp;rsquo;re familiar with the &lt;a href=&#34;http://www.blackwasp.co.uk/gofpatterns.aspx&#34;&gt;gang of four&lt;/a&gt;, you&amp;rsquo;re familiar with the &lt;a href=&#34;http://www.blackwasp.co.uk/Observer.aspx&#34;&gt;observer&lt;/a&gt; pattern.  The basic principle is objects can subscribe to other object&amp;rsquo;s events and when a particular event happens an object can notify its subscribers.&lt;/p&gt;
 
-&lt;p&gt;The thing about gang of four patterns is given different idioms some of the patterns don&amp;rsquo;t translate into all languages; it&amp;rsquo;s like trying to put a square peg into a round hole.  This was a good way to practice and learn meta-programming, but not something you would use directly in the real world.&lt;/p&gt;
+&lt;p&gt;The thing about gang of four patterns is given different idioms between languages some of the patterns don&amp;rsquo;t translate as gracefully into all languages, or at the least, wouldn&amp;rsquo;t be implemented the same way.  This was a fun endeavor, but I wouldn&amp;rsquo;t reccomend it in the real world.&lt;/p&gt;
 
-&lt;p&gt;Regardless I thought it worth sharing.&lt;/p&gt;
+&lt;p&gt;Regardless, because meta-programming is interesting and fun I thought this endeavour worth sharing at least as another example of Python meta-class mechanics.&lt;/p&gt;
 
 
 &#34;&#34;&#34;
@@ -116,15 +116,17 @@ they observe.&lt;/p&gt;
 
 &lt;p&gt;Since &lt;code&gt;Friend&lt;/code&gt;&amp;rsquo;s metaclass is &lt;code&gt;Observer&lt;/code&gt; the &lt;code&gt;Observer&lt;/code&gt; &lt;code&gt;__call__&lt;/code&gt; method intercepts the class creation before &lt;code&gt;Friend&lt;/code&gt;&amp;rsquo;s &lt;code&gt;__init__&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;p&gt;The &lt;code&gt;__call__&lt;/code&gt; method on &lt;code&gt;Observer&lt;/code&gt; finds all functions marked as observers and stores them in a dictionary alongside their parameter specs.  It then adds a function &lt;code&gt;receive&lt;/code&gt; which is the observers receive method used to communicate messages to it.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;__call__&lt;/code&gt; method on &lt;code&gt;Observer&lt;/code&gt; finds all functions marked as observers and stores them in a dictionary alongside their parameter specs and adds this dictionary as an attribute to the class.  It then adds a function &lt;code&gt;receive&lt;/code&gt; which is the observers receive method used by communicating classes and function to pass messages.&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;__call__&lt;/code&gt; calls &lt;code&gt;Super&lt;/code&gt; with the modified &lt;code&gt;cls&lt;/code&gt;, which invokes &lt;code&gt;Friend&lt;/code&gt;&amp;rsquo;s &lt;code&gt;__init__&lt;/code&gt; method, continuing our normal program.&lt;/p&gt;
 
-&lt;p&gt;Anytime receive is called, it&amp;rsquo;s passed a parameter of message type, and a **splat of the message into function arguments.  The &lt;code&gt;receive&lt;/code&gt; method intelligently maps the message arguments to the functions arg spec, and invokes the mapped receiving function.&lt;/p&gt;
+&lt;p&gt;Anytime receive is called, it&amp;rsquo;s passed a parameter of message type (as string), and a **splat of the message into function arguments.  The &lt;code&gt;receive&lt;/code&gt; method intelligently maps the message arguments to the functions arg spec, and invokes the mapped receiving function.&lt;/p&gt;
 
-&lt;p&gt;In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class is my parser for XBee messages would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.&lt;/p&gt;
+&lt;p&gt;In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class was my parser for XBee messages in my thesis code would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.&lt;/p&gt;
 
-&lt;p&gt;One fallacy with this method is that &lt;em&gt;ALL&lt;/em&gt; instances of &lt;code&gt;Friend&lt;/code&gt; will receive messages, rather than just the one you notified of the message.  Correcting this calls on more code, reducing its elegance, creating more of a point that this is probably the wrong way to fix whatever solution this was meant to solve.&lt;/p&gt;
+&lt;h2 id=&#34;a-square-peg-in-a-round-hole:eaf9853e2ff62465491e8f49c533cf3b&#34;&gt;A Square Peg in a Round Hole&lt;/h2&gt;
+
+&lt;p&gt;One fallacy with this method is that &lt;em&gt;only the first&lt;/em&gt; instance of &lt;code&gt;Friend&lt;/code&gt; will receive messages since &lt;code&gt;__call__&lt;/code&gt; only builds the observing function map on creation of the class, so latter instance&amp;rsquo;s won&amp;rsquo;t get their functions mapped.  There are a couple of solutions to mitigate this, but they call on more code and more rabbit holes to dig down.  At this point I felt the problem further vindicated my hunch that trying to create a generalized meta-class for the observer pattern in Python was fitting a square peg in a round hole.  Nonetheless, it was a fun opportunity to mess with meta-classes and get a better idea of what uses they have.&lt;/p&gt;
 </description>
     </item>
     

@@ -6,16 +6,24 @@
     <description>Recent content in Abouts on Erdmanczyk.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 08 Aug 2014 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 15 May 2016 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://serdmanczyk.github.io/about/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Steven J. Erdmanczyk Jr: Software/Electrical Engineer</title>
+      <title>About Me</title>
       <link>http://serdmanczyk.github.io/about/</link>
-      <pubDate>Fri, 08 Aug 2014 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 15 May 2016 00:00:00 +0000</pubDate>
       
       <guid>http://serdmanczyk.github.io/about/</guid>
-      <description>&lt;p&gt;I&amp;rsquo;m a software developer currently working in Go and Python with a history in C, C++, and asm.  By day I work at Disney in Seatte, WA and by nights I try to tinker with embedded electronics when I can squeeze it in.  I have a Master&amp;rsquo;s of Science in Electrical Engineering from the University of North Carolina at Charlotte.  Professionally I enjoy backend system design and programming focused on highly available, distributed systems.&lt;/p&gt;
+      <description>&lt;p&gt;By day I work at Disney doing Runbook Automation in Seatte, WA.&lt;/p&gt;
+
+&lt;p&gt;By night I play with electronics and whatever silly programming hobbies I can get into.&lt;/p&gt;
+
+&lt;p&gt;With the rest of my free time I like to go on adventures, train parkour, and spend time with my lovely wife.&lt;/p&gt;
+
+&lt;p&gt;I have a Master&amp;rsquo;s of Science in Electrical Engineering from the University of North Carolina at Charlotte.&lt;/p&gt;
+
+&lt;p&gt;Professionally I enjoy backend system design and programming focused on highly available, distributed systems.  I have extensice experience working in Go, Python, C, and C++.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/other/iceland_selfpic.jpg&#34; alt=&#34;Selfie in Iceland&#34; /&gt;&lt;/p&gt;
 </description>

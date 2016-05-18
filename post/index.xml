@@ -6,8 +6,110 @@
     <description>Recent content in Posts on Erdmanczyk.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 10 Mar 2016 17:24:01 -0800</lastBuildDate>
+    <lastBuildDate>Tue, 17 May 2016 20:00:01 -0700</lastBuildDate>
     <atom:link href="http://serdmanczyk.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Freyr: Gardenspark pivoted</title>
+      <link>http://serdmanczyk.github.io/post/2016-05-17-Freyr/</link>
+      <pubDate>Tue, 17 May 2016 20:00:01 -0700</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/post/2016-05-17-Freyr/</guid>
+      <description>
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/freyr/freyr_logo.png&#34; alt=&#34;FreyrLogo&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;i-m-pivoting:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;I&amp;rsquo;m Pivoting&lt;/h1&gt;
+
+&lt;p&gt;After a revisit of the server side of my GardenSpark project, I decided to make a few changes.  To take some words from one of my favorite scenes of Silicon Valley: &lt;a href=&#34;https://youtu.be/M1vfXoUNDYA&#34;&gt;I&amp;rsquo;m pivoting&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The current version of the code now lives at &lt;a href=&#34;https://github.com/serdmanczyk/Freyr&#34;&gt;https://github.com/serdmanczyk/Freyr&lt;/a&gt; and there is already a running instance at: &lt;a href=&#34;https://freyr.erdmanczyk.com/&#34;&gt;https://freyr.erdmanczyk.com/&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;review-what-is-all-this-again:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Review: what is all this again?&lt;/h2&gt;
+
+&lt;p&gt;&amp;lsquo;Gardenspark&amp;rsquo; was a personal project to make a connected plant environment sensor and custom server app to host a data API and web application for data retreival and visualization.  This was a sandbox to merge my interests in embedded programming, electronics design, as well as writing back-end software.&lt;/p&gt;
+
+&lt;h2 id=&#34;rebranding:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Rebranding&lt;/h2&gt;
+
+&lt;p&gt;The Spark from Gardenspark has &lt;a href=&#34;http://blog.particle.io/2015/05/13/spark-is-now-particle/&#34;&gt;renamed&lt;/a&gt; , and &amp;lsquo;Gardenspark&amp;rsquo; started to annoy me.  When all else fails (and your give-a-sh* is low), go with a Norse god.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Freyr&#34;&gt;Freyr (fray-ur)&lt;/a&gt;: the Norse god associated with fertility and fair weather.&lt;/p&gt;
+
+&lt;p&gt;Happy coincidence: the &lt;a href=&#34;https://en.wikipedia.org/wiki/Younger_Futhark&#34;&gt;Futhark&lt;/a&gt; equivalent of &lt;a href=&#34;https://en.wikipedia.org/wiki/Fehu&#34;&gt;&amp;lsquo;F&amp;rsquo;, ᚠ (&amp;lsquo;Fehu&amp;rsquo;)&lt;/a&gt;, lent itself well to a logo, seen above incorporating the rune into a leaf.&lt;/p&gt;
+
+&lt;h2 id=&#34;new-features:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;New Features&lt;/h2&gt;
+
+&lt;p&gt;The old server had no concept of users or logins.  The new server supports:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;user log-ins via Google Oauth&lt;/li&gt;
+&lt;li&gt;sessions via HMAC sign JTW&amp;rsquo;s stored as secure, http-only, cookies&lt;/li&gt;
+&lt;li&gt;Cross site request forgery protection&lt;/li&gt;
+&lt;li&gt;API and device authentication using shared secrets&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I wanted to take some time with this implementation to study web-app security issues and real methods to protect against them.  It&amp;rsquo;s still &lt;a href=&#34;https://www.schneier.com/blog/archives/2015/08/mickens_on_secu.html&#34;&gt;no match for the Mossad&lt;/a&gt;, but I&amp;rsquo;ve made it hard to get in unless you&amp;rsquo;re fairly smart and really give a shit about other people&amp;rsquo;s plants.&lt;/p&gt;
+
+&lt;h2 id=&#34;switching-from-nodejs-to-go:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Switching from Nodejs to Go&lt;/h2&gt;
+
+&lt;p&gt;Node.js was pretty cool, but Go seemed like a better fit for me.  Programming in Go for me has been quite enjoyable.  A few features of Go that I&amp;rsquo;ve been fond of:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Can compile to a single, statically-linked, binary (also: cross-compilation)&lt;/li&gt;
+&lt;li&gt;Strongly-typed&lt;/li&gt;
+&lt;li&gt;Simple language spec&lt;/li&gt;
+&lt;li&gt;Strongly enforced conventions (yay, gofmt), yet not overly prescriptive&lt;/li&gt;
+&lt;li&gt;Rich standard library&lt;/li&gt;
+&lt;li&gt;Interfaces and composition vs. OOP and inheritance&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Switching from Nodejs to Go was a central point of this pivot, and I&amp;rsquo;m fairly happy with the decision.&lt;/p&gt;
+
+&lt;h2 id=&#34;back-to-basics-mongodb-to-postgresql:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Back to basics: MongoDB to Postgresql&lt;/h2&gt;
+
+&lt;p&gt;MongoDB is hip, but after some reflection, the tried-and-true relational data model fits my use-case better.  My data types are flat and non-homogeneous, and I have cases where sub-queries are a more efficient way to satisfy my end-goals.&lt;/p&gt;
+
+&lt;h2 id=&#34;user-interface-angular-reactjs:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;User Interface: Angular -&amp;gt; ReactJS&lt;/h2&gt;
+
+&lt;p&gt;Originally I wanted to switch from Angular because of reading about its performance gripes.  In retrospect, my app is so simple that&amp;rsquo;s not really an issue.  But as a result, the amount of code and interleaving with the html required to get my simple interface running has become much simpler and easier to manage.  I was happy with React because much like Go, it&amp;rsquo;s a good balance of solving problems quickly but not being overly prescriptive.&lt;/p&gt;
+
+&lt;h2 id=&#34;adding-nginx-to-the-mix:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Adding Nginx to the mix&lt;/h2&gt;
+
+&lt;p&gt;I wanted to separate my user interface from the API, so I needed a load balancer to route requests properly.  This may not be ideal for production apps, where you would want to render server-side, but it was good for a personal project where I wanted to partition my UI code from my server code and feel a bit more sane.&lt;/p&gt;
+
+&lt;p&gt;On top of load balancing and enabling me to scale my app horizontally, Nginx has a lot of things built-in that I&amp;rsquo;m able to solve in just a few lines of config vs. re-inventing the wheel in my API code.  This includes:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Serving static files&lt;/li&gt;
+&lt;li&gt;compressing responses&lt;/li&gt;
+&lt;li&gt;304 on unchanged content&lt;/li&gt;
+&lt;li&gt;Redirecting http -&amp;gt; https&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;testing-and-deployment-with-docker:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Testing and Deployment with Docker&lt;/h2&gt;
+
+&lt;p&gt;I&amp;rsquo;ve been doing a lot with Docker at work lately, and thought it would be a fantastic tool for organizing my environments and deployments; I wasn&amp;rsquo;t dissapointed.&lt;/p&gt;
+
+&lt;p&gt;Alongside providing an effective tool for deployment, Docker-izing my application had a couple of added benefits:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Automating testing environments for integration and acceptance tests&lt;/li&gt;
+&lt;li&gt;Run my full stack in containers on a single host, saving $$ for just a personal project&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With just a few commands from docker-machine and docker-compose I can update my live application, run full-stack tests, or mount my code into containers to debug locally.&lt;/p&gt;
+
+&lt;p&gt;Deploying with docker is fantastic because it doesn&amp;rsquo;t tightly bind my application to a single deployment interface e.g. Google App Engine, Heroku, OpenShift.&lt;/p&gt;
+
+&lt;h2 id=&#34;free-certs:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Free Certs!&lt;/h2&gt;
+
+&lt;p&gt;LetsEncrypt made it super simple to get a valid &lt;a href=&#34;https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04&#34;&gt;SSL certificate on my server for free&lt;/a&gt; once it was up and running.&lt;/p&gt;
+
+&lt;h2 id=&#34;moving-forward:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Moving Forward&lt;/h2&gt;
+
+&lt;p&gt;The current code is running live at &lt;a href=&#34;https://freyr.erdmanczyk.com/&#34;&gt;https://freyr.erdmanczyk.com/&lt;/a&gt;.  I&amp;rsquo;m once again using it to record the environment in my office, as well as have a demo page up that&amp;rsquo;s public for anyone to see.  In the next posts I&amp;rsquo;ll cover at a high level how the application works, then will go into details on various techniques I used with Go, etc.  I don&amp;rsquo;t intend these to be tutorials, but hopefully my techniques can serve as examples for others trying to do similar things.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Python Oberserver Metaclass</title>

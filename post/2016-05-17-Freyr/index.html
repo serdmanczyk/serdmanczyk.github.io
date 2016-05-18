@@ -1,0 +1,329 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Steven J. Erdmanczyk Jr.">
+		<meta name="description" content="Obligatory software soap box">
+		<meta name="generator" content="Hugo 0.15" />
+		<title>Freyr: Gardenspark pivoted &middot; Erdmanczyk.io</title>
+		<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+		<link rel="stylesheet" href="http://serdmanczyk.github.io/css/monosocialiconsfont.css">
+		
+		<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Erdmanczyk.io" />
+		
+	</head>
+
+    <body>
+        <nav class="main-nav">
+	
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://serdmanczyk.github.io/about'>About</a>
+	
+
+	
+	<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+        <div class="profile">
+    <section id="wrapper">
+        <header id="header">
+            <a href='http://serdmanczyk.github.io/about'>
+                <img id="avatar" class="2x" src="http://serdmanczyk.github.io/images/avatar.png"/>
+            </a>
+            <h1>Steven J. Erdmanczyk Jr.</h1>
+            <h2>Software Engineer - Embedded hobbyist - Adventurer</h2>
+            
+		        
+<div id="social">
+    
+    <a class="symbol" href="https://www.github.com/serdmanczyk">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://plus.google.com/u/0/&#43;StevenErdmanczykJr/posts">
+        circlegoogleplus
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="http://stackoverflow.com/users/2406040/serdmanczyk">
+        circlestackoverflow
+    </a>
+    
+</div>
+
+		    
+        </header>
+    </section>
+</div>
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Freyr: Gardenspark pivoted</h1>
+                    <h2 class="headline">May 17, 2016</h2>
+                     
+                        <div id="toc" class="well col-md-4 col-sm-6">
+                            <nav id="TableOfContents">
+<ul>
+<li><a href="#i-m-pivoting:5d65f2defdf6804fb1484b234f5f01eb">I&rsquo;m Pivoting</a>
+<ul>
+<li><a href="#review-what-is-all-this-again:5d65f2defdf6804fb1484b234f5f01eb">Review: what is all this again?</a></li>
+<li><a href="#rebranding:5d65f2defdf6804fb1484b234f5f01eb">Rebranding</a></li>
+<li><a href="#new-features:5d65f2defdf6804fb1484b234f5f01eb">New Features</a></li>
+<li><a href="#switching-from-nodejs-to-go:5d65f2defdf6804fb1484b234f5f01eb">Switching from Nodejs to Go</a></li>
+<li><a href="#back-to-basics-mongodb-to-postgresql:5d65f2defdf6804fb1484b234f5f01eb">Back to basics: MongoDB to Postgresql</a></li>
+<li><a href="#user-interface-angular-reactjs:5d65f2defdf6804fb1484b234f5f01eb">User Interface: Angular -&gt; ReactJS</a></li>
+<li><a href="#adding-nginx-to-the-mix:5d65f2defdf6804fb1484b234f5f01eb">Adding Nginx to the mix</a></li>
+<li><a href="#testing-and-deployment-with-docker:5d65f2defdf6804fb1484b234f5f01eb">Testing and Deployment with Docker</a></li>
+<li><a href="#free-certs:5d65f2defdf6804fb1484b234f5f01eb">Free Certs!</a></li>
+<li><a href="#moving-forward:5d65f2defdf6804fb1484b234f5f01eb">Moving Forward</a></li>
+</ul></li>
+</ul>
+</nav>
+                        </div>
+                                            
+                </header>
+
+                <section id="post-body">
+                    
+
+<p><img src="/images/freyr/freyr_logo.png" alt="FreyrLogo" /></p>
+
+<h1 id="i-m-pivoting:5d65f2defdf6804fb1484b234f5f01eb">I&rsquo;m Pivoting</h1>
+
+<p>After a revisit of the server side of my GardenSpark project, I decided to make a few changes.  To take some words from one of my favorite scenes of Silicon Valley: <a href="https://youtu.be/M1vfXoUNDYA">I&rsquo;m pivoting</a>.</p>
+
+<p>The current version of the code now lives at <a href="https://github.com/serdmanczyk/Freyr">https://github.com/serdmanczyk/Freyr</a> and there is already a running instance at: <a href="https://freyr.erdmanczyk.com/">https://freyr.erdmanczyk.com/</a>.</p>
+
+<h2 id="review-what-is-all-this-again:5d65f2defdf6804fb1484b234f5f01eb">Review: what is all this again?</h2>
+
+<p>&lsquo;Gardenspark&rsquo; was a personal project to make a connected plant environment sensor and custom server app to host a data API and web application for data retreival and visualization.  This was a sandbox to merge my interests in embedded programming, electronics design, as well as writing back-end software.</p>
+
+<h2 id="rebranding:5d65f2defdf6804fb1484b234f5f01eb">Rebranding</h2>
+
+<p>The Spark from Gardenspark has <a href="http://blog.particle.io/2015/05/13/spark-is-now-particle/">renamed</a> , and &lsquo;Gardenspark&rsquo; started to annoy me.  When all else fails (and your give-a-sh* is low), go with a Norse god.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Freyr">Freyr (fray-ur)</a>: the Norse god associated with fertility and fair weather.</p>
+
+<p>Happy coincidence: the <a href="https://en.wikipedia.org/wiki/Younger_Futhark">Futhark</a> equivalent of <a href="https://en.wikipedia.org/wiki/Fehu">&lsquo;F&rsquo;, ᚠ (&lsquo;Fehu&rsquo;)</a>, lent itself well to a logo, seen above incorporating the rune into a leaf.</p>
+
+<h2 id="new-features:5d65f2defdf6804fb1484b234f5f01eb">New Features</h2>
+
+<p>The old server had no concept of users or logins.  The new server supports:</p>
+
+<ul>
+<li>user log-ins via Google Oauth</li>
+<li>sessions via HMAC sign JTW&rsquo;s stored as secure, http-only, cookies</li>
+<li>Cross site request forgery protection</li>
+<li>API and device authentication using shared secrets</li>
+</ul>
+
+<p>I wanted to take some time with this implementation to study web-app security issues and real methods to protect against them.  It&rsquo;s still <a href="https://www.schneier.com/blog/archives/2015/08/mickens_on_secu.html">no match for the Mossad</a>, but I&rsquo;ve made it hard to get in unless you&rsquo;re fairly smart and really give a shit about other people&rsquo;s plants.</p>
+
+<h2 id="switching-from-nodejs-to-go:5d65f2defdf6804fb1484b234f5f01eb">Switching from Nodejs to Go</h2>
+
+<p>Node.js was pretty cool, but Go seemed like a better fit for me.  Programming in Go for me has been quite enjoyable.  A few features of Go that I&rsquo;ve been fond of:</p>
+
+<ul>
+<li>Can compile to a single, statically-linked, binary (also: cross-compilation)</li>
+<li>Strongly-typed</li>
+<li>Simple language spec</li>
+<li>Strongly enforced conventions (yay, gofmt), yet not overly prescriptive</li>
+<li>Rich standard library</li>
+<li>Interfaces and composition vs. OOP and inheritance</li>
+</ul>
+
+<p>Switching from Nodejs to Go was a central point of this pivot, and I&rsquo;m fairly happy with the decision.</p>
+
+<h2 id="back-to-basics-mongodb-to-postgresql:5d65f2defdf6804fb1484b234f5f01eb">Back to basics: MongoDB to Postgresql</h2>
+
+<p>MongoDB is hip, but after some reflection, the tried-and-true relational data model fits my use-case better.  My data types are flat and non-homogeneous, and I have cases where sub-queries are a more efficient way to satisfy my end-goals.</p>
+
+<h2 id="user-interface-angular-reactjs:5d65f2defdf6804fb1484b234f5f01eb">User Interface: Angular -&gt; ReactJS</h2>
+
+<p>Originally I wanted to switch from Angular because of reading about its performance gripes.  In retrospect, my app is so simple that&rsquo;s not really an issue.  But as a result, the amount of code and interleaving with the html required to get my simple interface running has become much simpler and easier to manage.  I was happy with React because much like Go, it&rsquo;s a good balance of solving problems quickly but not being overly prescriptive.</p>
+
+<h2 id="adding-nginx-to-the-mix:5d65f2defdf6804fb1484b234f5f01eb">Adding Nginx to the mix</h2>
+
+<p>I wanted to separate my user interface from the API, so I needed a load balancer to route requests properly.  This may not be ideal for production apps, where you would want to render server-side, but it was good for a personal project where I wanted to partition my UI code from my server code and feel a bit more sane.</p>
+
+<p>On top of load balancing and enabling me to scale my app horizontally, Nginx has a lot of things built-in that I&rsquo;m able to solve in just a few lines of config vs. re-inventing the wheel in my API code.  This includes:</p>
+
+<ul>
+<li>Serving static files</li>
+<li>compressing responses</li>
+<li>304 on unchanged content</li>
+<li>Redirecting http -&gt; https</li>
+</ul>
+
+<h2 id="testing-and-deployment-with-docker:5d65f2defdf6804fb1484b234f5f01eb">Testing and Deployment with Docker</h2>
+
+<p>I&rsquo;ve been doing a lot with Docker at work lately, and thought it would be a fantastic tool for organizing my environments and deployments; I wasn&rsquo;t dissapointed.</p>
+
+<p>Alongside providing an effective tool for deployment, Docker-izing my application had a couple of added benefits:</p>
+
+<ul>
+<li>Automating testing environments for integration and acceptance tests</li>
+<li>Run my full stack in containers on a single host, saving $$ for just a personal project</li>
+</ul>
+
+<p>With just a few commands from docker-machine and docker-compose I can update my live application, run full-stack tests, or mount my code into containers to debug locally.</p>
+
+<p>Deploying with docker is fantastic because it doesn&rsquo;t tightly bind my application to a single deployment interface e.g. Google App Engine, Heroku, OpenShift.</p>
+
+<h2 id="free-certs:5d65f2defdf6804fb1484b234f5f01eb">Free Certs!</h2>
+
+<p>LetsEncrypt made it super simple to get a valid <a href="https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04">SSL certificate on my server for free</a> once it was up and running.</p>
+
+<h2 id="moving-forward:5d65f2defdf6804fb1484b234f5f01eb">Moving Forward</h2>
+
+<p>The current code is running live at <a href="https://freyr.erdmanczyk.com/">https://freyr.erdmanczyk.com/</a>.  I&rsquo;m once again using it to record the environment in my office, as well as have a demo page up that&rsquo;s public for anyone to see.  In the next posts I&rsquo;ll cover at a high level how the application works, then will go into details on various techniques I used with Go, etc.  I don&rsquo;t intend these to be tutorials, but hopefully my techniques can serve as examples for others trying to do similar things.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                
+                        <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Steven J. Erdmanczyk Jr.</span>
+                            <span>Software Engineer</span>
+                        </div>
+                    
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-05-17-Freyr%2f - Freyr%3a%20Gardenspark%20pivoted "><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'serdmanczyk';
+    var disqus_identifier = 'http:\/\/serdmanczyk.github.io\/post\/2016-05-17-Freyr\/';
+    var disqus_title = 'Freyr: Gardenspark pivoted';
+    var disqus_url = 'http:\/\/serdmanczyk.github.io\/post\/2016-05-17-Freyr\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-05-17-Freyr/">Freyr: Gardenspark pivoted<aside class="dates">May 17</aside></a>
+        </li>
+        
+   
+    
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/">Python Oberserver Metaclass<aside class="dates">Mar 10</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/">GardenSpark: Part Three - Make the Internet Pretty<aside class="dates">Apr 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/">GardenSpark: Part Two - Putting It in the Cloud<aside class="dates">Sep 11</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/">GardenSpark: Part One - Prototype / stream to plotly<aside class="dates">Jul 22</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    <p class="small">
+    
+        © Copyright 2016 Steven J. Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+    </body>
+</html>

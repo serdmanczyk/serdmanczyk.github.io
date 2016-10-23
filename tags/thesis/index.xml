@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Thesis on Erdmanczyk.io</title>
-    <link>http://serdmanczyk.github.io/tags/thesis/</link>
-    <description>Recent content in Thesis on Erdmanczyk.io</description>
-    <generator>Hugo -- gohugo.io</generator>
+      <title> on Steven Erdmanczyk Jr. </title>
+      <generator uri="https://gohugo.io">Hugo</generator>
+    <link>http://serdmanczyk.github.io/tags/thesis/index.xml</link>
     <language>en-us</language>
-    <lastBuildDate>Wed, 28 May 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://serdmanczyk.github.io/tags/thesis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
     
     <item>
       <title>Master&#39;s Thesis</title>
       <link>http://serdmanczyk.github.io/MSEEThesis/</link>
-      <pubDate>Wed, 28 May 2014 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 28 May 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/MSEEThesis/</guid>
       <description>
 
-&lt;h2 id=&#34;intro:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Intro&lt;/h2&gt;
+&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 
 &lt;p&gt;I’ve decided to begin blogging my various endeavors in software development and electrical engineering hackery. To kick it off, I’m writing a post describing the work I did for my Masters of Science in Electrical Engineering thesis. This post will start it off with a brief introduction/overview, then I’ll cover individual aspects of the project.&lt;/p&gt;
 
@@ -55,7 +55,7 @@
 
 &lt;p&gt;That concludes the basic, top-level overview, now let&amp;rsquo;s delve into how I handled the networking layer in my application.&lt;/p&gt;
 
-&lt;h2 id=&#34;networking:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Networking&lt;/h2&gt;
+&lt;h2 id=&#34;networking&#34;&gt;Networking&lt;/h2&gt;
 
 &lt;!-- EMBED: http://instagram.com/p/gZgK3NFzgv/ --&gt;
 
@@ -105,7 +105,7 @@
 
 &lt;p&gt;Now that networking is covered, our next layer to cover is using this to communicate RSSI among all of the nodes and using that to evaluate communications strength amongst the system.&lt;/p&gt;
 
-&lt;h2 id=&#34;rss-rssi-and-syncing-measurements:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
+&lt;h2 id=&#34;rss-rssi-and-syncing-measurements&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
 
 &lt;p&gt;So, what is RSS? RSS is an acronym for &lt;a href=&#34;http://en.wikipedia.org/wiki/Signal_strength&#34;&gt;Received Signal Strength&lt;/a&gt; which is a metric used to represent how strong a radio signal is when a message is received on a listening device. In lower powered applications such as with embedded radios, it can commonly be measured as the log base 10 of the ratio of the received signal power to 1 milliwatt, aka &lt;a href=&#34;http://www.rapidtables.com/electric/dBm.htm&#34;&gt;Decibel-milliwatt&lt;/a&gt; (dBm).&lt;/p&gt;
 
@@ -125,7 +125,7 @@
 
 &lt;p&gt;So that’s how I handled monitoring and syncing signal strength between nodes in my application’s system. This functionality is critical as one of the primary objectives in the system is to maintain distance between nodes in order to maximize communication’s strength. In my  into the primary logical functions of my system: deploying nodes as needed, maintaining distance between nodes, and healing the tether when nodes go down.&lt;/p&gt;
 
-&lt;h2 id=&#34;node-deployment:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Node Deployment&lt;/h2&gt;
+&lt;h2 id=&#34;node-deployment&#34;&gt;Node Deployment&lt;/h2&gt;
 
 &lt;p&gt;When it came to the system’s responsibilities of deployment, distance management, and recovery I had to make a choice with each of how I would split that responsibility among the system parts. Should the logic for deployment be a distributed protocol among the nodes? What about healing and distance management, is that something nodes should defer to the base station? In the case of deployment, the choice of centralizing the logic to the base station was an easy one.&lt;/p&gt;
 
@@ -188,7 +188,7 @@
 
 &lt;p&gt;That sums up the deployment process, which is the simplest of the three system tasks. Now let&amp;rsquo;s go over the distance maintenance algorithm.&lt;/p&gt;
 
-&lt;h2 id=&#34;distance-maintenance:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Distance Maintenance&lt;/h2&gt;
+&lt;h2 id=&#34;distance-maintenance&#34;&gt;Distance Maintenance&lt;/h2&gt;
 
 &lt;p&gt;I chose to make the distance maintenance algorithm a distributed one. The phrase ‘distributed algorithm’ tends to invoke thoughts of complexity. Implementing a distributed algorithm may require additional code to handle concurrency, error correction, message passing, etc. however in the case of my system, distributed means that I could avoid that complexity as well as increase the speed of response.&lt;/p&gt;
 
@@ -219,7 +219,7 @@
 
 &lt;p&gt;So that covers how I implemented a simple, distributed, emergent algorithm to allow the mobile nodes in the system of my thesis to control their distance to each other. Now let&amp;rsquo;s look at the final and most difficult piece: handling recovery when nodes area lost.&lt;/p&gt;
 
-&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
+&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
 
 &lt;p&gt;If a node is lost, the nodes need not just to intelligently reconnect, they most likely also need to maneuver to be back in range of a healthy node. Once again there came the choice of whether to handle this distributively or centrally, and I once again chose the former.&lt;/p&gt;
 
@@ -256,7 +256,7 @@
 
 &lt;p&gt;That gives a general overview of how my application handles situations where a node is lost. Once again not too complicated given the other layers are designed well.&lt;/p&gt;
 
-&lt;h2 id=&#34;summary:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Summary&lt;/h2&gt;
+&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
 
 &lt;p&gt;Thus concludes the &amp;lsquo;blog-ification&amp;rsquo; of the work I did on my thesis.  I spared intricate details on coding and such, because that would drag on longer than I would wish for what I wanted to get across.  I will give a post soon on the basics of using API mode with XBees using Python and Arduino that will include code from this project.  Hopefully the general overview of how I implemented a system of mobile nodes/a base station to provide an automated wireless communications tether can be helpful to others with a similar project and/or may have just been entertaining to read.&lt;/p&gt;
 

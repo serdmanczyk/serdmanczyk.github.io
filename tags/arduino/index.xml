@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Arduino on Erdmanczyk.io</title>
-    <link>http://serdmanczyk.github.io/tags/arduino/</link>
-    <description>Recent content in Arduino on Erdmanczyk.io</description>
-    <generator>Hugo -- gohugo.io</generator>
+      <title> on Steven Erdmanczyk Jr. </title>
+      <generator uri="https://gohugo.io">Hugo</generator>
+    <link>http://serdmanczyk.github.io/tags/arduino/index.xml</link>
     <language>en-us</language>
-    <lastBuildDate>Sun, 01 Jun 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://serdmanczyk.github.io/tags/arduino/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
     
     <item>
       <title>XBee API Mode Tutorial Using Python and Arduino</title>
       <link>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</link>
-      <pubDate>Sun, 01 Jun 2014 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 01 Jun 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</guid>
       <description>
 
-&lt;p&gt;&lt;pre&gt;
+&lt;pre&gt;
 Disclaimer:  This is meant to be a tutorial.
 Primarily this is intended to educate with basic XBee
 API mode setup, and how the XBee frame format works.
-If you&amp;rsquo;re looking for a library, I recommend for &lt;a href=&#34;https://pypi.python.org/pypi/XBee&#34;&gt;XBee&lt;/a&gt; for
-Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#34;&gt;xbee-arduino&lt;/a&gt; for&amp;hellip; yeah.
-&lt;/pre&gt;&lt;/p&gt;
+If you&#39;re looking for a library, I recommend for [XBee][pyxbee] for
+Python and checkout [xbee-arduino][arxbee] for... yeah.
+&lt;/pre&gt;
 
-&lt;h2 id=&#34;introduction:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Introduction&lt;/h2&gt;
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
 
 &lt;p&gt;This post is a tutorial, with example code, covering how to communicate using XBee 802.15.4 (Series 1) radios in API mode using Python and Arduino.  I decided to write these tutorials because I couldn&amp;rsquo;t find a substantial amount of simple examples when I decided to use XBee&amp;rsquo;s in API mode while working on my Masters thesis.  It&amp;rsquo;s my hopes this tutorial can help other people working on applications similar to mine get off the ground and running faster.&lt;/p&gt;
 
@@ -33,7 +33,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;This tutorial does assume you are familiar with Digi X-CTU and Arduino software.  You will be instructed what to do in X-CTU and Arduino (e.g. &amp;ldquo;compile&amp;rdquo;, &amp;ldquo;change these settings&amp;rdquo;), but will not be instructed how to do it (e.g. &amp;ldquo;push the blue button&amp;rdquo;, &amp;ldquo;go to menu File-&amp;gt;&amp;rdquo;)&lt;/p&gt;
 
-&lt;h2 id=&#34;requisite-hardware:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Hardware&lt;/h2&gt;
+&lt;h2 id=&#34;requisite-hardware&#34;&gt;Requisite Hardware&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;2 XBee 802.15.4 Series 1 radios&lt;/li&gt;
@@ -45,7 +45,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;I recommend the &lt;a href=&#34;http://amzn.com/B00B6SF2C6&#34;&gt;Parallax XBee Wireless Pack&lt;/a&gt;, but there are also several other options on &lt;a href=&#34;https://www.sparkfun.com&#34;&gt;SparkFun&lt;/a&gt;, &lt;a href=&#34;https://www.adafruit.com&#34;&gt;Adafruit&lt;/a&gt;, &lt;a href=&#34;http://www.makershed.com/SearchResults.asp?Search=xbee&#34;&gt;Maker Shed&lt;/a&gt; and other hobby electronics stores.  Many of them are very similar to the pieces used in this post.&lt;/p&gt;
 
-&lt;h2 id=&#34;requisite-software:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Software&lt;/h2&gt;
+&lt;h2 id=&#34;requisite-software&#34;&gt;Requisite Software&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/xctu&#34;&gt;Digi X-CTU&lt;/a&gt;&lt;/li&gt;
@@ -55,11 +55,11 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 &lt;li&gt;&lt;a href=&#34;http://arduino.cc/en/main/software&#34;&gt;Arduino Software&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;why-xbee-802-15-4:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
+&lt;h2 id=&#34;why-xbee-802-15-4&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
 
 &lt;p&gt;XBee radios are handy in embedded applications because they enable wireless communications with relatively low power compared to Wi-Fi, bluetooth, or cellular technologies at the cost of slower speed.  XBee 802.15.4 (Series 1) provides simple OSI layer one and two functionality on the module.  Zigbee radios (XBee Series 2) provide an additional networking layer that can handle cool things like automatic mesh networking, however, Zigbee mesh networks are limited to a maximum of 10 nodes.  Zigbee radios can also operate in API mode, frame packaging is the same, and the frames used for Zigbee are very similar.  This tutorial covers XBee 80.15.4 because their frames are simpler for beginners and are all we need to cover the basics.&lt;/p&gt;
 
-&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
+&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
 
 &lt;p&gt;Using API mode to communicate has a few advantages compared to other XBee configuration options:&lt;/p&gt;
 
@@ -110,7 +110,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;That covers the basics of API frames / the boring part.  Now let&amp;rsquo;s actually have some fun.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
+&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
 
 &lt;p&gt;For all parts of this tutorial we&amp;rsquo;ll have two XBee radios with different settings.  To make things easier we&amp;rsquo;ll give them names.  For the rest of this tutorial &amp;ldquo;Atreyu&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our computer and &amp;ldquo;Falcor&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our Arduino.&lt;/p&gt;
 
@@ -159,7 +159,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;Congratulations!  You&amp;rsquo;ve successfully setup and communicated with the XBee&amp;rsquo;s in transparent mode.  Now we&amp;rsquo;re ready to switch Atreyu into API mode and start communicating using Python in part two.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
+&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
 
 &lt;p&gt;Now that we have things setup and we&amp;rsquo;ve verified they can communicate, we can switch our first XBee into API mode and begin sending messages with it via Python. Re-configure the following parameter on Atreyu to enable API mode.&lt;/p&gt;
 
@@ -189,28 +189,28 @@ Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
 
 &lt;p&gt;You did it!  What exactly did we do?  Let&amp;rsquo;s start examining the code by looking at the body of main.py.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    xbee = XBee.XBee(&amp;quot;COM3&amp;quot;)  # Your serial port name here
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;    xbee = XBee.XBee(&#34;COM3&#34;)  # Your serial port name here
 
     # A simple string message
-    sent = xbee.SendStr(&amp;quot;Hello World&amp;quot;)
+    sent = xbee.SendStr(&#34;Hello World&#34;)
     sleep(0.25)
     Msg = xbee.Receive()
     if Msg:
         content = Msg[7:-1].decode(&#39;ascii&#39;)
-        print(&amp;quot;Msg: &amp;quot; + content)
+        print(&#34;Msg: &#34; + content)
 
     # A message that requires escaping
-    xbee.Send(bytearray.fromhex(&amp;quot;7e 7d 11 13 5b 01 01 01 01 01 01 01&amp;quot;))
+    xbee.Send(bytearray.fromhex(&#34;7e 7d 11 13 5b 01 01 01 01 01 01 01&#34;))
     sleep(0.25)
     Msg = xbee.Receive()
     if Msg:
         content = Msg[7:-1]
-        print(&amp;quot;Msg: &amp;quot; + xbee.format(content))
+        print(&#34;Msg: &#34; + xbee.format(content))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;As can be seen, we sent and received two messages.  The first messages contents were simply &amp;ldquo;Hello World&amp;rdquo; in ascii encoding.  The second message is a bit more obscure, it is formatted to demonstrate API mode character escaping which we&amp;rsquo;ll get more into soon.  Now, let&amp;rsquo;s get into the pieces that are the heart of this tutorial.  Lets start with the XBee &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class XBee():
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;class XBee():
     ...
     def __init__(self, serialport, baudrate=9600):
         self.serial = serial.Serial(port=serialport, baudrate=baudrate)
@@ -220,7 +220,7 @@ Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
 
 &lt;p&gt;Now lets look at the interesting stuff, starting with the SendStr() method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
         return self.Send(msg.encode(&#39;utf-8&#39;), addr, options, frameid)
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -392,7 +392,7 @@ start delimiter |  |  |     |  |  |  |  |                                       
 
 &lt;p&gt;That concludes all the example pieces to do basic message sending and receiving in API mode using Python.  Next, we&amp;rsquo;ll switch worlds into C++ code to handle message reception on an Arduino.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
+&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
 
 &lt;p&gt;Now we&amp;rsquo;ll need to re-connect Falcor to our computer briefly to reset the following parameters in X-CTU:&lt;/p&gt;
 
@@ -632,7 +632,7 @@ void setup(void)
 
 &lt;p&gt;That sums up all the main parts of the XBee example code.&lt;/p&gt;
 
-&lt;h2 id=&#34;review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Review&lt;/h2&gt;
+&lt;h2 id=&#34;review&#34;&gt;Review&lt;/h2&gt;
 
 &lt;p&gt;That covers a basic example of programming for XBee 802.15.4 radios configured in API mode.  I found API mode very helpful when programming for my Masters thesis, which you should check out the &lt;a href=&#34;https://github.com/serdmanczyk/masters-thesis&#34;&gt;source code for&lt;/a&gt; if you would like to see an example of receiving, parsing, and sending many different API frame types in an actual application.  Hopefully this tutorial and example code enable you to get off the ground running with your application, or better understand some feature of Python, Arduino, XBee, serial communications, etc.  If you&amp;rsquo;ve encounter any trouble running the examples, or have any questions / comments / concerns please post them in the comments so others with similar problems can see too :).&lt;/p&gt;
 </description>

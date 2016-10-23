@@ -1,145 +1,167 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Erdmanczyk.io</title>
-    <link>http://serdmanczyk.github.io/</link>
-    <description>Recent content on Erdmanczyk.io</description>
-    <generator>Hugo -- gohugo.io</generator>
+      <title> on Steven Erdmanczyk Jr. </title>
+      <generator uri="https://gohugo.io">Hugo</generator>
+    <link>http://serdmanczyk.github.io/index.xml</link>
     <language>en-us</language>
-    <lastBuildDate>Tue, 17 May 2016 20:00:01 -0700</lastBuildDate>
-    <atom:link href="http://serdmanczyk.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <updated>Sun, 23 Oct 2016 20:00:01 PDT</updated>
     
     <item>
-      <title>Freyr: Gardenspark pivoted</title>
-      <link>http://serdmanczyk.github.io/post/2016-05-17-Freyr/</link>
-      <pubDate>Tue, 17 May 2016 20:00:01 -0700</pubDate>
+      <title>A fullstack Go &#43; ReactJS App deployed with Docker</title>
+      <link>http://serdmanczyk.github.io/post/2016-10-14-GoFullstackApp/</link>
+      <pubDate>Sun, 23 Oct 2016 20:00:01 PDT</pubDate>
       
-      <guid>http://serdmanczyk.github.io/post/2016-05-17-Freyr/</guid>
+      <guid>http://serdmanczyk.github.io/post/2016-10-14-GoFullstackApp/</guid>
       <description>
 
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/freyr/freyr_logo.png&#34; alt=&#34;FreyrLogo&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;what&#34;&gt;What?&lt;/h2&gt;
 
-&lt;h1 id=&#34;i-m-pivoting:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;I&amp;rsquo;m Pivoting&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;ve written a fullstack app: Go backend, ReactJS web frontend, deployed using Docker-Compose.&lt;/p&gt;
 
-&lt;p&gt;After a revisit of the server side of my GardenSpark project, I decided to make a few changes.  To take some words from one of my favorite scenes of Silicon Valley: &lt;a href=&#34;https://youtu.be/M1vfXoUNDYA&#34;&gt;I&amp;rsquo;m pivoting&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I call it Freyr, obligatory screenshots:&lt;/p&gt;
 
-&lt;p&gt;The current version of the code now lives at &lt;a href=&#34;https://github.com/serdmanczyk/Freyr&#34;&gt;https://github.com/serdmanczyk/Freyr&lt;/a&gt; and there is already a running instance at: &lt;a href=&#34;https://freyr.erdmanczyk.com/&#34;&gt;https://freyr.erdmanczyk.com/&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.17.39.png&#34; alt=&#34;Screenshot 2016-05-09 23.17.39.png&#34; /&gt;
+&lt;img src=&#34;https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.17.48.png&#34; alt=&#34;Screenshot 2016-05-09 23.17.48.png&#34; /&gt;
+&lt;img src=&#34;https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.18.04.png&#34; alt=&#34;Screenshot 2016-05-09 23.18.04.png&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;review-what-is-all-this-again:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Review: what is all this again?&lt;/h2&gt;
+&lt;p&gt;You can read more about the app itself on its &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/tree/v1.0&#34;&gt;github page&lt;/a&gt;.  You can even view the app actually running at &lt;a href=&#34;https://freyr.erdmanczyk.com/latest&#34;&gt;frey.erdmanczyk.com&lt;/a&gt;.  In this post I&amp;rsquo;ll share an overview of the app&amp;rsquo;s design.&lt;/p&gt;
 
-&lt;p&gt;&amp;lsquo;Gardenspark&amp;rsquo; was a personal project to make a connected plant environment sensor and custom server app to host a data API and web application for data retreival and visualization.  This was a sandbox to merge my interests in embedded programming, electronics design, as well as writing back-end software.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s yet another &amp;lsquo;arduino&amp;rsquo; (in this case a &lt;a href=&#34;https://docs.particle.io/datasheets/core-datasheet/&#34;&gt;Particle Core&lt;/a&gt;) plant sensor project: meausuring temperature, humidity, light, etc. with sensors and an MCU and then sending it to the cloud.  Unlike many other projects, however, the cloud server is custom built.&lt;/p&gt;
 
-&lt;h2 id=&#34;rebranding:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Rebranding&lt;/h2&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why?&lt;/h2&gt;
 
-&lt;p&gt;The Spark from Gardenspark has &lt;a href=&#34;http://blog.particle.io/2015/05/13/spark-is-now-particle/&#34;&gt;renamed&lt;/a&gt; , and &amp;lsquo;Gardenspark&amp;rsquo; started to annoy me.  When all else fails (and your give-a-sh* is low), go with a Norse god.&lt;/p&gt;
+&lt;p&gt;I cover the &amp;lsquo;why&amp;rsquo; of the app on the github page, but why this post?&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Freyr&#34;&gt;Freyr (fray-ur)&lt;/a&gt;: the Norse god associated with fertility and fair weather.&lt;/p&gt;
+&lt;p&gt;If you&amp;rsquo;re looking to write an app in Go, there is hardly a lack of resources for learning.  Be it tutorials, examples, existing libraries, etc. Go has a rich community.&lt;/p&gt;
 
-&lt;p&gt;Happy coincidence: the &lt;a href=&#34;https://en.wikipedia.org/wiki/Younger_Futhark&#34;&gt;Futhark&lt;/a&gt; equivalent of &lt;a href=&#34;https://en.wikipedia.org/wiki/Fehu&#34;&gt;&amp;lsquo;F&amp;rsquo;, ᚠ (&amp;lsquo;Fehu&amp;rsquo;)&lt;/a&gt;, lent itself well to a logo, seen above incorporating the rune into a leaf.&lt;/p&gt;
+&lt;p&gt;My goal with this post isn&amp;rsquo;t to make a mega-tutorial covering all the how-to&amp;rsquo;s of what I did in this project, but to provide a simple example of pulling those components together into a Thing™.&lt;/p&gt;
 
-&lt;h2 id=&#34;new-features:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;New Features&lt;/h2&gt;
+&lt;p&gt;Rather than an exhaustive overview of how to build this from the ground up, this will instead be a high-level overview of the app, its components, and their purposes.  I&amp;rsquo;ll make some assumptions that the reader understands how the underlying technology works, but if you see something cool and want to know more feel free to comment/e-mail ☺.&lt;/p&gt;
 
-&lt;p&gt;The old server had no concept of users or logins.  The new server supports:&lt;/p&gt;
+&lt;h2 id=&#34;how-does-this-work&#34;&gt;How does this work?&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;user log-ins via Google Oauth&lt;/li&gt;
-&lt;li&gt;sessions via HMAC sign JTW&amp;rsquo;s stored as secure, http-only, cookies&lt;/li&gt;
-&lt;li&gt;Cross site request forgery protection&lt;/li&gt;
-&lt;li&gt;API and device authentication using shared secrets&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I wanted to take some time with this implementation to study web-app security issues and real methods to protect against them.  It&amp;rsquo;s still &lt;a href=&#34;https://www.schneier.com/blog/archives/2015/08/mickens_on_secu.html&#34;&gt;no match for the Mossad&lt;/a&gt;, but I&amp;rsquo;ve made it hard to get in unless you&amp;rsquo;re fairly smart and really give a shit about other people&amp;rsquo;s plants.&lt;/p&gt;
-
-&lt;h2 id=&#34;switching-from-nodejs-to-go:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Switching from Nodejs to Go&lt;/h2&gt;
-
-&lt;p&gt;Node.js was pretty cool, but Go seemed like a better fit for me.  Programming in Go for me has been quite enjoyable.  A few features of Go that I&amp;rsquo;ve been fond of:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/deploygoapp/layout.png&#34; alt=&#34;App layout&#34; /&gt;&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Can compile to a single, statically-linked, binary (also: cross-compilation)&lt;/li&gt;
-&lt;li&gt;Strongly-typed&lt;/li&gt;
-&lt;li&gt;Simple language spec&lt;/li&gt;
-&lt;li&gt;Strongly enforced conventions (yay, gofmt), yet not overly prescriptive&lt;/li&gt;
-&lt;li&gt;Rich standard library&lt;/li&gt;
-&lt;li&gt;Interfaces and composition vs. OOP and inheritance&lt;/li&gt;
+&lt;li&gt;Deployed via docker-compose&lt;/li&gt;
+&lt;li&gt;Nginx gateway&lt;/li&gt;
+&lt;li&gt;ReactJS frontend&lt;/li&gt;
+&lt;li&gt;Go backend w/ Postgres database&lt;/li&gt;
+&lt;li&gt;Google oauth authentication, &lt;a href=&#34;https://jwt.io/&#34;&gt;JWT&lt;/a&gt; managed sessions, HMAC signed API access&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Switching from Nodejs to Go was a central point of this pivot, and I&amp;rsquo;m fairly happy with the decision.&lt;/p&gt;
+&lt;h2 id=&#34;deployment&#34;&gt;Deployment&lt;/h2&gt;
 
-&lt;h2 id=&#34;back-to-basics-mongodb-to-postgresql:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Back to basics: MongoDB to Postgresql&lt;/h2&gt;
+&lt;p&gt;Docker-compose was great because I could script my app environments.  This made spinning up and tearing down the apps on the fly super easy.&lt;/p&gt;
 
-&lt;p&gt;MongoDB is hip, but after some reflection, the tried-and-true relational data model fits my use-case better.  My data types are flat and non-homogeneous, and I have cases where sub-queries are a more efficient way to satisfy my end-goals.&lt;/p&gt;
+&lt;p&gt;Another benefit was the provider I used for this project, &lt;a href=&#34;https://www.digitalocean.com/&#34;&gt;DigitalOcean&lt;/a&gt;, has a &lt;a href=&#34;https://docs.docker.com/machine/drivers/digital-ocean/&#34;&gt;docker-machine driver&lt;/a&gt;.  I created my VM with docker-machine, then could use the same docker client commands to deploy my app in production as I do to test on my local machine.&lt;/p&gt;
 
-&lt;h2 id=&#34;user-interface-angular-reactjs:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;User Interface: Angular -&amp;gt; ReactJS&lt;/h2&gt;
-
-&lt;p&gt;Originally I wanted to switch from Angular because of reading about its performance gripes.  In retrospect, my app is so simple that&amp;rsquo;s not really an issue.  But as a result, the amount of code and interleaving with the html required to get my simple interface running has become much simpler and easier to manage.  I was happy with React because much like Go, it&amp;rsquo;s a good balance of solving problems quickly but not being overly prescriptive.&lt;/p&gt;
-
-&lt;h2 id=&#34;adding-nginx-to-the-mix:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Adding Nginx to the mix&lt;/h2&gt;
-
-&lt;p&gt;I wanted to separate my user interface from the API, so I needed a load balancer to route requests properly.  This may not be ideal for production apps, where you would want to render server-side, but it was good for a personal project where I wanted to partition my UI code from my server code and feel a bit more sane.&lt;/p&gt;
-
-&lt;p&gt;On top of load balancing and enabling me to scale my app horizontally, Nginx has a lot of things built-in that I&amp;rsquo;m able to solve in just a few lines of config vs. re-inventing the wheel in my API code.  This includes:&lt;/p&gt;
+&lt;p&gt;The repository has four Docker Compose files:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Serving static files&lt;/li&gt;
-&lt;li&gt;compressing responses&lt;/li&gt;
-&lt;li&gt;304 on unchanged content&lt;/li&gt;
-&lt;li&gt;Redirecting http -&amp;gt; https&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.yml&#34;&gt;docker-compose.yml&lt;/a&gt;: Production deployment, pulls all files into the images&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.debug.yml&#34;&gt;docker-compose.debug.yml&lt;/a&gt;: Rather than copying in files, mounts directories into the container to speed launching docker as well as allow live editing of things such as UI files.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.integration.yml&#34;&gt;docker-compose.integration.yml&lt;/a&gt;: Runs integration tests, organized as unit tests that require external resources such as database connections.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.acceptance.yml&#34;&gt;docker-compose.acceptance.yml&lt;/a&gt;: Runs full-path acceptance tests, performing API calls and asserting results&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;testing-and-deployment-with-docker:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Testing and Deployment with Docker&lt;/h2&gt;
+&lt;p&gt;I used a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/Makefile&#34;&gt;Makefile&lt;/a&gt; to simplify some commonly used commands e.g. running tests, building binaries and deploying.&lt;/p&gt;
 
-&lt;p&gt;I&amp;rsquo;ve been doing a lot with Docker at work lately, and thought it would be a fantastic tool for organizing my environments and deployments; I wasn&amp;rsquo;t dissapointed.&lt;/p&gt;
+&lt;h2 id=&#34;nginx&#34;&gt;Nginx&lt;/h2&gt;
 
-&lt;p&gt;Alongside providing an effective tool for deployment, Docker-izing my application had a couple of added benefits:&lt;/p&gt;
+&lt;p&gt;My app doesn&amp;rsquo;t need any load balancing yet.  Rather, at this stage I employ Nginx for other features including:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Automating testing environments for integration and acceptance tests&lt;/li&gt;
-&lt;li&gt;Run my full stack in containers on a single host, saving $$ for just a personal project&lt;/li&gt;
+&lt;li&gt;Terminating SSL&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L29&#34;&gt;Redirecting HTTP -&amp;gt; HTTPS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Serving static files and &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L44&#34;&gt;handling 304&lt;/a&gt; &amp;lsquo;Content Not Modifed&amp;rsquo; responses&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L12&#34;&gt;Gzipping responses&lt;/a&gt; when applicable&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L49&#34;&gt;Routing &amp;lsquo;/api/&amp;rsquo; requests&lt;/a&gt; to the backend.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;With just a few commands from docker-machine and docker-compose I can update my live application, run full-stack tests, or mount my code into containers to debug locally.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m admittedly not an ops or Nginx configuration expert, so I owe a lot to The Google and Stackoverflow for getting this working.&lt;/p&gt;
 
-&lt;p&gt;Deploying with docker is fantastic because it doesn&amp;rsquo;t tightly bind my application to a single deployment interface e.g. Google App Engine, Heroku, OpenShift.&lt;/p&gt;
+&lt;p&gt;All nginx config is in the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf&#34;&gt;nginx/conf&lt;/a&gt; directory.&lt;/p&gt;
 
-&lt;h2 id=&#34;free-certs:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Free Certs!&lt;/h2&gt;
+&lt;h2 id=&#34;reactjs-frontend-some-d3-js&#34;&gt;ReactJS Frontend (+ some D3.js)&lt;/h2&gt;
 
-&lt;p&gt;LetsEncrypt made it super simple to get a valid &lt;a href=&#34;https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04&#34;&gt;SSL certificate on my server for free&lt;/a&gt; once it was up and running.&lt;/p&gt;
+&lt;p&gt;I picked ReactJS mainly because of how simple it was to get up and going vs. other frameworks.  I wanted to write Go code, I didn&amp;rsquo;t want to spend my time learning what the perfect frontend framework is.  The less time for me spent on the frontend the better, but I also didn&amp;rsquo;t want to half-ass it&amp;hellip;  too badly.&lt;/p&gt;
 
-&lt;h2 id=&#34;moving-forward:5d65f2defdf6804fb1484b234f5f01eb&#34;&gt;Moving Forward&lt;/h2&gt;
+&lt;p&gt;All ReactJS and other static files are packed with Nginx in the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/tree/v1.0/nginx/static&#34;&gt;nginx/static&lt;/a&gt; directory.  I used the free &lt;a href=&#34;https://startbootstrap.com/template-overviews/grayscale/&#34;&gt;grayscale&lt;/a&gt; bootsrap theme for CSS/layout.  The background picture I actually &lt;a href=&#34;https://www.flickr.com/photos/erby/19310748252/in/album-72157655281974332/&#34;&gt;took myself&lt;/a&gt; on a &lt;a href=&#34;https://www.flickr.com/photos/erby/albums/72157655281974332&#34;&gt;hike&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;The current code is running live at &lt;a href=&#34;https://freyr.erdmanczyk.com/&#34;&gt;https://freyr.erdmanczyk.com/&lt;/a&gt;.  I&amp;rsquo;m once again using it to record the environment in my office, as well as have a demo page up that&amp;rsquo;s public for anyone to see.  In the next posts I&amp;rsquo;ll cover at a high level how the application works, then will go into details on various techniques I used with Go, etc.  I don&amp;rsquo;t intend these to be tutorials, but hopefully my techniques can serve as examples for others trying to do similar things.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>About Me</title>
-      <link>http://serdmanczyk.github.io/about/</link>
-      <pubDate>Sun, 15 May 2016 00:00:00 +0000</pubDate>
-      
-      <guid>http://serdmanczyk.github.io/about/</guid>
-      <description>&lt;p&gt;By day I work at Disney doing Runbook Automation in Seatte, WA.&lt;/p&gt;
+&lt;p&gt;I use Webpack to build the app files into a single bundle.js.  My development docker-compose file was handy working on this because I could set webpack to watch changes and rebuild on the fly, and updating my changes in the container.&lt;/p&gt;
 
-&lt;p&gt;By night I play with electronics and whatever silly programming hobbies I can get into.&lt;/p&gt;
+&lt;p&gt;The web page is a single-page app.  All paths on Nginx not matching &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L49&#34;&gt;&lt;code&gt;/api&lt;/code&gt;&lt;/a&gt; or a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L46&#34;&gt;valid path in the content directory&lt;/a&gt; serve the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/static/index.html&#34;&gt;index.html&lt;/a&gt; file.  This allows users to return to &amp;lsquo;pages&amp;rsquo; within the app courtesy of react-router&amp;rsquo;s functionality.  To demonstrate try going to the &lt;a href=&#34;https://freyr.erdmanczyk.com&#34;&gt;demo&lt;/a&gt;, logging in as the demo user, navigating to a chart, and then copying and pasting the url into a new browser tab.&lt;/p&gt;
 
-&lt;p&gt;With the rest of my free time I like to go on adventures, train parkour, and spend time with my lovely wife.&lt;/p&gt;
+&lt;p&gt;The app also includes charts, for which I chose &lt;a href=&#34;https://d3js.org/&#34;&gt;d3.js&lt;/a&gt;.  It&amp;rsquo;s easy to make fun of Javascript, but there are those who do make good things with it, and D3.js is one of those things.  It took some magic to get d3 to work with React, because of how React uses a virtual DOM representation, but some code from &lt;a href=&#34;https://github.com/Olical/react-faux-dom&#34;&gt;react-faux-dom&lt;/a&gt; came to the rescue.&lt;/p&gt;
 
-&lt;p&gt;I have a Master&amp;rsquo;s of Science in Electrical Engineering from the University of North Carolina at Charlotte.&lt;/p&gt;
+&lt;h2 id=&#34;go-backend&#34;&gt;Go backend&lt;/h2&gt;
 
-&lt;p&gt;Professionally I enjoy backend system design and programming focused on highly available, distributed systems.  I have extensice experience working in Go, Python, C, and C++.&lt;/p&gt;
+&lt;p&gt;Go powers the backend, the meat of the project, powering:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/other/iceland_selfpic.jpg&#34; alt=&#34;Selfie in Iceland&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Negotiating &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/oauth/oauth.go#L66&#34;&gt;oauth&lt;/a&gt; with &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/oauth/google_oauth.go#L22&#34;&gt;Google&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Issuing signed &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/token/token.go#L39&#34;&gt;JWT&amp;rsquo;s&lt;/a&gt; to &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L54&#34;&gt;authenticated users&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Authorizing &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/models/secret.go#L25&#34;&gt;HMAC signed&lt;/a&gt; web requests for &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L93&#34;&gt;API access&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Receiving, storing, and serving &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go&#34;&gt;sensor readings&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This was the part I really cared about, by trade I consider myself a backend developer.&lt;/p&gt;
+
+&lt;p&gt;I won&amp;rsquo;t do the intro to &amp;lsquo;What Go Is™&amp;rsquo; that seems obligatory on every blog post.&lt;/p&gt;
+
+&lt;p&gt;I will say I have really enjoyed programming in Go.  Having a background in C, then C++, then Python working in Go has been a happy combination of what I&amp;rsquo;ve enjoyed between those worlds.  It&amp;rsquo;s got some problems to fix, but it gets a lot of things satisfyingly right.&lt;/p&gt;
+
+&lt;p&gt;I could spend a whole couple blog posts talking about how I designed the Go backend, but instead I&amp;rsquo;ll just point at some key design features I chose writing it:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Using interfaces to model data sources: separating concerns in code, enabling mocking for unit tests, and allowing extensible swapping of data sources.&lt;/li&gt;
+&lt;li&gt;No global config or config loading in libraries, only loading configuration in main and passing to components via parameters, which also enables easier unit testing.&lt;/li&gt;
+&lt;li&gt;Sticking to the standard lib as much as possible (e.g. &lt;a href=&#34;https://golang.org/pkg/net/http/&#34;&gt;net/http&lt;/a&gt;), making the code more reusable and less dependent on third party libraries.&lt;/li&gt;
+&lt;li&gt;Using &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L40&#34;&gt;contexts&lt;/a&gt; in http handlers.  I used the &lt;a href=&#34;https://github.com/cyclopsci/apollo&#34;&gt;apollo&lt;/a&gt; library for chaining, but need to switch to instead conform to context adaptations in Go 1.7+.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One example of how I used interfaces is with the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/models/readings.go#L17&#34;&gt;models.ReadingStore&lt;/a&gt; which is implemented by the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/database/reading.go#L9&#34;&gt;DB type&lt;/a&gt;.  When implementing handlers such as &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go#L67&#34;&gt;PostReadings&lt;/a&gt; and &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go#L93&#34;&gt;GetLatestReadings&lt;/a&gt;, the functions accept the interface type rather than DB.  This allowed me to test the handlers using a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/fake/reading.go#L43&#34;&gt;mock&lt;/a&gt; and the &lt;a href=&#34;https://golang.org/pkg/net/http/httptest/&#34;&gt;httptest&lt;/a&gt; package in &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings_test.go#L26&#34;&gt;readings_test.go&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Rather than using a framework such as &lt;a href=&#34;https://github.com/gin-gonic/gin&#34;&gt;Gin&lt;/a&gt;, &lt;a href=&#34;https://github.com/labstack/echo&#34;&gt;Echo&lt;/a&gt;, or even &lt;a href=&#34;http://www.gorillatoolkit.org/&#34;&gt;Gorilla&lt;/a&gt; (which actually plays very well with the stdlib) I chose to stick to the standard library as much as possible for handlers.  I only used &lt;a href=&#34;https://github.com/urfave/negroni&#34;&gt;negroni&lt;/a&gt; to easily get a couple handy middleware&amp;rsquo;s for free.  I didn&amp;rsquo;t want my project code heavily dependent on a third-party framework, lest I leave the project for a bit and come back to find the library deprecated or no longer compatible with updated language versions.  This also allows easier switching between libraries that also play nice the with standard library.&lt;/p&gt;
+
+&lt;h2 id=&#34;ok-what-about-the-sensors&#34;&gt;Ok, what about the sensors?&lt;/h2&gt;
+
+&lt;p&gt;I mentioned this app&amp;rsquo;s main purpose was to gather and log sensor data.  I also mentioned some security features.  How do those work together?&lt;/p&gt;
+
+&lt;p&gt;I briefly hand-waved at the ability to verify API access via signed HTTP requests.  Once a user is logged in, they can access the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/main.go#L66&#34;&gt;&lt;code&gt;/api/secret&lt;/code&gt;&lt;/a&gt; endpoint to get a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/secret.go#L11&#34;&gt;one-time-only private secret&lt;/a&gt;.  This can be used to access the API as their user by &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L154&#34;&gt;signing the request in a certain way&lt;/a&gt;.  The secret can also be &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/secret.go#L45&#34;&gt;rotated&lt;/a&gt; if needed.  I wrote a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/tree/v1.0/cmd/surtr&#34;&gt;CLI&lt;/a&gt; to convenience these operations.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;You may notice I named my app &lt;a href=&#34;https://en.wikipedia.org/wiki/Freyr&#34;&gt;Freyr&lt;/a&gt; and CLI &lt;a href=&#34;https://en.wikipedia.org/wiki/Surtr&#34;&gt;surtr&lt;/a&gt;.  These are references to the Norse God and jötunn adversary at Ragnarok.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Currently the MCU I use enables registering a webhook for whenever data is posted using a provided firmware function.  This webhook can send a POST request to a specified endpoint, in this case &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/main.go#L70&#34;&gt;&lt;code&gt;/api/reading&lt;/code&gt;&lt;/a&gt;.  Unfortunately, their current functionality as of the time I was doing this work didn&amp;rsquo;t provide methods for request signing, so the best that could be done is to configure the webhook to include a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/token/token.go#L107&#34;&gt;signed JWT&lt;/a&gt; and headers with the POST request.  Admittedly not the most secure method, but given the amount of free-time I had(/have) it was a compromise for now that got me going.  I mean, people would look at what I&amp;rsquo;ve done already and awe themselves with my apparent amount of free-time.&lt;/p&gt;
+
+&lt;h2 id=&#34;other-things-worth-mentioning&#34;&gt;Other things worth Mentioning&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04&#34;&gt;Free certs with LetsEncrypt!&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Automated testing (because why not) with &lt;a href=&#34;https://travis-ci.org/serdmanczyk/Freyr&#34;&gt;Travis CI&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://goreportcard.com/report/github.com/serdmanczyk/freyr&#34;&gt;A+ Go Report&lt;/a&gt; :)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://godoc.org/github.com/serdmanczyk/Freyr&#34;&gt;Godoc&lt;/a&gt; compliant&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;in-summary&#34;&gt;In Summary&lt;/h2&gt;
+
+&lt;p&gt;That&amp;rsquo;s a high level overview of the app, with a little more exposition on the Go pieces.  Hopefully this serves as a handy example to others working on similar projects.  In the future I look to add more features to this project, such as the ability to water plants and splitting the backend into smaller microservices.  All in time.&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>Python Oberserver Metaclass</title>
       <link>http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/</link>
-      <pubDate>Thu, 10 Mar 2016 17:24:01 -0800</pubDate>
+      <pubDate>Thu, 10 Mar 2016 17:24:01 PST</pubDate>
       
       <guid>http://serdmanczyk.github.io/post/2016-03-11-PythonOberserverMetaclass/</guid>
       <description>
 
-&lt;h2 id=&#34;why:eaf9853e2ff62465491e8f49c533cf3b&#34;&gt;Why?&lt;/h2&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why?&lt;/h2&gt;
 
 &lt;p&gt;Looking back and grimacing at my Master&amp;rsquo;s thesis code written in the halcyon days of graduate school when I had just started learning Python, I thought it would be a rewarding process to try and re-write it using better coding practices.&lt;/p&gt;
 
@@ -157,7 +179,7 @@
 
 &lt;script src=&#34;https://gist.github.com/serdmanczyk/6a22cb9868162d0d47bb.js&#34;&gt;&lt;/script&gt;
 
-&lt;h2 id=&#34;what-s-happening:eaf9853e2ff62465491e8f49c533cf3b&#34;&gt;What&amp;rsquo;s happening?&lt;/h2&gt;
+&lt;h2 id=&#34;what-s-happening&#34;&gt;What&amp;rsquo;s happening?&lt;/h2&gt;
 
 &lt;p&gt;The functions decorated by &lt;code&gt;observers&lt;/code&gt; are given an attribute marking what
 they observe.&lt;/p&gt;
@@ -172,7 +194,7 @@ they observe.&lt;/p&gt;
 
 &lt;p&gt;In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class was my parser for XBee messages in my thesis code would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.&lt;/p&gt;
 
-&lt;h2 id=&#34;a-square-peg-in-a-round-hole:eaf9853e2ff62465491e8f49c533cf3b&#34;&gt;A Square Peg in a Round Hole&lt;/h2&gt;
+&lt;h2 id=&#34;a-square-peg-in-a-round-hole&#34;&gt;A Square Peg in a Round Hole&lt;/h2&gt;
 
 &lt;p&gt;One fallacy with this method is that &lt;em&gt;only the first&lt;/em&gt; instance of &lt;code&gt;Friend&lt;/code&gt; will receive messages since &lt;code&gt;__call__&lt;/code&gt; only builds the observing function map on creation of the class, so latter instance&amp;rsquo;s won&amp;rsquo;t get their functions mapped.  There are a couple of solutions to mitigate this, but they call on more code and more rabbit holes to dig down.  At this point I felt the problem further vindicated my hunch that trying to create a generalized meta-class for the observer pattern in Python was fitting a square peg in a round hole.  Nonetheless, it was a fun opportunity to mess with meta-classes and get a better idea of what uses they have.&lt;/p&gt;
 </description>
@@ -181,7 +203,7 @@ they observe.&lt;/p&gt;
     <item>
       <title>Notes and Chords using Python</title>
       <link>http://serdmanczyk.github.io/Python_XBee_Sounds_Library/</link>
-      <pubDate>Thu, 11 Jun 2015 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 11 Jun 2015 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/Python_XBee_Sounds_Library/</guid>
       <description>&lt;p&gt;Life events: my wife and I will be closing on a house in a couple days.  Yay!&lt;/p&gt;
@@ -196,771 +218,14 @@ they observe.&lt;/p&gt;
 
 &lt;p&gt;This is just a starting framework that turns a computer keyboard into a music generating keyboard.  Currently it just assigns notes at random, or sequentially (see commented line 29).  Once a key is pressed, it continues to play the same note.  If all notes are assigned, random notes are given to new keys.&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;#!/usr/bin/python&lt;/span&gt;
-&lt;span style=&#34;color: #75715e&#34;&gt;# coding=utf-8&lt;/span&gt;
-
-&lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;random&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;math&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;copy&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pyaudio&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Tkinter&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt;
-
-&lt;span style=&#34;color: #66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;NoteGen&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(object):&lt;/span&gt;
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__init__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;notes&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;range(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;30&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;70&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;choices&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;list(map(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;_note,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;notes))&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;possibilities&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;copy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;copy(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;choices)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mapping&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{}&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__call__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;key,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;float(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;inf&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;),&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;note&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;_get(key,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude)&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note:&lt;/span&gt;
-            &lt;span style=&#34;color: #f8f8f2&#34;&gt;note&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;_map(key,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude)&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;_map&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;key,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;possibilities:&lt;/span&gt;
-            &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mapping[key]&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;random&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;choice(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;choices)&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Note(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mapping[key],&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude)&lt;/span&gt;
-
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;n&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;possibilities[&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;
-        &lt;span style=&#34;color: #75715e&#34;&gt;# n = random.choice(self.possibilities)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;possibilities&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remove(n)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mapping[key]&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;n&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Note(n,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude)&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;_get&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;key,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;key&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mapping:&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Note(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mapping[key],&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude)&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;_note&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;n):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;math&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;pow(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(float(n)&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;49&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;12&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;440&lt;/span&gt;
-
-
-&lt;span style=&#34;color: #66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;Note&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(object):&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;names&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;A&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;A#/Bf&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;B&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;C&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;C#/Df&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;D&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;D#/Ef&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;E&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;F&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;F#/Gf&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;G&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;G#/Af&amp;quot;&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__init__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;440&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;float(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;inf&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;),&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;rate&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;44100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;total_frames&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;rate&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frame_offset&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;rate&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;rate&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__call__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frames):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;done:&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;zeros(frames,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;float)&lt;/span&gt;
-
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;factor&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;float(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;((math&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;pi&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;rate)&lt;/span&gt;
-        
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;length&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(frames&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frames&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remaining&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remaining)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;sin&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;sin((numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;arange(length)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frame_offset)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;factor)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;amplitude&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frames&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remaining:&lt;/span&gt;
-            &lt;span style=&#34;color: #f8f8f2&#34;&gt;sin&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;concatenate([sin,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;zeros(frames&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remaining,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;float)])&lt;/span&gt;
-
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frame_offset&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frames&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;sin&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__lt__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;other):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;other&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__eq__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;other):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;other&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt;
-    
-    &lt;span style=&#34;color: #a6e22e&#34;&gt;@property&lt;/span&gt;
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;remaining&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;total_frames&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frame_offset&lt;/span&gt;
-    
-    &lt;span style=&#34;color: #a6e22e&#34;&gt;@property&lt;/span&gt;
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;done&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frame_offset&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;total_frames&lt;/span&gt;
-
-    &lt;span style=&#34;color: #a6e22e&#34;&gt;@property&lt;/span&gt;
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;keynum&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;int((&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;12&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;math&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;log((self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;440&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;),&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;))&lt;/span&gt;  &lt;span style=&#34;color: #f92672&#34;&gt;+&lt;/span&gt;  &lt;span style=&#34;color: #ae81ff&#34;&gt;48&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;12&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;names[keynum]&lt;/span&gt;
-
-&lt;span style=&#34;color: #66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;Chord&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(object):&lt;/span&gt;
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__init__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[]&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;__call__&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;duration):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;len(self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes):&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;zeros(duration,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;float)&lt;/span&gt;
-
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;gen&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;lambda&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note:note(duration)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;output&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;sum(map(gen,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes))&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;clean()&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;output&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;add_note&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;isinstance(note,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Note):&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;ValueError&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;Must be of type Note&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
-
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;append(note)&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;remove_note&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;isinstance(note,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Note):&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt;
-
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes:&lt;/span&gt;
-            &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remove(note)&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;clean&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(self):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes:&lt;/span&gt;
-            &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;note&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;done:&lt;/span&gt;
-                &lt;span style=&#34;color: #f8f8f2&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;remove(note)&lt;/span&gt;
-
-
-&lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;__name__&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pyaudio&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;PyAudio()&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;chord&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Chord()&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;gen&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;NoteGen()&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;callback&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(in_data,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;frame_count,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;time_info,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;status):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;wave&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;chord(frame_count)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;data&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;wave&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;astype(numpy&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;float32)&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;tostring()&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(data,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pyaudio&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;paContinue)&lt;/span&gt;
-
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;stream&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;p&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;open(&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;format&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;pyaudio&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;paFloat32,&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;channels&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;rate&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;44100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;output&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;True,&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;stream_callback&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;callback&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
-
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;start_stream()&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;keydown&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(event):&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;k&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;gen(event&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;char,&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
-        &lt;span style=&#34;color: #f8f8f2&#34;&gt;chord&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;add_note(k)&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[(n&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;name,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;n&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;frequency)&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;n&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;chord&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;notes]&lt;/span&gt;
-
-    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;keyup&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(event):&lt;/span&gt;
-        &lt;span style=&#34;color: #66d9ef&#34;&gt;pass&lt;/span&gt;
-        &lt;span style=&#34;color: #75715e&#34;&gt;# k = gen(event.char)&lt;/span&gt;
-        &lt;span style=&#34;color: #75715e&#34;&gt;# chord.remove_note(k)&lt;/span&gt;
-        &lt;span style=&#34;color: #75715e&#34;&gt;# print [n.name for n in chord.notes]&lt;/span&gt;
-
-
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;root&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Tk()&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;frame&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Frame(root,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;width&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;height&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;frame&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;bind_all(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&amp;lt;KeyPress&amp;gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;keydown)&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;frame&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;bind_all(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&amp;lt;KeyRelease&amp;gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;keyup)&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;frame&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;pack()&lt;/span&gt;
-
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;root&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;mainloop()&lt;/span&gt;
-
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;stop_stream()&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;close()&lt;/span&gt;
-    &lt;span style=&#34;color: #f8f8f2&#34;&gt;p&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;terminate()&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This is also available on Github as a &lt;a href=&#34;https://gist.github.com/serdmanczyk/5a9389d80db94440cf15&#34;&gt;gist&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>GardenSpark: Part Three - Make the Internet Pretty</title>
-      <link>http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/</link>
-      <pubDate>Sun, 05 Apr 2015 00:00:00 +0000</pubDate>
-      
-      <guid>http://serdmanczyk.github.io/gardenspark/gardenspark-part-three-making-it-pretty/</guid>
-      <description>
-
-&lt;pre&gt;
-This project is undergoing a revamp.  Stay tuned for updates!
-&lt;/pre&gt;
-
-&lt;h2 id=&#34;intro:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Intro&lt;/h2&gt;
-
-&lt;p&gt;It&amp;rsquo;s been a few months since I&amp;rsquo;ve last done work on this project.  I&amp;rsquo;ve been distracted by job interviews, relocating from Charlotte to Seattle, as well as adjusting to a new job and city with my wife and pets.  Not a bad thing to be distracted by!&lt;/p&gt;
-
-&lt;p&gt;Now that we&amp;rsquo;ve settled a bit, I&amp;rsquo;ve been able to get back into the groove.  In the past couple weeks I&amp;rsquo;ve been able to make a number of changes to the cloud portion of my project.  I&amp;rsquo;ve switched to using webhooks to consume sensor data, added Angularjs to the client framework, improved the web interface, added in-page charts, and implemented live data updates.  That&amp;rsquo;s quite a mouthful!&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/&#34;&gt;
-&lt;figure class=&#34;third&#34;&gt;
-  &lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/postthree_home.png&#34;&gt;
-  &lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/postthree_temphum.png&#34;&gt;
-  &lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/postthree_moistlight.png&#34;&gt;
-  &lt;figcaption&gt;Screenshots of the new web interface&lt;/figcaption&gt;
-&lt;/figure&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;spark-webhooks:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Spark Webhooks!&lt;/h2&gt;
-
-&lt;p&gt;Minor change, but now &lt;a href=&#34;https://www.spark.io/&#34;&gt;Spark&lt;/a&gt; supports webhooks!  What does this mean?  Previously, to consume the data being sent into the cloud from the Spark Core, I needed to subscribe to it and consume it within my server code.  In my case I used a NodeJS implementation of the EventSource object.&lt;/p&gt;
-
-&lt;p&gt;Now, with webhooks, you can format a request you want Spark&amp;rsquo;s servers to execute against a specific web endpoint when your Spark Core publishes an event.  In my case, the core publishes my sensor data, so I could specify Spark&amp;rsquo;s servers to POST the sensor data to the &amp;lsquo;/readings&amp;rsquo; endpoint on my server when data is published.  So, with about 10 minutes refactoring of code, I now had a much more elegant solution to how to get the data onto my server.  Here&amp;rsquo;s the code for my webhook (&lt;a href=&#34;http://docs.spark.io/webhooks/&#34;&gt;more on Spark&amp;rsquo;s webhooks here&lt;/a&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-    &amp;quot;eventName&amp;quot;: &amp;quot;Readings&amp;quot;,
-    &amp;quot;url&amp;quot;: &amp;quot;https://gardenspark-evargreen.rhcloud.com/readings&amp;quot;,
-    &amp;quot;requestType&amp;quot;: &amp;quot;POST&amp;quot;,
-    &amp;quot;headers&amp;quot;: {
-        &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;
-    },
-    &amp;quot;json&amp;quot;: {
-        &amp;quot;magicpasscode&amp;quot; : &amp;quot;XXX___SECRET___XXX&amp;quot;
-    },
-    &amp;quot;mydevices&amp;quot;: true
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;implementing-angularjs:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Implementing Angularjs&lt;/h2&gt;
-
-&lt;p&gt;That minor change out of the way, the next change I made was transitioning from rendering the web page content server side using &lt;a href=&#34;http://jade-lang.com/&#34;&gt;Jade&lt;/a&gt; to loading it dynamically client side via Angularjs.  Loading data client side has a number of advantages:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Faster page loading (data loads async)&lt;/li&gt;
-&lt;li&gt;Less strain on server from rendering&lt;/li&gt;
-&lt;li&gt;More dynamic content&lt;/li&gt;
-&lt;li&gt;Easier transitioning between different data presentation models (tables, charts, etc.)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;My prime motivation for choosing Angular as a client framework is that it easily binds data between scripts and html elements via explicit two-way bindings.  This removes the complicated (and ugly code generating) step of having to inspect the DOM to update elements every time data updates.&lt;/p&gt;
-
-&lt;p&gt;If you&amp;rsquo;re looking to implement Angular yourself I recommend starting with the &lt;a href=&#34;http://www.w3schools.com/angular/default.asp&#34;&gt;w3schools tutorial&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;So the process of transitioning to Angularjs was as simple as a couple iterative steps:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Refactor jade templates to remove dependencies on variables&lt;/li&gt;
-&lt;li&gt;Implement AngularJS (create app, controllers, etc.)&lt;/li&gt;
-&lt;li&gt;Integrate Angular data-binding into templates&lt;/li&gt;
-&lt;li&gt;Use Angular to dynamically data
-
-&lt;ul&gt;
-&lt;li&gt;Front page with latest reading&lt;/li&gt;
-&lt;li&gt;Readings page with query specified start and end data&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;At this point I have this for my angular app code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var app = angular.module(&#39;gardenSpark&#39;, [&#39;&#39;]);
-
-app.controller(&#39;readingsController&#39;, function ($scope, $http) {
-   $scope.readings = [];
-   $scope.endDate = moment()
-      .set(&#39;second&#39;, 0)
-      .set(&#39;millisecond&#39;, 0)
-      .toDate();
-   $scope.startDate = moment()
-      .subtract(1, &#39;day&#39;)
-      .set(&#39;second&#39;, 0)
-      .set(&#39;millisecond&#39;, 0)
-      .toDate();
-
-   $scope.refresh = function() {
-     $http({
-         method: &#39;GET&#39;,
-         url: &#39;/readings&#39;,
-         params : {
-            &#39;start&#39; : $scope.startDate.toISOString(),
-            &#39;end&#39; : $scope.endDate.toISOString()
-         },
-         data:&#39;&#39;
-     }).success(function(data){
-        $scope.readings = data;
-     });
-   };
-
-   $scope.refresh();
- });
-
-app.controller(&#39;latestController&#39;, function ($scope, $http){
-  $scope.reading = {};
-
-     $http.get(&#39;/latest&#39;).success(function(data){
-        $scope.reading = data;
-     });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And these pieces for my web page templates (in jade):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{% raw %} 
-div(ng-controller=&amp;quot;latestController&amp;quot;)
-	h2 GardenSpark
-	pre
-		| ---
-		|	Timestamp: {{reading.timestamp | date:&#39;medium&#39;}}
-		|	Air_Temperature: {{reading.airtemp}}
-		|	Soil_Temperature: {{reading.soiltemp}}
-		|	Humidity: {{reading.humidity}}
-		|	Soil_Moisture: {{reading.soilmoist}}
-		|	Light: {{reading.light}}
-
-div(ng-controller=&amp;quot;readingsController&amp;quot;)
-	input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;startDate&amp;quot;)
-	input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;endDate&amp;quot;)
-	button(ng-click=&amp;quot;refresh()&amp;quot;) refresh
-	table
-		tr
-			th Timestamp
-			th Air Temperature
-			th Soil Temperature
-			th Humidity
-			th Soil Moisture
-			th Light
-		tr(ng-repeat=&amp;quot;reading in readings&amp;quot;)
-			td {{reading.timestamp | date:&#39;medium&#39;}}
-			td {{reading.airtemp}}
-			td {{reading.soiltemp}}
-			td {{reading.humidity}}
-			td {{reading.soilmoist}}
-			td {{reading.light}}
-{% endraw %}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now my start date and end date is bound to the datetime picker elements, which make it easy to dynamically modify the period of time of data I&amp;rsquo;m interested in seeing on the page.&lt;/p&gt;
-
-&lt;h2 id=&#34;reducing-and-smoothing-large-data:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Reducing and Smoothing Large Data&lt;/h2&gt;
-
-&lt;p&gt;It was a big desire of mine to chart the data myself using client side javascript libraries.  First step before doing that was implementing an algorithm to perform reduction and smoothing on the server side to both reduce the amount of data being sent as well as lessen the load on the client scripting perfoming the plotting functionality.  I needed to select a filter that would compact-ify large sets of data while still preserving important features.&lt;/p&gt;
-
-&lt;p&gt;I did some research on existing algorithms.  Some options included &lt;a href=&#34;https://github.com/Tom-Alexander/regression-js&#34;&gt;polynomial regressions&lt;/a&gt;, bayesian algorithms, doing computations based on slope for subsets, or just averaging the data.  Polynomial algorithms wouldn&amp;rsquo;t work well, because the nature of the data doesn&amp;rsquo;t necessarily indicate a polynomial process depending on the time interval being interpreted.  A bayesian algorithm might be best due to the data being better modeled as a &lt;a href=&#34;http://en.wikipedia.org/wiki/Markov_process&#34;&gt;markov process&lt;/a&gt;, but I haven&amp;rsquo;t had time to implement an algorithm of that complexity.  For the time being, I&amp;rsquo;ve decided to simply split any large amount of data into 100 equally spaced subsets and then average the subsets.  This is probably the simplest approach, and for a set of evenly spaced data provides a decent view of trends over time.  This reduces the data to a more handle-able size but has drawbacks such as it hides peaks and the averages aren&amp;rsquo;t &amp;lsquo;true&amp;rsquo; when there are gaps in the data.  This will serve for now while the Spark Core can be expected to consistently log data at the same interval.&lt;/p&gt;
-
-&lt;p&gt;To that end, I made the following simple module.  This runs in the order of O(n + k), where n is the number of datapoints and k is the number of dimensions of the data (in the case of this project 6 dimensions: Air Temperature, Soil Temperature, Humidity, Soil Moisture, Light, Time).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;function split(a, n, processor) {
-    var len = a.length,out = [], i = 0, c = 0;
-    while (i &amp;lt; len) {
-        var size = Math.ceil((len - i) / n--);
-        processor(a.slice(i, i += size), c++);
-    }
-};
-
-module.exports = function(readings) {
-	if (readings.length &amp;lt; 100) {
-		return readings;
-	}
-
-	output = [];
-	split(readings, 100, function(subset) {
-		averaged = {};
-
-		subset.forEach(function (reading, c) {
-		    for (var key in reading){
-		    	var n;
-
-		        if (key === &amp;quot;timestamp&amp;quot;){
-					n = new Date(reading[key]).getTime();
-		        } else {
-		        	n = Number(reading[key]);
-		        }
-
-		        if (key in averaged){
-		            var o = averaged[key];
-
-		            averaged[key] = o + ((n-o)/(c+1));
-		        }else{
-		            averaged[key] = n;
-		        }
-		    };
-		});
-
-		averaged[&#39;timestamp&#39;] = new Date(averaged[&#39;timestamp&#39;]);
-
-		output.push(averaged);
-	});
-
-	return output;
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;self-made-charts-sorry-plotly:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Self Made Charts! (sorry plotly)&lt;/h2&gt;
-
-&lt;p&gt;This was a big desire of mine.  Plotly was useful, as it was simple to get started and their API made streaming easy (also, it was free).  It&amp;rsquo;s a fantastic platform, but understandably performance begins to decline when plotting large sets of data, and being able to chart configurable subsets of data on-the-fly is also fairly difficult.&lt;/p&gt;
-
-&lt;p&gt;There&amp;rsquo;s a plethora of javascript plotting libraries available now on the web, many of them based on D3.  After trying a couple, I settled on &lt;a href=&#34;https://github.com/n3-charts/line-chart&#34;&gt;n3-charts&lt;/a&gt;] because it works seemlessly with Angular&amp;rsquo;s two-way data binding model, and the visual product appealed to me.  Adding this on top of my existing Angular code was very easy, I first removed my tables and added their linechart objects.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;div(ng-controller=&amp;quot;readingsController&amp;quot;)
-    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;startDate&amp;quot;)
-    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;endDate&amp;quot;)
-    button(ng-click=&amp;quot;refresh()&amp;quot;) refresh
-        span(class=&amp;quot;glyphicon glyphicon-leaf&amp;quot;, aria-hidden=&amp;quot;true&amp;quot;)
-
-    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;airhumoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
-    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;moistlightoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I also needed to update my javascript to include the options to set up the charts.  As not to intrude on the application code in my controllers, I added these as constants to the Angular app, then I only needed to import them in the controller code.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;app.constant(&#39;tempHumOptions&#39;, {
-  series: [
-    {
-      y: &amp;quot;airtemp&amp;quot;,
-      label: &amp;quot;Air Temperature&amp;quot;,
-      color: &amp;quot;#0099FF&amp;quot;,
-      axis: &amp;quot;y&amp;quot;,
-      type: &amp;quot;line&amp;quot;,
-      thickness: &amp;quot;1px&amp;quot;,
-      dotSize: 2,
-      id: &amp;quot;airtemp&amp;quot;
-    },
-    {
-      y: &amp;quot;soiltemp&amp;quot;,
-      axis: &amp;quot;y&amp;quot;,
-      label: &amp;quot;Soil Temperature&amp;quot;,
-      color: &amp;quot;#009999&amp;quot;,
-      type: &amp;quot;line&amp;quot;,
-      thickness: &amp;quot;1px&amp;quot;,
-      dotSize: 2,
-      id: &amp;quot;soiltemp&amp;quot;
-    },
-    {
-      y: &amp;quot;humidity&amp;quot;,
-      axis: &amp;quot;y2&amp;quot;,
-      label: &amp;quot;Humidity&amp;quot;,
-      color: &amp;quot;#6666FF&amp;quot;,
-      type: &amp;quot;line&amp;quot;,
-      thickness: &amp;quot;1px&amp;quot;,
-      dotSize: 2,
-      id: &amp;quot;humidity&amp;quot;
-    }
-  ],
-  stacks: [],
-  axes: {
-    x: {type: &amp;quot;date&amp;quot;, key: &amp;quot;timestamp&amp;quot;},
-    y: {type: &amp;quot;linear&amp;quot;, min: 14, max: 25},
-    y2: {type: &amp;quot;linear&amp;quot;, min: 0, max:100}
-  },
-  lineMode: &amp;quot;monotone&amp;quot;,
-  tension: 0.7,
-  tooltip: {mode: &amp;quot;scrubber&amp;quot;,interpolate:true},
-  drawLegend: true,
-  drawDots: false,
-  columnsHGap: 5
-});
-
-app.constant(&#39;moistLightOptions&#39;, {
-  series: [
-    {
-      y: &amp;quot;soilmoist&amp;quot;,
-      label: &amp;quot;Soil Moisture&amp;quot;,
-      color: &amp;quot;#996633&amp;quot;,
-      axis: &amp;quot;y&amp;quot;,
-      type: &amp;quot;line&amp;quot;,
-      thickness: &amp;quot;1px&amp;quot;,
-      dotSize: 2,
-      id: &amp;quot;soilmoist&amp;quot;
-    },
-    {
-      y: &amp;quot;light&amp;quot;,
-      axis: &amp;quot;y2&amp;quot;,
-      label: &amp;quot;Light&amp;quot;,
-      color: &amp;quot;#B28F00&amp;quot;,
-      type: &amp;quot;line&amp;quot;,
-      thickness: &amp;quot;1px&amp;quot;,
-      dotSize: 2,
-      id: &amp;quot;light&amp;quot;
-    }
-  ],
-  stacks: [],
-  axes: {
-    x: {type: &amp;quot;date&amp;quot;, key: &amp;quot;timestamp&amp;quot;},
-    y: {type: &amp;quot;linear&amp;quot;, min: 1, max: 2},
-    y2: {type: &amp;quot;linear&amp;quot;, min: 0, max: 400}
-  },
-  lineMode: &amp;quot;cardinal-open&amp;quot;,
-  tension: 0.7,
-  tooltip: {mode: &amp;quot;scrubber&amp;quot;},
-  drawLegend: true,
-  drawDots: false,
-  columnsHGap: 5
-});
-
-app.controller(&#39;readingsController&#39;, function ($scope, $http, tempHumOptions, moistLightOptions) {
-....
-   $scope.airhumoptions = tempHumOptions;
-   $scope.moistlightoptions = moistLightOptions;
-...
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;All that done, I had fast, visually appealing charts generated on client-side code in my web page with which I can easily update to preview data from different time spans.  w00t!&lt;/p&gt;
-
-&lt;h2 id=&#34;hosting-server-sent-events:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Hosting Server-Sent Events&lt;/h2&gt;
-
-&lt;p&gt;So now I have charts, and my app is constantly receiving data from the core via the Spark Cloud.  Wouldn&amp;rsquo;t it be cool to have the page automatically update as data is recieved?  In the past I used Server-Sent Events to consume data from the Spark Cloud, so now I decided to utilize this on the server side as a way to publish the data live to the web page.  Publishing the data is as simple as modifying my route for getting the latest data to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// routes/latest.js
-...
-router.get(&#39;/&#39;, function(req,res){
-	if (req.query.one == &#39;true&#39;) {
-	    db.getLatest(function(data){
-			res.end(JSON.stringify(data));
-	    });
-	    return;
-	}
-
-	req.socket.setTimeout(Infinity);
-
-	var genEvent = (function () {
-		var messageCount = 0;
-		return function(data) {
-			var event = [
-				&#39;event: newdata&#39;,
-				&#39;id: &#39; + messageCount,
-				&#39;data: &#39; + JSON.stringify(data),
-			].join(&#39;\n&#39;) + &#39;\n\n&#39;;
-
-			messageCount++;
-			return event;
-		}
-	})()
-
-	spewer.on(&#39;data&#39;, function(data){
-		res.write(genEvent(data));
-    });
-
-    db.getLatest(function(data){
-		res.write(genEvent(data));
-    });
-
-	res.writeHead(200, {
-		&#39;Content-Type&#39;: &#39;text/event-stream&#39;,
-		&#39;Cache-Control&#39;: &#39;no-cache&#39;,
-		&#39;Connection&#39;: &#39;keep-alive&#39;
-	});
-	res.write(&#39;\n&#39;);
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The code simply sends the appropriate headers, keeps the connection open, then as new data is emitted via &amp;lsquo;spewer&amp;rsquo; (an emitter object) it sends it to the client in the appropriate format.  I generate the function that formats the data via a closure as an elegant way to encapsulate the message count (id) of the events.&lt;/p&gt;
-
-&lt;p&gt;With sending SSE so simple, the main question was how to pipe the data from the receiving portion of the code to the response handling portion.  Some examples will use a separate publish/subscribe system such as &lt;a href=&#34;http://redis.io/&#34;&gt;redis&lt;/a&gt;, but as cool as that would be I thought it be overkill in my case.  That would be more useful in distributed systems, or where the system is optimized for multiple processes and there is a need to pass the information between independent instances (future plans!(maybe)).  In my case, I just needed something quick and clean, and as I improve the server I could easily scale.  I simply created a singleton that subclasses the emitter object, then shared that between the modules that receive and send the data.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;//  spewer.js
-&amp;quot;use strict&amp;quot;
-var util = require(&#39;util&#39;),
-    Emitter = require(&#39;events&#39;).EventEmitter;
-
-var spewer = function spewer(){
-    Emitter.call(this);
-};
-
-util.inherits(spewer, Emitter)
-
-module.exports = new spewer();
-
-// routes/readings.js
-...
-router.post(&#39;/&#39;, function(req,res){
-    if (req.body.magicpasscode &amp;amp;&amp;amp; req.body.magicpasscode == readings_secret) {
-        var readings = JSON.parse(req.body.data),
-            sparkData = {
-                &amp;quot;timestamp&amp;quot;: req.body.published_at,
-                &amp;quot;airtemp&amp;quot;: readings[0],
-                &amp;quot;soiltemp&amp;quot;: readings[1],
-                &amp;quot;humidity&amp;quot;: readings[2],
-                &amp;quot;soilmoist&amp;quot;: readings[3],
-                &amp;quot;light&amp;quot;: readings[4]
-            };
-
-        spewer.emit(&#39;data&#39;, sparkData);
-        db.insert(sparkData);
-    }
-
-    res.writeHead(200, {&#39;Content-Type&#39;: &#39;application/json&#39;});
-    res.end(&#39;&#39;);
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;On the client side, I just needed to modify my controller to use the html5 EventSource object, which automagically handles connecting, re-connecting, and emitting the data.  I borrowed an angular factory from &lt;a href=&#34;https://github.com/timruffles/chat-event-source&#34;&gt;this example&lt;/a&gt;, that wraps the standard EventSource to apply the handling function within Angular&amp;rsquo;s $scope (&lt;a href=&#34;http://jimhoskins.com/2012/12/17/angularjs-and-apply.html&#34;&gt;more on why, here&lt;/a&gt;).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// app.js
-...
-app.factory(&amp;quot;EventSource&amp;quot;, EventSourceNg);
-
-function EventSourceNg($rootScope) {
-  function EventSourceNg(url) {
-    this.source = new EventSource(url);
-  }
-  EventSourceNg.prototype = {
-    addEventListener: function(x, fn) {
-      this.source.addEventListener(x, function(event) {
-        $rootScope.$apply(fn.bind(null, event));
-      });
-    }
-  }
-  if (typeof(EventSource) !== &amp;quot;undefined&amp;quot;) {
-    return EventSourceNg;
-  } else {
-    return undefined;
-  }
-};
-
-// controllers.js
-...
-app.controller(&#39;latestController&#39;, function ($scope, $http, EventSource){
-  $scope.reading = {};
-
-  if (typeof(EventSource) !== &amp;quot;undefined&amp;quot;) {
-    var dataEvent = new EventSource(&#39;/latest&#39;);
-
-    dataEvent.addEventListener(&#39;newdata&#39;, function(event) {
-      $scope.reading = JSON.parse(event.data);
-    }, false);
-  }
-  else {
-     $http({
-           method: &#39;GET&#39;,
-           url: &#39;/latest&#39;,
-           params : {
-              &#39;one&#39;: &#39;true&#39;,
-           },
-           data:&#39;&#39;
-     }).success(function(data){
-        $scope.reading = data;
-     });
-  }
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;presentation-with-reveal-js:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Presentation with reveal.js&lt;/h2&gt;
-
-&lt;p&gt;So now I have all this cool stuff, but my web page was still lacking in terms of overall aesthetics.  There&amp;rsquo;s libraries like &lt;a href=&#34;http://getbootstrap.com/2.3.2/&#34;&gt;Twitter Bootstrap&lt;/a&gt; to simplify getting from zero to useful in interface design, but that&amp;rsquo;s better suited to a more complex interface.  For all the parts of this system, it doesn&amp;rsquo;t really require a complicated interface to present the data it needs.  It needs only present one interface with current data and another interface to visualize historical data.  There&amp;rsquo;s no real need for menus, columns, forms, or anything elaborate.&lt;/p&gt;
-
-&lt;p&gt;All I really wanted was to present my information on a single web page, and allow the user to intuitively navigate between sections of the page.  Enter &amp;lsquo;&lt;a href=&#34;http://lab.hakim.se/reveal-js/&#34;&gt;reveal.js&lt;/a&gt;&amp;rsquo;, a handy framework for building &amp;lsquo;powerpoint&amp;rsquo; presentations using html and javascript.  It&amp;rsquo;s a bit of overkill for what I want, but super simple to use, so implementation cost was fairly low.  I could spend the time to figure out how to write my own custom code to do just what I need, but the time cost was more than I&amp;rsquo;m interested in.&lt;/p&gt;
-
-&lt;p&gt;To make my page use reveal.js I simply combined everything into a single file, split the pages into &amp;lsquo;section&amp;rsquo; elements and included the reveal.js scripts.  Which led to the following refactored jade template for my index page:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;doctype
-html(ng-app=&amp;quot;gardenSpark&amp;quot;)
-	head
-		meta(charset=&amp;quot;utf-8&amp;quot;)
-
-		title GardenSpark
-
-		meta(name=&amp;quot;description&amp;quot; content=&amp;quot;DIY home garden sensor!&amp;quot;)
-		meta(name=&amp;quot;author&amp;quot; content=&amp;quot;Steven James Erdmanczyk Jr.&amp;quot;)
-
-		meta(name=&amp;quot;apple-mobile-web-app-capable&amp;quot; content=&amp;quot;yes&amp;quot;)
-		meta(name=&amp;quot;apple-mobile-web-app-status-bar-style&amp;quot; content=&amp;quot;black-translucent&amp;quot;)
-
-		meta(name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui&amp;quot;)
-
-		link(rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;stylesheets/reveal.css&amp;quot;)
-		link(rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;stylesheets/theme/sky.css&amp;quot; id=&amp;quot;theme&amp;quot;)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;    &amp;lt;link rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;stylesheets/zenburn.css&amp;quot;&amp;gt;
-
-    &amp;lt;!--[if lt IE 9]&amp;gt;
-    &amp;lt;script src=&amp;quot;lib/js/html5shiv.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
-    &amp;lt;![endif]--&amp;gt;
-body
-    .reveal
-        .slides
-            section(ng-controller=&amp;quot;latestController&amp;quot;)
-                h2 GardenSpark
-                pre
-                    | ---
-                    |   Timestamp: &amp;quot;{{reading.timestamp | date:&#39;medium&#39;}}&amp;quot;
-                    |   Air_Temperature: {{reading.airtemp}}
-                    |   Soil_Temperature: {{reading.soiltemp}}
-                    |   Humidity: {{reading.humidity}}
-                    |   Soil_Moisture: {{reading.soilmoist}}
-                    |   Light: {{reading.light}}
-
-            section(ng-controller=&amp;quot;readingsController&amp;quot;)
-                section
-                    h2 Temperature / Humidity
-                    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;startDate&amp;quot;)
-                    input(type=&amp;quot;datetime-local&amp;quot; ng-model=&amp;quot;endDate&amp;quot;)
-
-                    button(ng-click=&amp;quot;refresh()&amp;quot;) refresh
-                        span(class=&amp;quot;glyphicon glyphicon-leaf&amp;quot;, aria-hidden=&amp;quot;true&amp;quot;)
-                    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;airhumoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
-
-                section
-                    h2 Soil Moisture / Light
-
-                    linechart(data=&amp;quot;readings&amp;quot; options=&amp;quot;moistlightoptions&amp;quot; mode=&amp;quot;&amp;quot; width=&amp;quot;700&amp;quot; height=&amp;quot;400&amp;quot; style=&amp;quot;background-color:white&amp;quot;)
-
-    //- script(src=&#39;//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js&#39;)
-    //- script(src=&#39;//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js&#39;)
-    script(src=&#39;//ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js&#39;)
-    script(src=&amp;quot;//d3js.org/d3.v3.min.js&amp;quot; charset=&amp;quot;utf-8&amp;quot;)
-    script(src=&#39;/scripts/moment.min.js&#39;)
-    script(src=&#39;/scripts/line-chart.min.js&#39;)
-    script(src=&#39;/scripts/app.js&#39;)
-    script(src=&#39;/scripts/controllers.js&#39;)
-    script(src=&amp;quot;scripts/head.min.js&amp;quot;)
-    script(src=&amp;quot;scripts/reveal.js&amp;quot;)
-
-    script(type=&#39;text/javascript&#39;).
-
-        // Full list of configuration options available at:
-        // https://github.com/hakimel/reveal.js#configuration
-        Reveal.initialize({
-            controls: true,
-            progress: true,
-            history: true,
-            center: true,
-            loop: true,
-
-            transition: &#39;convex&#39;, // none/fade/slide/convex/concave/zoom
-
-            // Optional reveal.js plugins
-            dependencies: [
-                // { src: &#39;lib/js/classList.js&#39;, condition: function() { return !document.body.classList; } },
-                // { src: &#39;plugin/markdown/marked.js&#39;, condition: function() { return !!document.querySelector( &#39;[data-markdown]&#39; ); } },
-                // { src: &#39;plugin/markdown/markdown.js&#39;, condition: function() { return !!document.querySelector( &#39;[data-markdown]&#39; ); } },
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;					// { src: &#39;plugin/zoom-js/zoom.js&#39;, async: true },
-					// { src: &#39;plugin/notes/notes.js&#39;, async: true }
-				]
-			});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Bam!  I have something pretty.&lt;/p&gt;
-
-&lt;h2 id=&#34;summary:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Summary&lt;/h2&gt;
-
-&lt;p&gt;I feel like I&amp;rsquo;ve made a lightyear jump from where I was in just a couple weeks time.  This is quite encouraging.  Now my interface is almost at 100% of where I wanted it to be.  Next step will be to update the live preview page to include guages or some sort of visualization mechanism.  Once that&amp;rsquo;s done, I&amp;rsquo;m going to get back into the physical world and work on cooler things such as adding solar power, making a custom PCB, building an enclosure, and implementing an automated watering mechanism.&lt;/p&gt;
-
-&lt;h2 id=&#34;helpful-resources:67cc732d739b2a5cfc6d74f2ffc310d5&#34;&gt;Helpful Resources&lt;/h2&gt;
-
-&lt;p&gt;I used quite a few resources during this phase of the project, so I figured it would be helpful to link them here for other people trying to do the same thing, sort of like a bibliography.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.w3schools.com/angular/default.asp&#34;&gt;Angular tutorial at w3schools&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/timruffles/chat-event-source&#34;&gt;Wrapping EventSource for Angular&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://lab.hakim.se/reveal-js/&#34;&gt;HTML5 presentations using reveal.js&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/a/8189268/2406040&#34;&gt;Slicing a list into N equal size pieces (Javascript)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/Smoothing#Smoothing_algorithms&#34;&gt;Data smoothing algorithms&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/Tom-Alexander/regression-js&#34;&gt;Polynomial (and other) regressions in Javascript (library)&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;script src=&#34;https://gist.github.com/serdmanczyk/5a9389d80db94440cf15.js&#34;&gt;&lt;/script&gt;
 </description>
     </item>
     
     <item>
       <title>Moving to Seattle, How&#39;s the Weather? (graphs!)</title>
       <link>http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/</link>
-      <pubDate>Wed, 25 Feb 2015 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 25 Feb 2015 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/post/2015-02-12-moving-to-seattle-hows-the-weather/</guid>
       <description>&lt;p&gt;My wife and I recently relocated from Charlotte, NC to Seattle, WA and so far we&amp;rsquo;ve loved it!&lt;/p&gt;
@@ -1396,607 +661,22 @@ print(&#39;Seattle: &#39;, totals[&#39;Seattle&#39;])
     </item>
     
     <item>
-      <title>GardenSpark: Part Two - Putting It in the Cloud</title>
-      <link>http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/</link>
-      <pubDate>Thu, 11 Sep 2014 00:00:00 +0000</pubDate>
-      
-      <guid>http://serdmanczyk.github.io/gardenspark/gardenspark-part-two-putting-it-in-the-cloud/</guid>
-      <description>
-
-&lt;pre&gt;
-This project is undergoing a revamp.  Stay tuned for updates!
-&lt;/pre&gt;
-
-&lt;h2 id=&#34;intro:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Intro&lt;/h2&gt;
-
-&lt;p&gt;This is the second part of my project hacking together a home plant/garden monitoring system using the &lt;a href=&#34;https://www.spark.io/&#34;&gt;Spark Core&lt;/a&gt;, sensors, web technologies, and wizardry.  The first part involved making a prototype of Spark attached to a few sensors, then using the Spark itself to stream the sensor data to &lt;a href=&#34;https://plot.ly/&#34;&gt;plotly&lt;/a&gt;.  For my next step I wanted to put an entity in the cloud to consume the data from the Spark, store it away in a database, offer a web interface to access that stored data, as well as handle streaming that data to plotly.&lt;/p&gt;
-
-&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;repo=gardenspark&amp;type=fork&amp;size=large&#34; height=&#34;30&#34; width=&#34;100&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:100px; height: 30px;&#34; allowTransparency=&#34;true&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;type=follow&amp;size=large&#34; height=&#34;30&#34; width=&#34;240&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:240px; height: 30px;&#34; allowTransparency=&#34;false&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;iframe width=&#34;800&#34; height=&#34;600&#34; frameborder=&#34;0&#34; seamless=&#34;seamless&#34; scrolling=&#34;no&#34; src=&#34;https://plot.ly/~serdmanczyk/19/800/600&#34;&gt;&lt;/iframe&gt;
-
-&lt;h2 id=&#34;sending-the-data:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Sending the Data&lt;/h2&gt;
-
-&lt;p&gt;The first step was to alter the Spark sketch to send the data to an intermediary server rather than just to plotly.  I considered a couple options for delivering data such as through TCP in a proprietary format or packaged in HTTP POST requests as JSON.  I eventually decided to use the Spark firmware&amp;rsquo;s ability to &lt;a href=&#34;http://docs.spark.io/firmware/#spark-publish&#34;&gt;publish events&lt;/a&gt; to Spark&amp;rsquo;s cloud servers which can easily be &lt;a href=&#34;http://docs.spark.io/api/#reading-data-from-a-core-events&#34;&gt;subscribed to&lt;/a&gt; by HTTP via &lt;a href=&#34;http://dev.w3.org/html5/eventsource/&#34;&gt;server sent events&lt;/a&gt;.  Being integrated into the Spark firmware, this was simple to setup, and the connection from the core to the Spark cloud is very reliable.  This also decoupled by server code from being connected to the core, making testing simpler.  My main sketch code is now even simpler:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;#include &amp;quot;math.h&amp;quot;
-#include &amp;quot;defines.h&amp;quot;
-#include &amp;quot;DHT.h&amp;quot;
-#include &amp;quot;Adafruit_TSL2561_U.h&amp;quot;
-
-unsigned long timesync = 0;
-unsigned long lastloop = 0;
-
-DHT dht(DHTPIN, DHTTYPE);
-Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
-
-void setup() {
-    tsl.enableAutoRange(true);            /* Auto-gain ... switches automatically between 1x and 16x */
-    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
-    tsl.begin();
-    dht.begin();
-
-    pinMode(MOISTPIN, INPUT);
-    pinMode(TEMPPIN, INPUT);
-
-    timesync = millis();
-}
-
-void loop() {
-    unsigned long now = millis();
-
-    if ((now - lastloop) &amp;gt; TEN_SECONDS){
-        sensors_event_t event;
-        char data[42];
-        double AirTemp = 0.0;
-        double SoilTemp = 0.0;
-        double Humidity = 0.0;
-        double Light = 0.0;
-        double Moisture = 0;
-
-        tsl.getEvent(&amp;amp;event);
-        Light = (double)event.light;
-        AirTemp = (double)dht.readTemperature();
-        Humidity = (double)dht.readHumidity();
-        Moisture = ((double)map(analogRead(MOISTPIN), 0, 4096, 0, 330) / 100);  // convert to voltage
-        SoilTemp = ((double)analogRead(TEMPPIN) * ANALOGKELVINCONVERSION) + KELVINCELSIUSCONVERSION;
-
-        sprintf(data, &amp;quot;[%03.03f,%03.03f,%03.03f,%03.03f,%03.03f]&amp;quot;, AirTemp, SoilTemp, Humidity, Moisture, Light);
-        Spark.publish(&amp;quot;Readings&amp;quot;, data, 300, PRIVATE);
-
-        lastloop = now;
-    }else if ((now - timesync) &amp;gt; HALF_A_DAY){
-        Spark.syncTime();
-        timesync = now;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;setting-up-the-server-using-nodejs:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Setting Up the Server Using Nodejs&lt;/h2&gt;
-
-&lt;p&gt;As an impetus to learn, and to see what all the hype was about, I decided to use Nodejs to power the server side for this project, for it&amp;rsquo;s ease in getting up and running and for its appeal to IoT (internet of things) applications&lt;/p&gt;
-
-&lt;p&gt;I found it very helpful to take an aside and read some material on the basic workings of Javascript before trying to do too much with Nodejs.  I found this book: &lt;a href=&#34;http://eloquentjavascript.net/&#34;&gt;Eloquent Javascript&lt;/a&gt; a great primer that helped integrate my knowledge based on programming in C to how programming works in Javascript-land.&lt;/p&gt;
-
-&lt;p&gt;For hosting, my &lt;a href=&#34;https://www.openshift.com/&#34;&gt;OpenShift&lt;/a&gt; account had one more free gear available.  Creating a server with a MongoDB database was as simple as running a few commands from the command line using &lt;a href=&#34;https://www.openshift.com/blogs/using-rhc-to-manage-paas-apps&#34;&gt;rhc&lt;/a&gt;, updates are managed automatically using git, and all imported node modules are managed by OpenShift using the same &lt;a href=&#34;https://www.npmjs.org/doc/files/package.json.html&#34;&gt;package.json file&lt;/a&gt; npm uses.  Pretty forking easy.&lt;/p&gt;
-
-&lt;h2 id=&#34;consuming-server-sent-events:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Consuming Server Sent Events&lt;/h2&gt;
-
-&lt;p&gt;The first order of business in my server application was get it connected to the data from the Spark.  Subscribing to the events is as simple as &lt;a href=&#34;http://techblog.hybris.com/2014/05/02/consuming-spark-core-sse-events-via-node-js/&#34;&gt;sending an HTTP request and leaving the connection open&lt;/a&gt;.  However, with my application running for days at a time, I was running into trouble with the connection closing every twelve hours or so (not surpisingly).  Instead of taking a lot of time to homebake a solution, I searched through the &lt;a href=&#34;https://www.npmjs.org/&#34;&gt;npm repository&lt;/a&gt; to find an implementation of html5&amp;rsquo;s &lt;a href=&#34;https://www.npmjs.org/package/eventsource&#34;&gt;EventSource&lt;/a&gt; that&amp;rsquo;s been working very well at reconnecting in the event of errors.  Here&amp;rsquo;s a snipper of my implementation:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;SparkCloud.prototype.init = function init(done){
-    var self = this,
-        url = &amp;quot;https://api.spark.io/v1/devices/&amp;quot; + self.config.DeviceId + &amp;quot;/events&amp;quot;,
-        evsSettings = {
-           rejectUnauthorized: false,
-           headers:{
-              &amp;quot;Transfer-Encoding&amp;quot;:&amp;quot;Chunked&amp;quot;,
-              Authorization: &amp;quot;Bearer &amp;quot;+ self.config.AccessToken
-           }
-        };
-
-    var es = new EventSource(url,evsSettings);
-    es.addEventListener(&#39;Readings&#39;, function ParseEvent(event) {
-        var sparkObj = JSON.parse(event.data),
-            Readings = JSON.parse(sparkObj.data),
-            SparkData = {
-                &amp;quot;TimeStamp&amp;quot;: sparkObj.published_at,
-                &amp;quot;Air Temperature&amp;quot;: Readings[0],
-                &amp;quot;Soil Temperature&amp;quot;: Readings[1],
-                &amp;quot;Humidity&amp;quot;: Readings[2],
-                &amp;quot;Soil Moisture&amp;quot;: Readings[3],
-                &amp;quot;Light&amp;quot;: Readings[4]
-            };
-
-        self.emit(&#39;data&#39;, SparkData)
-    }, false);
-
-    es.onerror = function(){
-        console.log(&amp;quot;Error with EventSource connection with SparkCloud&amp;quot;);
-    };
-
-    self.es = es;
-    done();
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&amp;lsquo;SparkCloud,&amp;rsquo; in the context of the code above, is my own object that inherits from &lt;a href=&#34;http://www.sitepoint.com/nodejs-events-and-eventemitter/&#34;&gt;EventEmitter&lt;/a&gt;.  It gathers data from Spark&amp;rsquo;s stream in the background and emits an object to the rest of my application when data from my core becomes available.&lt;/p&gt;
-
-&lt;p&gt;In the future, Spark intends to add the to feature register an address for their servers to POST the data to via HTTP when events are published.  When this comes available I may implement it at it makes for a better model, but SSE is working in the mean time.&lt;/p&gt;
-
-&lt;h2 id=&#34;saving-to-a-database:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Saving to a database&lt;/h2&gt;
-
-&lt;p&gt;Now that I had my server sending the data, I wanted to save it.  Streaming to plotly is pretty cool, but after you&amp;rsquo;ve expanded beyond your maximum points on your plot you start losing data.  When it comes to plant data, only the past few hours of data is pretty boring, my goal is to see days/weeks/months of data with summaries, bells, and whistles.&lt;/p&gt;
-
-&lt;p&gt;The node-mongodb-native module is recommended but I decided to use the mongojs module because it makes the code easier to read and implement.  A brief overview of the two is given on the &lt;a href=&#34;https://www.openshift.com/blogs/getting-started-with-mongodb-on-nodejs-on-openshift&#34;&gt;OpenShift blog&lt;/a&gt;.  To start I only needed three methods.  One to add new data, to get the most recent entry, and to get entries from a start date to an end date.  Not too complicated, here&amp;rsquo;s the entire module:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;quot;use strict&amp;quot;
-var mongojs = require(&#39;mongojs&#39;),
-    connection_string = &#39;127.0.0.1:27017/gardenspark&#39;;
-
-// if OPENSHIFT env variables are present, use the available connection info:
-if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
-    connection_string = process.env.OPENSHIFT_MONGODB_DB_USERNAME + &amp;quot;:&amp;quot; +
-      process.env.OPENSHIFT_MONGODB_DB_PASSWORD + &amp;quot;@&amp;quot; +
-      process.env.OPENSHIFT_MONGODB_DB_HOST + &#39;:&#39; +
-      process.env.OPENSHIFT_MONGODB_DB_PORT + &#39;/&#39; +
-      process.env.OPENSHIFT_APP_NAME;
-};
-
-var db = mongojs(connection_string, [&#39;readings&#39;]),
-    readings = db.readings;
-
-readings.ensureIndex({TimeStamp:1});
-
-exports.insert = function insert(Data){
-    console.log(&amp;quot;saved data: &amp;quot; + Data.TimeStamp);
-    readings.insert(Data, {safe:true}, function(err, objects){
-        if (err) {console.warn(err.message);}
-    });
-
-    delete Data._id;
-};
-
-exports.getReadings = function getReadings(start, end, callback){
-    function validDate(dateStr, def){
-        return (Date(dateStr) !== &amp;quot;Invalid Date&amp;quot;) ? new Date(dateStr) : new Date(def);
-    };
-
-    var query = {
-            TimeStamp:{
-                $gt:(validDate(start, 0).toISOString()),
-                $lt:(validDate(end, Date.now()).toISOString())
-            }
-        },
-        results = [];
-
-    readings.find(query,{_id:false})
-        .forEach(function(err,doc){
-            if (!doc) {
-                return callback(results);
-            };
-            results.push(doc);
-        });
-};
-
-exports.getLatest = function getLatest(callback){
-    var latest = {};
-
-    readings.find({},{_id:false})
-        .sort({TimeStamp:-1})
-        .limit(1)
-        .forEach(function(err,doc){
-            if (!doc) {
-                callback(latest);
-            };
-
-            latest = doc;
-        });
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;sending-to-plotly:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Sending to plotly&lt;/h2&gt;
-
-&lt;p&gt;For streaming to plotly, I simply adapted code from their &lt;a href=&#34;https://github.com/plotly/plotly-nodejs/tree/master/examples&#34;&gt;streaming example&lt;/a&gt;, to my application, with some modifications for specifying plot names and tokens in a separate file, and adding a heartbeast function and pass a plotting function to a callback from my initialization.  It&amp;rsquo;s noticeably more amicable streaming the data from nodejs to plotly rather than from the Spark.  Hopefully this pieces of the server code will be short lived as my planned next step is to switch from using plotly to drawing the plots myself with my own code.&lt;/p&gt;
-
-&lt;h2 id=&#34;caching-readings-for-plotly:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Caching readings for plotly&lt;/h2&gt;
-
-&lt;p&gt;As another feature I wanted to have the ability to modify the interval at which the application will send data to plotly.  With data being sent from the Spark every 10 seconds the plot will fill rather quickly, and rather than needing to do a git add/commit/push/etc. to update the OpenShift app every time I want to update the interval, using a REST call seemed a lot more convenient.&lt;/p&gt;
-
-&lt;p&gt;With the interval to plot possibly longer or shorter than the interval data is being received, just plotting the most recent value received wouldn&amp;rsquo;t accurately represent the data over that time period.  Instead, I made a module that would cache the average of the readings received over the plotting period.  After the interval from the last plot had elapsed, it would send the average to plotly instead.  Here&amp;rsquo;s a snippet of the moving average piece:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;DataCache.prototype.append = function append(data){
-    var self = this,
-        c = this.data.count;
-
-    for (var key in data){
-        if (key === &amp;quot;TimeStamp&amp;quot;){
-            continue;
-        };
-        if (key in self.data){
-            var o = self.data[key],
-                n = data[key];
-
-            self.data[key] = o + ((n-o)/(c+1));
-        }else{
-            self.data[key] = data[key];
-        }
-    };
-    self.data.count++;
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This obviously doesn&amp;rsquo;t handle all error conditions, so isn&amp;rsquo;t a fully robust, but handles well in my app where I have full control.  Then for modifying the interval I simply made another method for the DataCache object.  The interval is stored as a member.  When the interval length is modified, the interval variable is cleared and modified.  Every time the interval is triggered, the object will emit the averaged data (if any) to any listeners.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;DataCache.prototype.setEmitInterval = function setEmitInterval(ms){
-    var self = this;
-
-    self.timeout = ms;
-    if (self.interval !== undefined){
-        clearInterval(self.interval);
-    };
-
-    self.interval = setInterval(function(){
-        if (self.data.count &amp;gt; 0){
-            self.emit(&#39;interval&#39;, self.get());
-        };
-    }, self.timeout);
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;hosting-an-interface:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Hosting an interface&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/web_interface_preview.png&#34; alt=&#34;web interface&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;It seems there&amp;rsquo;s quite the variety of frameworks for rendering web interfaces for Nodejs.  I stuck with the what seemed the most basic: &lt;a href=&#34;http://expressjs.com/&#34;&gt;express&lt;/a&gt;.  All I wanted was a simple home page that displays the latest reading alongside the current interval time.  Besides that, I wanted to be able to request data between specified time intervals in either a web page or, if the content type header is specified, as JSON for the use in APIs (such as a plotting utility).  I made sure to default the page for displaying readings to the 50 most recent readings, and not to return all data unless explicitly requested.  Using jade templates made rendering the pages from simple javascript objects a breeze.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;app.get(&#39;/&#39;, function(req,res){
-    db.getLatest(function(data){
-        if (req.headers[&#39;content-type&#39;] === &#39;application/json&#39;){
-            res.send(JSON.stringify(data));
-        }else{
-            data.TimeStamp = (new Date(data.TimeStamp));
-            var rs = \_.map(data, function(v,k,l){
-                    return {name:k,value:v};
-                });
-            res.render(&#39;index&#39;,{
-                title:name,
-                readings:rs,
-                interval:cache.timeout.toString()
-            });
-        };
-
-    });
-});
-
-app.get(&#39;/readings&#39;, function(req, res){
-        var n = Date.now(),
-            all = (req.query.all ? true : false),
-            startDate = (req.query.start || 0),
-            endDate = (req.query.end || n);
-
-    if (startDate === 0 &amp;amp;&amp;amp; endDate === n &amp;amp;&amp;amp; !all){
-        endDate = Date.now();
-        startDate = endDate - 300000; // Five minutes ago
-    }else if (all){
-        startDate = 0;
-        endDate = Date.now();
-    };
-
-    db.getReadings(startDate, endDate, function(results) {
-        if (req.headers[&#39;content-type&#39;] === &#39;application/json&#39;) {
-            res.send(JSON.stringify(results));
-        }else{
-            var ret = {
-                title:name,
-                readings:results || []
-            };
-            res.render(&#39;readings&#39;, ret);
-        };
-    });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Here&amp;rsquo;s a preview of the readings interface:
-&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/readings_preview.png&#34; alt=&#34;readings interface&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Check it out!  The server is live, so head on over: &lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/&#34;&gt;gardenspark-evargreen.rhcloud.com&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Check out the &lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/readings&#34;&gt;readings page&lt;/a&gt;, and an example of getting readings over &lt;a href=&#34;http://gardenspark-evargreen.rhcloud.com/readings?start=2014-09-11T16:00:00.000Z&amp;amp;end=2014-09-11T17:00:00.000Z&#34;&gt;an interval&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;summary:80bdf840bb03d6cab3ef663bac316d7c&#34;&gt;Summary&lt;/h2&gt;
-
-&lt;p&gt;Here&amp;rsquo;s a basic diagram of the system as it is now: x&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/gardenspark_serverdiagram.png&#34; alt=&#34;System Overview&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Thanks to Nodejs&amp;rsquo; architecture, with callbacks and event emitters, it was particularly efficient to implement this architecture in an easy to read and snappy fashion without an excessive amount of get-up-and-go time.  Nodejs will definitely be a handy tool for other personal projects I take up.  Now, with a web interface, it&amp;rsquo;s been easy to check up on my system and verify readings have been occurring properly.  I can now even use it for the practical purpose of seeing if I need to water my plant, if it gets too much sunlight during a particular part of the day, if an A/C vent is hitting it the plant too hard, etc.  Exciting stuff!&lt;/p&gt;
-
-&lt;p&gt;For the next part of this project I&amp;rsquo;m going to deviate into the less familiar realm (for myself at least) of graphics and interface design and attempt to implement the &lt;a href=&#34;http://d3js.org/&#34;&gt;D3&lt;/a&gt; library to host the plots themselves via my web interface.  Hopefully this will enable more responsive charts as well as the ability to visualize the data more intuitively.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>GardenSpark: Part One - Prototype / stream to plotly</title>
-      <link>http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/</link>
-      <pubDate>Tue, 22 Jul 2014 00:00:00 +0000</pubDate>
-      
-      <guid>http://serdmanczyk.github.io/gardenspark/GardenSpark-Prototyping/</guid>
-      <description>
-
-&lt;pre&gt;
-This project is undergoing a revamp.  Stay tuned for updates!
-&lt;/pre&gt;
-
-&lt;h2 id=&#34;intro:2753be554e797cd6a2ab8852ac642412&#34;&gt;Intro&lt;/h2&gt;
-
-&lt;p&gt;My specialty is working with software and electronics, but also being a fan of nature and reducing our footprint on earth, sometimes I feel my occupation is often contradictory to some of my philosophies.  In the interest of closing this gap and walking down the path of leveraging technology to help us live a lower impact existence, I thought a great personal project would be a system that helps use technology to connect people with growing their our own food.&lt;/p&gt;
-
-&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;repo=gardenspark&amp;type=fork&amp;size=large&#34; height=&#34;30&#34; width=&#34;100&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:100px; height: 30px;&#34; allowTransparency=&#34;true&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;td&gt;&lt;iframe src=&#34;http://ghbtns.com/github-btn.html?user=serdmanczyk&amp;type=follow&amp;size=large&#34; height=&#34;30&#34; width=&#34;240&#34; frameborder=&#34;0&#34; scrolling=&#34;0&#34; style=&#34;width:240px; height: 30px;&#34; allowTransparency=&#34;false&#34;&gt;&lt;/iframe&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;p&gt;This is definitely a budding application with a few products just recently being funded on Kickstarter.  Just to list a few projects/products:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.edyn.com/&#34;&gt;Edyn&lt;/a&gt;: (my favorite) Garden sensor and smart watering device&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.harvestgeek.com/&#34;&gt;HarvestGeek&lt;/a&gt;: Garden sensing and visualization (unfortunately it seems they are behind on delivering after their kickstarter was funded)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.growerbot.com/&#34;&gt;GrowerBot&lt;/a&gt;: (formerly Garduino) An Arduino based plant monitoring system&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://gardenbot.org/&#34;&gt;GardenBot&lt;/a&gt;: Not a product, but an open source set of plant sensor designs and tutorials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://bit.ly/1pnlyFF&#34;&gt;Streaming Data to Plotly Using the DHT22&lt;/a&gt; - A simple example of streaming environment data to a live graph online.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This is definitely an area of interest With the growing popularity of the &amp;ldquo;Internet of Things.&amp;rdquo;  This will give me the opportunity to start playing around in that area, renew/refresh my embedded programming skills, and also learn and implement other new frameworks in the process.&lt;/p&gt;
-
-&lt;p&gt;The current scope of this project goes through the following stages, with this post covering the first stage:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Prototype integrating a micro-controller with sensors, and stream the readings to &lt;a href=&#34;https://plot.ly/&#34;&gt;plotly&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Set up a server using &lt;a href=&#34;http://nodejs.org/&#34;&gt;nodejs&lt;/a&gt; to consume sensor data, save data to a database, and offer a simple web interface to preview the data.&lt;/li&gt;
-&lt;li&gt;Upgrade web interface to plot eye friendly charts of the data using the &lt;a href=&#34;http://d3js.org/&#34;&gt;D3&lt;/a&gt; library.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Other planned non-step dependent additions&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Connect pump to mcu for automated watering based on sensor readings&lt;/li&gt;
-&lt;li&gt;Implement manual trigger for watering via cloud API&lt;/li&gt;
-&lt;li&gt;Design pretty enclosure for sensors that&amp;rsquo;s environment proof&lt;br /&gt;&lt;/li&gt;
-&lt;li&gt;Add battery/solar power to mcu.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;After some reading through parts used in the other projects I decided on the following hardware to start:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.spark.io/&#34;&gt;Spark Core&lt;/a&gt; for processing and internet connectivity
-
-&lt;ul&gt;
-&lt;li&gt;Built-in WiFi and cloud connection libraries&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.adafruit.com/products/385&#34;&gt;DHT22&lt;/a&gt; for Air Temperature / Humidity
-
-&lt;ul&gt;
-&lt;li&gt;0 to 100% humidity w/ 2 to 5% accuracy&lt;/li&gt;
-&lt;li&gt;-40 to 80 °C temperature w/ +-0.5°C accuracy&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://amzn.to/1qMxZGs&#34;&gt;LM335&lt;/a&gt; for measuring Soil Temperature
-
-&lt;ul&gt;
-&lt;li&gt;-40C to +100°C temperature w/ +-1°C accuracy&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://amzn.com/B00B886H7S&#34;&gt;DFRobot Soil Moisture Sensor&lt;/a&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Analog voltage output increases with wetness&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.adafruit.com/products/439&#34;&gt;TSL2561&lt;/a&gt; for measuring Lux (Light)
-
-&lt;ul&gt;
-&lt;li&gt;0.1 - 40,000 Lux&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Since apparently all the other projects get their own cool titles I&amp;rsquo;ve dubbed the working title for my project: GardenSpark.  It goes in a garden, it uses the Spark Core, and it intends to &amp;lsquo;spark&amp;rsquo; interest in growing your own plants and food.  Aren&amp;rsquo;t I clever.&lt;/p&gt;
-
-&lt;h2 id=&#34;humidity-air-temperature:2753be554e797cd6a2ab8852ac642412&#34;&gt;Humidity / Air Temperature&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/dht22.jpg&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Connecting to the &lt;a href=&#34;http://www.adafruit.com/products/385&#34;&gt;DHT22&lt;/a&gt; was made super easy by using the Arduino libraries for the sensor provided by &lt;a href=&#34;https://learn.adafruit.com/dht/downloads&#34;&gt;Adafruit&lt;/a&gt;.  It uses a single wire bus, so getting a reading involves setting a pin high for a specified amount of milliseconds, then switching the pin back to an input and counting on your board&amp;rsquo;s timing to process the duration of highs and lows in the returned signal which contains the sensors serialized response values.  Luckily, the adafruit libraries were pretty much plug-and-play on the Spark despite being written for Arduino.  Connecting was simple:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Vin -&amp;gt; Spark 3.3V*&lt;/li&gt;
-&lt;li&gt;GND -&amp;gt; Spark GND&lt;/li&gt;
-&lt;li&gt;data pin -&amp;gt; Spark Digital pin (your preference)&lt;/li&gt;
-&lt;li&gt;data pin -&amp;gt; pull-up resistor -&amp;gt; 3.3V*&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;lux-light:2753be554e797cd6a2ab8852ac642412&#34;&gt;Lux (Light)&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/TLS2561.png&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The &lt;a href=&#34;http://www.adafruit.com/products/439&#34;&gt;TSL2561&lt;/a&gt; communicates via I2C, which the Spark Core conveniently provides on pins D0(Serial Data / SDA) and D1(Serial Clock / SCL) via their &lt;a href=&#34;http://docs.spark.io/firmware/#communication-wire&#34;&gt;Wire&lt;/a&gt; library.  Also, like the DTH22, Adafruit is once again kind enough to provide a &lt;a href=&#34;https://learn.adafruit.com/tsl2561/&#34;&gt;tutorial&lt;/a&gt; and  &lt;a href=&#34;https://learn.adafruit.com/tsl2561/use&#34;&gt;code library&lt;/a&gt; to do the communications and calculations for you.  This library was basically plug-and-play on the Spark as well, save for some modification to match the Arduino application headers and I2C library to the Spark Core.  Wiring the sensor was also easy, as it only required four pins:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Vin -&amp;gt; Spark Core 3.3V*&lt;/li&gt;
-&lt;li&gt;GND -&amp;gt; Spark GND&lt;/li&gt;
-&lt;li&gt;SDA -&amp;gt; Spark D0(SDA)&lt;/li&gt;
-&lt;li&gt;SCL -&amp;gt; Spark D1(SCL)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;soil-moisture:2753be554e797cd6a2ab8852ac642412&#34;&gt;Soil Moisture&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/SoilMoistureSensor.png&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;For sensing soil moisture, instead of going through the trouble of &lt;a href=&#34;http://gardenbot.org/howTo/soilMoisture/&#34;&gt;using nails&lt;/a&gt;, I went with a pre-made sensor from &lt;a href=&#34;http://amzn.com/B00B886H7S&#34;&gt;DFRobot&lt;/a&gt; to save time.  I may make my own sensor to match the final prototype enclosure.  Of course, there are no pre-defined units for how moist soil is, so the sensor only gives an analog output voltage approximately proportional to how wet the soil is.  One pitfall of the sensor documentation is that it is written specifically for Arduino users, giving the output values as:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;0-300: dry soil&lt;/li&gt;
-&lt;li&gt;300-700: humid soil&lt;/li&gt;
-&lt;li&gt;700-900: in water&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;What do these values mean?  These are actually the output of AnalogRead() on the Arduino, and a look at the Arduino documentation for AnalogRead() says that the output maps values of 0 to 5V to integer values of 0 to 1023, or ~4.9mV per value.  The Spark Core is different, so our values aren&amp;rsquo;t the same.  The Spark analogRead() maps values between 0 to 3.3V(instead of 5V) to integer values from 0 to 4095, or ~0.8mV per unit.  So to figure what the Spark Core reading is for those values we need to:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;convert those AnalogRead() values to the actual voltage output&lt;/li&gt;
-&lt;li&gt;convert that voltage output from that of a Vin of 5V down to 3.3V&lt;/li&gt;
-&lt;li&gt;convert that to the analogRead() value on the Spark Core for that voltage&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Our actual values come out mapped to be:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;|Arduino (Vin=5V)| AnalogRead() | Vout   |Spark Core (Vin=3.3V)| Vout  |  analogRead() |
-||:-----------: | :----: || :---: | :-----------: |
-||  0           |  0     || 0     | 0             |
-||  300         |  1.465 || 0.967 | 1200          |
-||  700         |  3.418 || 2.256 | 2800          |
-||  900         |  4.395 || 2.90  | 3600          |
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Of course this is all still approximate.  Dry is dry and wet is wet, but it was fun to calculate.&lt;/p&gt;
-
-&lt;h2 id=&#34;soil-temperature:2753be554e797cd6a2ab8852ac642412&#34;&gt;Soil Temperature&lt;/h2&gt;
-
-&lt;p&gt;This one was the most interesting.  I used &lt;a href=&#34;http://gardenbot.org/howTo/soilTemp/&#34;&gt;this tutorial&lt;/a&gt; on GardenBot as a template.  It gives an excellent starting point and base info, but I found their schematics and description a bit disjointed.  Oddly, it starts off telling you to solder adjustment resistors with the sensor to go in the ground, and then proceeds later to explain why this is a bad idea (changes in soil temperature changes resistance, resistance effects calibration).  I did a bit of research to figure better resistance values and get a complete schematic, with a little help from &lt;a href=&#34;http://bit.ly/1nJAbNY&#34;&gt;this post on StackExchange&lt;/a&gt;.  After having refreshed my electronics knowledge a bit, my wiring ended up as the following schematic, which may be simpler and easier to understand than the GardenBot schematics:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/gardenspark/LM335_Temp_Schematic.png&#34; alt=&#34;LM335 Soil Temp Sensor Circuit Schematic&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;I chose to use a potentiometer to adjust the LM335 during the prototyping phace, and did some calculations to figure that the resistor between the output node and ground needed to be 270 ohms (not 1K) so that the LM335 would get the proper current for the temperature values I desired to read.  The capacitor is there as a noise filter.  I&amp;rsquo;ll pick two resistors similar to the pot setting for the final prototype.&lt;/p&gt;
-
-&lt;p&gt;Calculating the readings on the Spark was a bit straightforward.  It&amp;rsquo;s a matter of multiplying by a constant to convert the voltage reading to kelvin then adding an offest to convert to celsius.  The sensor&amp;rsquo;s output is approximately +10mv for every Kelvin.  You&amp;rsquo;ll remember from the last section that the Spark readings analog input as integers between 0-4096 to correspond with voltages from 0-3.3V.  The formula for converting the analog input to Kelvin is: Kelvin = input*(3.&lt;sup&gt;3&lt;/sup&gt;&amp;frasl;&lt;sub&gt;4096&lt;/sub&gt;)*100.  To convert to Celsius you simply subtract 273.15.&lt;/p&gt;
-
-&lt;p&gt;Currently I have the LM335 connected on the breadboard and am observing it in relation to the DHT22.  Their appears to be some adjusting to do still to get it accurately calibrated, which I&amp;rsquo;ll have to do when I have access to better equipment (such as at our local &lt;a href=&#34;http://hackerspacecharlotte.org/&#34;&gt;Charlotte Hackerspace&lt;/a&gt;).  Once that&amp;rsquo;s done I plan to do the further physical work to heat-shrink the sensor into a component that can be inserted into the soil.&lt;/p&gt;
-
-&lt;h2 id=&#34;streaming-to-plotly:2753be554e797cd6a2ab8852ac642412&#34;&gt;Streaming to Plotly&lt;/h2&gt;
-
-&lt;p&gt;Connecting to the internet with the Spark is made easy out of the box, you simply set your WiFi credentials with the mobile app or the &lt;a href=&#34;]http://docs.spark.io/cli/&#34;&gt;spark cli&lt;/a&gt; and it will automatically connect every time it runs.  Programming the MCU is made easy by their web IDE, but you can also program via USB by setting up the nodejs based spark cli, which I found very useful.  It still requires the spark cloud to compile code into a firmware binary.  The language is very similar to Arduino (which is based on &lt;a href=&#34;http://wiring.org.co/&#34;&gt;Wiring&lt;/a&gt;, which is base on &lt;a href=&#34;http://processing.org/&#34;&gt;Processing&lt;/a&gt;&amp;hellip;).&lt;/p&gt;
-
-&lt;p&gt;For connecting the core to the plotly API, once again, a library already exists!  Plotly provides an &lt;a href=&#34;https://github.com/plotly/arduino-api&#34;&gt;Arduino library&lt;/a&gt;, which was re-purposed ever so slightly &lt;a href=&#34;https://github.com/krvarma/Plotly_SparkCore&#34;&gt;here&lt;/a&gt; for the Spark Core.  It makes plotting easy by encapsulating the &lt;a href=&#34;https://plot.ly/streaming/&#34;&gt;Plotly REST API&lt;/a&gt; calls to initialize the graph and send data into an easy to use C++ class.  Unfortunately there were some errors in the HTTP POST built on the Spark Core version, but I easily corrected them (and it seems as of the time of this writing, the errors have been fixed in the repository).  Since the update interval I desired was farther apart than the plotly API allows, I also had to add code to send a &lt;a href=&#34;https://github.com/plotly/Streaming-Demos#advanced-streaming-concepts&#34;&gt;heartbeat message&lt;/a&gt; within every minute interval to ensure plotly doesn&amp;rsquo;t disconnect.  After getting the library running, I had data!  You can check out my streaming test graph (live from my house!) below (update, the stream is now coming from my intermediary nodejs server, but it&amp;rsquo;s still the same data source):&lt;/p&gt;
-
-&lt;iframe width=&#34;800&#34; height=&#34;600&#34; frameborder=&#34;0&#34; seamless=&#34;seamless&#34; scrolling=&#34;no&#34; src=&#34;https://plot.ly/~serdmanczyk/19/800/600&#34;&gt;&lt;/iframe&gt;
-
-&lt;h2 id=&#34;putting-it-all-together:2753be554e797cd6a2ab8852ac642412&#34;&gt;Putting it All Together&lt;/h2&gt;
-
-&lt;p&gt;With all the parts assembled, the base sketch was very simple.  To start I chose to plot data every five minutes, which would make a full 24 hours of data on the graph equal a manageable 288 points.  All I needed to do was:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Initialize the requisite classes and variables&lt;/li&gt;
-&lt;li&gt;Monitor millis() (milliseconds elapsed in program) value
-
-&lt;ul&gt;
-&lt;li&gt;Every 5 minutes, read sensor data and send to plotly&lt;/li&gt;
-&lt;li&gt;Every 50 seconds (within a minute): send a heartbeat to plotly so the server doesn&amp;rsquo;t close the connection&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;You&amp;rsquo;ll also notice I used Spark&amp;rsquo;s firmware library to set &amp;lsquo;variables&amp;rsquo; for the sensor readings.  This enabled me to monitor readings from the sensors on the fly through &lt;a href=&#34;http://docs.spark.io/api/#reading-data-from-a-core-variables&#34;&gt;Spark&amp;rsquo;s cloud API&lt;/a&gt; rather than have to wait 5 minutes to check the readings being plotted, which was very handy especially because it was wireless unlike a serial connection. Here&amp;rsquo;s my entire main sketch:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;#include &amp;quot;plotly_spark.h&amp;quot;
-#include &amp;quot;plotly_defines.h&amp;quot;
-#include &amp;quot;math.h&amp;quot;
-#include &amp;quot;DHT.h&amp;quot;
-#include &amp;quot;Adafruit_TSL2561_U.h&amp;quot;
-
-#define TEMPPIN A0
-#define MOISTPIN A1
-#define DHTPIN D4
-#define DHTTYPE DHT22
-
-#define FIVE_MINUTES (5*60*1000)
-#define FIFTY_SECONDS (50*1000)
-
-// convert input volage reading to kelvin; 10mV = 1 K
-#define ANALOGKELVINCONVERSION 0.08056640625 // (3.3/4096)*100
-
-double Temp = 0.0;
-double SoilTemp = 0.0;
-double Humidity = 0.0;
-double Light = 0.0;
-int Moisture = 0;
-
-unsigned long lastloop = 0;
-unsigned long heartbeat = 0;
-
-char *tokens[TOKENS] = {AIRTEMPTOK, HUMIDTOK, SOILTEMPTOK, MOISTURETOK, LIGHTTOK};
-plotly graph = plotly(USERNAME, APITOKEN, tokens, PLOTNAME, TOKENS);
-DHT dht(DHTPIN, DHTTYPE);
-Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
-
-void setup() {
-    tsl.enableAutoRange(true);
-    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);
-
-    tsl.begin();
-    dht.begin();
-
-    pinMode(MOISTPIN, INPUT);
-    pinMode(TEMPPIN, INPUT);
-    Spark.variable(&amp;quot;Temperature&amp;quot;, &amp;amp;Temp, DOUBLE);
-    Spark.variable(&amp;quot;SoilTemperature&amp;quot;, &amp;amp;SoilTemp, DOUBLE);
-    Spark.variable(&amp;quot;Humidity&amp;quot;, &amp;amp;Humidity, DOUBLE);
-    Spark.variable(&amp;quot;Light&amp;quot;, &amp;amp;Light, DOUBLE);
-    Spark.variable(&amp;quot;Moisture&amp;quot;, &amp;amp;Moisture, INT);
-
-    graph.fileopt = &amp;quot;extend&amp;quot;;
-    graph.log_level = 4;
-    graph.maxpoints = 288;
-    graph.init();
-    graph.openStream();
-    heartbeat = millis();
-}
-
-void loop() {
-    unsigned long now = millis();
-
-    if ((now - lastloop) &amp;gt; FIVE_MINUTES){
-      sensors_event_t event;
-
-      tsl.getEvent(&amp;amp;event);
-      Light = (double)event.light;
-      Temp = (double)dht.readTemperature();
-      Humidity = (double)dht.readHumidity();
-      Moisture = map(analogRead(MOISTPIN), 0, 4096, 0, 330);
-      SoilTemp = (double)analogRead(TEMPPIN);
-      SoilTemp = (SoilTemp * ANALOGKELVINCONVERSION) - 273.15;
-
-      graph.plot(now, (float)Temp, tokens[0]);
-      graph.plot(now, (float)Humidity, tokens[1]);
-      graph.plot(now, (float)SoilTemp, tokens[2]);
-      graph.plot(now, Moisture, tokens[3]);
-      graph.plot(now, (float)Light, tokens[4]);
-
-      lastloop = now;
-  }else if((now-heartbeat) &amp;gt; FIFTY_SECONDS){
-      graph.heartbeat();
-      heartbeat = now;
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can see the rest of the code in the &lt;a href=&#34;https://github.com/serdmanczyk/gardenspark/tree/sparkonly&#34;&gt;&amp;lsquo;spark only&amp;rsquo; branch of my github repo&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;results:2753be554e797cd6a2ab8852ac642412&#34;&gt;Results&lt;/h2&gt;
-
-&lt;p&gt;Thanks to libraries and resources on the internet getting the basic sensors set up was made super easy.  Setting up the LM335 was a good refresher on basic electronics.  The Spark Core made internet connectivity very easy, and at a super affordable price (especially since mine was a birthday gift from my sister ^_^).  I still need to do some tuning to get the LM335 calibrated, and there are some bugs with the timestamp values drifting using plotly&amp;rsquo;s Arduino API.  After some experimenting with nodejs, it seems much more friendly with plotly&amp;rsquo;s API, so I look forward to getting the server portion going.  I also look forward to getting a database going so I can start observing patterns in the data over time.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Online Class Attendance App using Flask/MongoDB</title>
       <link>http://serdmanczyk.github.io/ClassAtttendanceApp/</link>
-      <pubDate>Wed, 18 Jun 2014 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 18 Jun 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/ClassAtttendanceApp/</guid>
       <description>
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Classes.png&#34; alt=&#34;Classes HomePage&#34; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;motivation:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Motivation&lt;/h1&gt;
+&lt;h1 id=&#34;motivation&#34;&gt;Motivation&lt;/h1&gt;
 
 &lt;p&gt;My friends and I teach a parkour class at a local gymnastics gym, which we organize ourselves.  We needed a solid method for logging attendance.  There were many free solutions, but they all followed the attendance model similar to school classroom attendance: each class has assigned students and you mark attendance by checking them off as absent, tardy, attended, excused, etc.  This didn&amp;rsquo;t fit our model because we ran our class on a come-as-you-can basis.  For lack of a better solution we used an Excel Google Doc or just left our attendance logs on paper.&lt;/p&gt;
 
 &lt;p&gt;Fast forward: not long ago I decided to take MongoDB&amp;rsquo;s free &lt;a href=&#34;https://university.mongodb.com/&#34;&gt;on-line developer&amp;rsquo;s course&lt;/a&gt;.  Part of the class used a simple blog example using the &lt;a href=&#34;http://bottlepy.org/docs/dev/index.html&#34;&gt;Bottle framework&lt;/a&gt; in Python, which made me think that a Python framework / MongoDB application would suit itself extremely well to what we wanted.  So I set to working using these tools to write my own simple class attendance application in my free time.&lt;/p&gt;
 
-&lt;h1 id=&#34;overview:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Overview&lt;/h1&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
 
 &lt;p&gt;My final application is pieced together using the following components:&lt;/p&gt;
 
@@ -2009,7 +689,7 @@ void loop() {
 &lt;li&gt;&lt;a href=&#34;http://www.openshift.com/&#34;&gt;OpenShift&lt;/a&gt; by RedHat for a free hosting solution easily managed by git and ssh.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h1 id=&#34;schema:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Schema&lt;/h1&gt;
+&lt;h1 id=&#34;schema&#34;&gt;Schema&lt;/h1&gt;
 
 &lt;p&gt;The MongoDB database schema uses four collections:&lt;/p&gt;
 
@@ -2022,44 +702,44 @@ void loop() {
 
 &lt;p&gt;The schema for the student and classes collections are shown below.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;# Students
+&lt;pre&gt;&lt;code class=&#34;json&#34;&gt;# Students
 {
-    &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167aa7&amp;quot;),
-    &amp;quot;firstname&amp;quot; : &amp;quot;Eunice&amp;quot;,
-    &amp;quot;lastname&amp;quot; : &amp;quot;Anderson&amp;quot;,
-    &amp;quot;gender&amp;quot; : &amp;quot;female&amp;quot;,
-    &amp;quot;email&amp;quot; : &amp;quot;altheabanks@zensor.com&amp;quot;
-    &amp;quot;dob&amp;quot; : ISODate(&amp;quot;1997-09-25T00:00:00Z&amp;quot;),
-    &amp;quot;emergencyphone&amp;quot; : &amp;quot;+1 (949) 511-3347&amp;quot;,
-    &amp;quot;emergencycontact&amp;quot; : &amp;quot;Althea Banks&amp;quot;,
+    &#34;_id&#34; : ObjectId(&#34;53a0ee5b798a010258167aa7&#34;),
+    &#34;firstname&#34; : &#34;Eunice&#34;,
+    &#34;lastname&#34; : &#34;Anderson&#34;,
+    &#34;gender&#34; : &#34;female&#34;,
+    &#34;email&#34; : &#34;altheabanks@zensor.com&#34;
+    &#34;dob&#34; : ISODate(&#34;1997-09-25T00:00:00Z&#34;),
+    &#34;emergencyphone&#34; : &#34;+1 (949) 511-3347&#34;,
+    &#34;emergencycontact&#34; : &#34;Althea Banks&#34;,
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;pre&gt;&lt;code&gt;# Classes
+&lt;pre&gt;&lt;code class=&#34;json&#34;&gt;# Classes
 {
-    &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;53a0f734798a0110dc74abc1&amp;quot;),
-    &amp;quot;date&amp;quot; : ISODate(&amp;quot;2014-01-01T00:00:00Z&amp;quot;),
-    &amp;quot;coach&amp;quot; : ObjectId(&amp;quot;53a0ef10798a010f40e8cabc&amp;quot;),
-    &amp;quot;type&amp;quot; : &amp;quot;beginner&amp;quot;
-    &amp;quot;attendance&amp;quot; : [
+    &#34;_id&#34; : ObjectId(&#34;53a0f734798a0110dc74abc1&#34;),
+    &#34;date&#34; : ISODate(&#34;2014-01-01T00:00:00Z&#34;),
+    &#34;coach&#34; : ObjectId(&#34;53a0ef10798a010f40e8cabc&#34;),
+    &#34;type&#34; : &#34;beginner&#34;
+    &#34;attendance&#34; : [
         {
-            &amp;quot;student&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167ab6&amp;quot;)
+            &#34;student&#34; : ObjectId(&#34;53a0ee5b798a010258167ab6&#34;)
         },
         {
-            &amp;quot;payment&amp;quot; : {
-                &amp;quot;amount&amp;quot; : 15,
-                &amp;quot;method&amp;quot; : &amp;quot;credit&amp;quot;,
-                &amp;quot;purchased&amp;quot; : &amp;quot;drop in&amp;quot;
+            &#34;payment&#34; : {
+                &#34;amount&#34; : 15,
+                &#34;method&#34; : &#34;credit&#34;,
+                &#34;purchased&#34; : &#34;drop in&#34;
             },
-            &amp;quot;student&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167ab5&amp;quot;)
+            &#34;student&#34; : ObjectId(&#34;53a0ee5b798a010258167ab5&#34;)
         },
         {
-            &amp;quot;payment&amp;quot; : {
-                &amp;quot;amount&amp;quot; : 0,
-                &amp;quot;method&amp;quot; : &amp;quot;punched&amp;quot;,
-                &amp;quot;purchased&amp;quot; : null
+            &#34;payment&#34; : {
+                &#34;amount&#34; : 0,
+                &#34;method&#34; : &#34;punched&#34;,
+                &#34;purchased&#34; : null
             },
-            &amp;quot;student&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167aaf&amp;quot;)
+            &#34;student&#34; : ObjectId(&#34;53a0ee5b798a010258167aaf&#34;)
         },
         ...
     ]
@@ -2068,13 +748,13 @@ void loop() {
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Schema.png&#34; alt=&#34;Schema Diagram&#34; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;screenshots:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Screenshots&lt;/h1&gt;
+&lt;h1 id=&#34;screenshots&#34;&gt;Screenshots&lt;/h1&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Class.png&#34; alt=&#34;Class Page&#34; /&gt;
 &lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Students.png&#34; alt=&#34;Students Page&#34; /&gt;
 &lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/edit_student.png&#34; alt=&#34;Edit Student Page&#34; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;demo-and-source-code:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Demo and Source Code&lt;/h1&gt;
+&lt;h1 id=&#34;demo-and-source-code&#34;&gt;Demo and Source Code&lt;/h1&gt;
 
 &lt;p&gt;&lt;a href=&#34;http://classdemo-evargreen.rhcloud.com/&#34; class=&#34;btn btn-success&#34;&gt;Live Demo&lt;/a&gt;    &lt;a href=&#34;https://github.com/serdmanczyk/parkour_class_attendance_app&#34; class=&#34;btn btn-success&#34;&gt;GitHub Repository&lt;/a&gt;&lt;/p&gt;
 
@@ -2082,7 +762,7 @@ void loop() {
 
 &lt;p&gt;All source code including provisions for OpenShift is available on GitHub.  Fork it and build it into your own class app!&lt;/p&gt;
 
-&lt;h1 id=&#34;summary:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Summary&lt;/h1&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
 
 &lt;p&gt;This is just a quick base application I programmed for fun to get practice using new frameworks and technologies.  Future work includes adding more feedback to users when errors happend server-side.  Currently there&amp;rsquo;s no real error checking and only minor form validation.  If there&amp;rsquo;s an exception flask returns a feedback page, if a submit fails the new data simply fails to show up.  I would also add a page to manage coaches as well as an ability to view charts of attendance and revenue over time.  I may use a future post to demonstrate using MapReduce with MongoDB to retrieve related data from two collections in one call, similar to a SQL Join.&lt;/p&gt;
 </description>
@@ -2091,20 +771,20 @@ void loop() {
     <item>
       <title>XBee API Mode Tutorial Using Python and Arduino</title>
       <link>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</link>
-      <pubDate>Sun, 01 Jun 2014 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 01 Jun 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</guid>
       <description>
 
-&lt;p&gt;&lt;pre&gt;
+&lt;pre&gt;
 Disclaimer:  This is meant to be a tutorial.
 Primarily this is intended to educate with basic XBee
 API mode setup, and how the XBee frame format works.
-If you&amp;rsquo;re looking for a library, I recommend for &lt;a href=&#34;https://pypi.python.org/pypi/XBee&#34;&gt;XBee&lt;/a&gt; for
-Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#34;&gt;xbee-arduino&lt;/a&gt; for&amp;hellip; yeah.
-&lt;/pre&gt;&lt;/p&gt;
+If you&#39;re looking for a library, I recommend for [XBee][pyxbee] for
+Python and checkout [xbee-arduino][arxbee] for... yeah.
+&lt;/pre&gt;
 
-&lt;h2 id=&#34;introduction:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Introduction&lt;/h2&gt;
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
 
 &lt;p&gt;This post is a tutorial, with example code, covering how to communicate using XBee 802.15.4 (Series 1) radios in API mode using Python and Arduino.  I decided to write these tutorials because I couldn&amp;rsquo;t find a substantial amount of simple examples when I decided to use XBee&amp;rsquo;s in API mode while working on my Masters thesis.  It&amp;rsquo;s my hopes this tutorial can help other people working on applications similar to mine get off the ground and running faster.&lt;/p&gt;
 
@@ -2112,7 +792,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;This tutorial does assume you are familiar with Digi X-CTU and Arduino software.  You will be instructed what to do in X-CTU and Arduino (e.g. &amp;ldquo;compile&amp;rdquo;, &amp;ldquo;change these settings&amp;rdquo;), but will not be instructed how to do it (e.g. &amp;ldquo;push the blue button&amp;rdquo;, &amp;ldquo;go to menu File-&amp;gt;&amp;rdquo;)&lt;/p&gt;
 
-&lt;h2 id=&#34;requisite-hardware:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Hardware&lt;/h2&gt;
+&lt;h2 id=&#34;requisite-hardware&#34;&gt;Requisite Hardware&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;2 XBee 802.15.4 Series 1 radios&lt;/li&gt;
@@ -2124,7 +804,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;I recommend the &lt;a href=&#34;http://amzn.com/B00B6SF2C6&#34;&gt;Parallax XBee Wireless Pack&lt;/a&gt;, but there are also several other options on &lt;a href=&#34;https://www.sparkfun.com&#34;&gt;SparkFun&lt;/a&gt;, &lt;a href=&#34;https://www.adafruit.com&#34;&gt;Adafruit&lt;/a&gt;, &lt;a href=&#34;http://www.makershed.com/SearchResults.asp?Search=xbee&#34;&gt;Maker Shed&lt;/a&gt; and other hobby electronics stores.  Many of them are very similar to the pieces used in this post.&lt;/p&gt;
 
-&lt;h2 id=&#34;requisite-software:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Software&lt;/h2&gt;
+&lt;h2 id=&#34;requisite-software&#34;&gt;Requisite Software&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/xctu&#34;&gt;Digi X-CTU&lt;/a&gt;&lt;/li&gt;
@@ -2134,11 +814,11 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 &lt;li&gt;&lt;a href=&#34;http://arduino.cc/en/main/software&#34;&gt;Arduino Software&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;why-xbee-802-15-4:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
+&lt;h2 id=&#34;why-xbee-802-15-4&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
 
 &lt;p&gt;XBee radios are handy in embedded applications because they enable wireless communications with relatively low power compared to Wi-Fi, bluetooth, or cellular technologies at the cost of slower speed.  XBee 802.15.4 (Series 1) provides simple OSI layer one and two functionality on the module.  Zigbee radios (XBee Series 2) provide an additional networking layer that can handle cool things like automatic mesh networking, however, Zigbee mesh networks are limited to a maximum of 10 nodes.  Zigbee radios can also operate in API mode, frame packaging is the same, and the frames used for Zigbee are very similar.  This tutorial covers XBee 80.15.4 because their frames are simpler for beginners and are all we need to cover the basics.&lt;/p&gt;
 
-&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
+&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
 
 &lt;p&gt;Using API mode to communicate has a few advantages compared to other XBee configuration options:&lt;/p&gt;
 
@@ -2189,7 +869,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;That covers the basics of API frames / the boring part.  Now let&amp;rsquo;s actually have some fun.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
+&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
 
 &lt;p&gt;For all parts of this tutorial we&amp;rsquo;ll have two XBee radios with different settings.  To make things easier we&amp;rsquo;ll give them names.  For the rest of this tutorial &amp;ldquo;Atreyu&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our computer and &amp;ldquo;Falcor&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our Arduino.&lt;/p&gt;
 
@@ -2238,7 +918,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;Congratulations!  You&amp;rsquo;ve successfully setup and communicated with the XBee&amp;rsquo;s in transparent mode.  Now we&amp;rsquo;re ready to switch Atreyu into API mode and start communicating using Python in part two.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
+&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
 
 &lt;p&gt;Now that we have things setup and we&amp;rsquo;ve verified they can communicate, we can switch our first XBee into API mode and begin sending messages with it via Python. Re-configure the following parameter on Atreyu to enable API mode.&lt;/p&gt;
 
@@ -2268,28 +948,28 @@ Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
 
 &lt;p&gt;You did it!  What exactly did we do?  Let&amp;rsquo;s start examining the code by looking at the body of main.py.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    xbee = XBee.XBee(&amp;quot;COM3&amp;quot;)  # Your serial port name here
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;    xbee = XBee.XBee(&#34;COM3&#34;)  # Your serial port name here
 
     # A simple string message
-    sent = xbee.SendStr(&amp;quot;Hello World&amp;quot;)
+    sent = xbee.SendStr(&#34;Hello World&#34;)
     sleep(0.25)
     Msg = xbee.Receive()
     if Msg:
         content = Msg[7:-1].decode(&#39;ascii&#39;)
-        print(&amp;quot;Msg: &amp;quot; + content)
+        print(&#34;Msg: &#34; + content)
 
     # A message that requires escaping
-    xbee.Send(bytearray.fromhex(&amp;quot;7e 7d 11 13 5b 01 01 01 01 01 01 01&amp;quot;))
+    xbee.Send(bytearray.fromhex(&#34;7e 7d 11 13 5b 01 01 01 01 01 01 01&#34;))
     sleep(0.25)
     Msg = xbee.Receive()
     if Msg:
         content = Msg[7:-1]
-        print(&amp;quot;Msg: &amp;quot; + xbee.format(content))
+        print(&#34;Msg: &#34; + xbee.format(content))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;As can be seen, we sent and received two messages.  The first messages contents were simply &amp;ldquo;Hello World&amp;rdquo; in ascii encoding.  The second message is a bit more obscure, it is formatted to demonstrate API mode character escaping which we&amp;rsquo;ll get more into soon.  Now, let&amp;rsquo;s get into the pieces that are the heart of this tutorial.  Lets start with the XBee &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class XBee():
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;class XBee():
     ...
     def __init__(self, serialport, baudrate=9600):
         self.serial = serial.Serial(port=serialport, baudrate=baudrate)
@@ -2299,7 +979,7 @@ Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
 
 &lt;p&gt;Now lets look at the interesting stuff, starting with the SendStr() method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
         return self.Send(msg.encode(&#39;utf-8&#39;), addr, options, frameid)
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -2471,7 +1151,7 @@ start delimiter |  |  |     |  |  |  |  |                                       
 
 &lt;p&gt;That concludes all the example pieces to do basic message sending and receiving in API mode using Python.  Next, we&amp;rsquo;ll switch worlds into C++ code to handle message reception on an Arduino.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
+&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
 
 &lt;p&gt;Now we&amp;rsquo;ll need to re-connect Falcor to our computer briefly to reset the following parameters in X-CTU:&lt;/p&gt;
 
@@ -2711,7 +1391,7 @@ void setup(void)
 
 &lt;p&gt;That sums up all the main parts of the XBee example code.&lt;/p&gt;
 
-&lt;h2 id=&#34;review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Review&lt;/h2&gt;
+&lt;h2 id=&#34;review&#34;&gt;Review&lt;/h2&gt;
 
 &lt;p&gt;That covers a basic example of programming for XBee 802.15.4 radios configured in API mode.  I found API mode very helpful when programming for my Masters thesis, which you should check out the &lt;a href=&#34;https://github.com/serdmanczyk/masters-thesis&#34;&gt;source code for&lt;/a&gt; if you would like to see an example of receiving, parsing, and sending many different API frame types in an actual application.  Hopefully this tutorial and example code enable you to get off the ground running with your application, or better understand some feature of Python, Arduino, XBee, serial communications, etc.  If you&amp;rsquo;ve encounter any trouble running the examples, or have any questions / comments / concerns please post them in the comments so others with similar problems can see too :).&lt;/p&gt;
 </description>
@@ -2720,7 +1400,7 @@ void setup(void)
     <item>
       <title>Developer Blog Begins</title>
       <link>http://serdmanczyk.github.io/BlogStarts/</link>
-      <pubDate>Thu, 29 May 2014 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 29 May 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/BlogStarts/</guid>
       <description>&lt;p&gt;So I&amp;rsquo;ve decided to start a developer&amp;rsquo;s blog.  My first motivation in doing this was to share information on side projects as I continue to hobby in hacking/making things with electronics in my free time.  Hopefully things I do/make would inspire other people to do similar or greater things.  My second motivation is to also use it as a place to showcase software engineering side projects for others to read and build off of as well as for professional exposure.&lt;/p&gt;
@@ -2741,12 +1421,12 @@ void setup(void)
     <item>
       <title>Master&#39;s Thesis</title>
       <link>http://serdmanczyk.github.io/MSEEThesis/</link>
-      <pubDate>Wed, 28 May 2014 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 28 May 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/MSEEThesis/</guid>
       <description>
 
-&lt;h2 id=&#34;intro:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Intro&lt;/h2&gt;
+&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 
 &lt;p&gt;I’ve decided to begin blogging my various endeavors in software development and electrical engineering hackery. To kick it off, I’m writing a post describing the work I did for my Masters of Science in Electrical Engineering thesis. This post will start it off with a brief introduction/overview, then I’ll cover individual aspects of the project.&lt;/p&gt;
 
@@ -2784,7 +1464,7 @@ void setup(void)
 
 &lt;p&gt;That concludes the basic, top-level overview, now let&amp;rsquo;s delve into how I handled the networking layer in my application.&lt;/p&gt;
 
-&lt;h2 id=&#34;networking:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Networking&lt;/h2&gt;
+&lt;h2 id=&#34;networking&#34;&gt;Networking&lt;/h2&gt;
 
 &lt;!-- EMBED: http://instagram.com/p/gZgK3NFzgv/ --&gt;
 
@@ -2834,7 +1514,7 @@ void setup(void)
 
 &lt;p&gt;Now that networking is covered, our next layer to cover is using this to communicate RSSI among all of the nodes and using that to evaluate communications strength amongst the system.&lt;/p&gt;
 
-&lt;h2 id=&#34;rss-rssi-and-syncing-measurements:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
+&lt;h2 id=&#34;rss-rssi-and-syncing-measurements&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
 
 &lt;p&gt;So, what is RSS? RSS is an acronym for &lt;a href=&#34;http://en.wikipedia.org/wiki/Signal_strength&#34;&gt;Received Signal Strength&lt;/a&gt; which is a metric used to represent how strong a radio signal is when a message is received on a listening device. In lower powered applications such as with embedded radios, it can commonly be measured as the log base 10 of the ratio of the received signal power to 1 milliwatt, aka &lt;a href=&#34;http://www.rapidtables.com/electric/dBm.htm&#34;&gt;Decibel-milliwatt&lt;/a&gt; (dBm).&lt;/p&gt;
 
@@ -2854,7 +1534,7 @@ void setup(void)
 
 &lt;p&gt;So that’s how I handled monitoring and syncing signal strength between nodes in my application’s system. This functionality is critical as one of the primary objectives in the system is to maintain distance between nodes in order to maximize communication’s strength. In my  into the primary logical functions of my system: deploying nodes as needed, maintaining distance between nodes, and healing the tether when nodes go down.&lt;/p&gt;
 
-&lt;h2 id=&#34;node-deployment:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Node Deployment&lt;/h2&gt;
+&lt;h2 id=&#34;node-deployment&#34;&gt;Node Deployment&lt;/h2&gt;
 
 &lt;p&gt;When it came to the system’s responsibilities of deployment, distance management, and recovery I had to make a choice with each of how I would split that responsibility among the system parts. Should the logic for deployment be a distributed protocol among the nodes? What about healing and distance management, is that something nodes should defer to the base station? In the case of deployment, the choice of centralizing the logic to the base station was an easy one.&lt;/p&gt;
 
@@ -2917,7 +1597,7 @@ void setup(void)
 
 &lt;p&gt;That sums up the deployment process, which is the simplest of the three system tasks. Now let&amp;rsquo;s go over the distance maintenance algorithm.&lt;/p&gt;
 
-&lt;h2 id=&#34;distance-maintenance:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Distance Maintenance&lt;/h2&gt;
+&lt;h2 id=&#34;distance-maintenance&#34;&gt;Distance Maintenance&lt;/h2&gt;
 
 &lt;p&gt;I chose to make the distance maintenance algorithm a distributed one. The phrase ‘distributed algorithm’ tends to invoke thoughts of complexity. Implementing a distributed algorithm may require additional code to handle concurrency, error correction, message passing, etc. however in the case of my system, distributed means that I could avoid that complexity as well as increase the speed of response.&lt;/p&gt;
 
@@ -2948,7 +1628,7 @@ void setup(void)
 
 &lt;p&gt;So that covers how I implemented a simple, distributed, emergent algorithm to allow the mobile nodes in the system of my thesis to control their distance to each other. Now let&amp;rsquo;s look at the final and most difficult piece: handling recovery when nodes area lost.&lt;/p&gt;
 
-&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
+&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
 
 &lt;p&gt;If a node is lost, the nodes need not just to intelligently reconnect, they most likely also need to maneuver to be back in range of a healthy node. Once again there came the choice of whether to handle this distributively or centrally, and I once again chose the former.&lt;/p&gt;
 
@@ -2985,7 +1665,7 @@ void setup(void)
 
 &lt;p&gt;That gives a general overview of how my application handles situations where a node is lost. Once again not too complicated given the other layers are designed well.&lt;/p&gt;
 
-&lt;h2 id=&#34;summary:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Summary&lt;/h2&gt;
+&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
 
 &lt;p&gt;Thus concludes the &amp;lsquo;blog-ification&amp;rsquo; of the work I did on my thesis.  I spared intricate details on coding and such, because that would drag on longer than I would wish for what I wanted to get across.  I will give a post soon on the basics of using API mode with XBees using Python and Arduino that will include code from this project.  Hopefully the general overview of how I implemented a system of mobile nodes/a base station to provide an automated wireless communications tether can be helpful to others with a similar project and/or may have just been entertaining to read.&lt;/p&gt;
 

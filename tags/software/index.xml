@@ -1,31 +1,175 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Software on Erdmanczyk.io</title>
-    <link>http://serdmanczyk.github.io/tags/software/</link>
-    <description>Recent content in Software on Erdmanczyk.io</description>
-    <generator>Hugo -- gohugo.io</generator>
+      <title> on Steven Erdmanczyk Jr. </title>
+      <generator uri="https://gohugo.io">Hugo</generator>
+    <link>http://serdmanczyk.github.io/tags/software/index.xml</link>
     <language>en-us</language>
-    <lastBuildDate>Wed, 18 Jun 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://serdmanczyk.github.io/tags/software/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
+    
+    <item>
+      <title>A fullstack Go &#43; ReactJS App deployed with Docker</title>
+      <link>http://serdmanczyk.github.io/post/2016-10-14-GoFullstackApp/</link>
+      <pubDate>Sun, 23 Oct 2016 20:00:01 PDT</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/post/2016-10-14-GoFullstackApp/</guid>
+      <description>
+
+&lt;h2 id=&#34;what&#34;&gt;What?&lt;/h2&gt;
+
+&lt;p&gt;I&amp;rsquo;ve written a fullstack app: Go backend, ReactJS web frontend, deployed using Docker-Compose.&lt;/p&gt;
+
+&lt;p&gt;I call it Freyr, obligatory screenshots:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.17.39.png&#34; alt=&#34;Screenshot 2016-05-09 23.17.39.png&#34; /&gt;
+&lt;img src=&#34;https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.17.48.png&#34; alt=&#34;Screenshot 2016-05-09 23.17.48.png&#34; /&gt;
+&lt;img src=&#34;https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.18.04.png&#34; alt=&#34;Screenshot 2016-05-09 23.18.04.png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You can read more about the app itself on its &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/tree/v1.0&#34;&gt;github page&lt;/a&gt;.  You can even view the app actually running at &lt;a href=&#34;https://freyr.erdmanczyk.com/latest&#34;&gt;frey.erdmanczyk.com&lt;/a&gt;.  In this post I&amp;rsquo;ll share an overview of the app&amp;rsquo;s design.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s yet another &amp;lsquo;arduino&amp;rsquo; (in this case a &lt;a href=&#34;https://docs.particle.io/datasheets/core-datasheet/&#34;&gt;Particle Core&lt;/a&gt;) plant sensor project: meausuring temperature, humidity, light, etc. with sensors and an MCU and then sending it to the cloud.  Unlike many other projects, however, the cloud server is custom built.&lt;/p&gt;
+
+&lt;h2 id=&#34;why&#34;&gt;Why?&lt;/h2&gt;
+
+&lt;p&gt;I cover the &amp;lsquo;why&amp;rsquo; of the app on the github page, but why this post?&lt;/p&gt;
+
+&lt;p&gt;If you&amp;rsquo;re looking to write an app in Go, there is hardly a lack of resources for learning.  Be it tutorials, examples, existing libraries, etc. Go has a rich community.&lt;/p&gt;
+
+&lt;p&gt;My goal with this post isn&amp;rsquo;t to make a mega-tutorial covering all the how-to&amp;rsquo;s of what I did in this project, but to provide a simple example of pulling those components together into a Thing™.&lt;/p&gt;
+
+&lt;p&gt;Rather than an exhaustive overview of how to build this from the ground up, this will instead be a high-level overview of the app, its components, and their purposes.  I&amp;rsquo;ll make some assumptions that the reader understands how the underlying technology works, but if you see something cool and want to know more feel free to comment/e-mail ☺.&lt;/p&gt;
+
+&lt;h2 id=&#34;how-does-this-work&#34;&gt;How does this work?&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/deploygoapp/layout.png&#34; alt=&#34;App layout&#34; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Deployed via docker-compose&lt;/li&gt;
+&lt;li&gt;Nginx gateway&lt;/li&gt;
+&lt;li&gt;ReactJS frontend&lt;/li&gt;
+&lt;li&gt;Go backend w/ Postgres database&lt;/li&gt;
+&lt;li&gt;Google oauth authentication, &lt;a href=&#34;https://jwt.io/&#34;&gt;JWT&lt;/a&gt; managed sessions, HMAC signed API access&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;deployment&#34;&gt;Deployment&lt;/h2&gt;
+
+&lt;p&gt;Docker-compose was great because I could script my app environments.  This made spinning up and tearing down the apps on the fly super easy.&lt;/p&gt;
+
+&lt;p&gt;Another benefit was the provider I used for this project, &lt;a href=&#34;https://www.digitalocean.com/&#34;&gt;DigitalOcean&lt;/a&gt;, has a &lt;a href=&#34;https://docs.docker.com/machine/drivers/digital-ocean/&#34;&gt;docker-machine driver&lt;/a&gt;.  I created my VM with docker-machine, then could use the same docker client commands to deploy my app in production as I do to test on my local machine.&lt;/p&gt;
+
+&lt;p&gt;The repository has four Docker Compose files:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.yml&#34;&gt;docker-compose.yml&lt;/a&gt;: Production deployment, pulls all files into the images&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.debug.yml&#34;&gt;docker-compose.debug.yml&lt;/a&gt;: Rather than copying in files, mounts directories into the container to speed launching docker as well as allow live editing of things such as UI files.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.integration.yml&#34;&gt;docker-compose.integration.yml&lt;/a&gt;: Runs integration tests, organized as unit tests that require external resources such as database connections.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.acceptance.yml&#34;&gt;docker-compose.acceptance.yml&lt;/a&gt;: Runs full-path acceptance tests, performing API calls and asserting results&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I used a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/Makefile&#34;&gt;Makefile&lt;/a&gt; to simplify some commonly used commands e.g. running tests, building binaries and deploying.&lt;/p&gt;
+
+&lt;h2 id=&#34;nginx&#34;&gt;Nginx&lt;/h2&gt;
+
+&lt;p&gt;My app doesn&amp;rsquo;t need any load balancing yet.  Rather, at this stage I employ Nginx for other features including:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Terminating SSL&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L29&#34;&gt;Redirecting HTTP -&amp;gt; HTTPS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Serving static files and &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L44&#34;&gt;handling 304&lt;/a&gt; &amp;lsquo;Content Not Modifed&amp;rsquo; responses&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L12&#34;&gt;Gzipping responses&lt;/a&gt; when applicable&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L49&#34;&gt;Routing &amp;lsquo;/api/&amp;rsquo; requests&lt;/a&gt; to the backend.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I&amp;rsquo;m admittedly not an ops or Nginx configuration expert, so I owe a lot to The Google and Stackoverflow for getting this working.&lt;/p&gt;
+
+&lt;p&gt;All nginx config is in the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf&#34;&gt;nginx/conf&lt;/a&gt; directory.&lt;/p&gt;
+
+&lt;h2 id=&#34;reactjs-frontend-some-d3-js&#34;&gt;ReactJS Frontend (+ some D3.js)&lt;/h2&gt;
+
+&lt;p&gt;I picked ReactJS mainly because of how simple it was to get up and going vs. other frameworks.  I wanted to write Go code, I didn&amp;rsquo;t want to spend my time learning what the perfect frontend framework is.  The less time for me spent on the frontend the better, but I also didn&amp;rsquo;t want to half-ass it&amp;hellip;  too badly.&lt;/p&gt;
+
+&lt;p&gt;All ReactJS and other static files are packed with Nginx in the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/tree/v1.0/nginx/static&#34;&gt;nginx/static&lt;/a&gt; directory.  I used the free &lt;a href=&#34;https://startbootstrap.com/template-overviews/grayscale/&#34;&gt;grayscale&lt;/a&gt; bootsrap theme for CSS/layout.  The background picture I actually &lt;a href=&#34;https://www.flickr.com/photos/erby/19310748252/in/album-72157655281974332/&#34;&gt;took myself&lt;/a&gt; on a &lt;a href=&#34;https://www.flickr.com/photos/erby/albums/72157655281974332&#34;&gt;hike&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I use Webpack to build the app files into a single bundle.js.  My development docker-compose file was handy working on this because I could set webpack to watch changes and rebuild on the fly, and updating my changes in the container.&lt;/p&gt;
+
+&lt;p&gt;The web page is a single-page app.  All paths on Nginx not matching &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L49&#34;&gt;&lt;code&gt;/api&lt;/code&gt;&lt;/a&gt; or a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L46&#34;&gt;valid path in the content directory&lt;/a&gt; serve the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/static/index.html&#34;&gt;index.html&lt;/a&gt; file.  This allows users to return to &amp;lsquo;pages&amp;rsquo; within the app courtesy of react-router&amp;rsquo;s functionality.  To demonstrate try going to the &lt;a href=&#34;https://freyr.erdmanczyk.com&#34;&gt;demo&lt;/a&gt;, logging in as the demo user, navigating to a chart, and then copying and pasting the url into a new browser tab.&lt;/p&gt;
+
+&lt;p&gt;The app also includes charts, for which I chose &lt;a href=&#34;https://d3js.org/&#34;&gt;d3.js&lt;/a&gt;.  It&amp;rsquo;s easy to make fun of Javascript, but there are those who do make good things with it, and D3.js is one of those things.  It took some magic to get d3 to work with React, because of how React uses a virtual DOM representation, but some code from &lt;a href=&#34;https://github.com/Olical/react-faux-dom&#34;&gt;react-faux-dom&lt;/a&gt; came to the rescue.&lt;/p&gt;
+
+&lt;h2 id=&#34;go-backend&#34;&gt;Go backend&lt;/h2&gt;
+
+&lt;p&gt;Go powers the backend, the meat of the project, powering:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Negotiating &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/oauth/oauth.go#L66&#34;&gt;oauth&lt;/a&gt; with &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/oauth/google_oauth.go#L22&#34;&gt;Google&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Issuing signed &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/token/token.go#L39&#34;&gt;JWT&amp;rsquo;s&lt;/a&gt; to &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L54&#34;&gt;authenticated users&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Authorizing &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/models/secret.go#L25&#34;&gt;HMAC signed&lt;/a&gt; web requests for &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L93&#34;&gt;API access&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Receiving, storing, and serving &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go&#34;&gt;sensor readings&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This was the part I really cared about, by trade I consider myself a backend developer.&lt;/p&gt;
+
+&lt;p&gt;I won&amp;rsquo;t do the intro to &amp;lsquo;What Go Is™&amp;rsquo; that seems obligatory on every blog post.&lt;/p&gt;
+
+&lt;p&gt;I will say I have really enjoyed programming in Go.  Having a background in C, then C++, then Python working in Go has been a happy combination of what I&amp;rsquo;ve enjoyed between those worlds.  It&amp;rsquo;s got some problems to fix, but it gets a lot of things satisfyingly right.&lt;/p&gt;
+
+&lt;p&gt;I could spend a whole couple blog posts talking about how I designed the Go backend, but instead I&amp;rsquo;ll just point at some key design features I chose writing it:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Using interfaces to model data sources: separating concerns in code, enabling mocking for unit tests, and allowing extensible swapping of data sources.&lt;/li&gt;
+&lt;li&gt;No global config or config loading in libraries, only loading configuration in main and passing to components via parameters, which also enables easier unit testing.&lt;/li&gt;
+&lt;li&gt;Sticking to the standard lib as much as possible (e.g. &lt;a href=&#34;https://golang.org/pkg/net/http/&#34;&gt;net/http&lt;/a&gt;), making the code more reusable and less dependent on third party libraries.&lt;/li&gt;
+&lt;li&gt;Using &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L40&#34;&gt;contexts&lt;/a&gt; in http handlers.  I used the &lt;a href=&#34;https://github.com/cyclopsci/apollo&#34;&gt;apollo&lt;/a&gt; library for chaining, but need to switch to instead conform to context adaptations in Go 1.7+.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One example of how I used interfaces is with the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/models/readings.go#L17&#34;&gt;models.ReadingStore&lt;/a&gt; which is implemented by the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/database/reading.go#L9&#34;&gt;DB type&lt;/a&gt;.  When implementing handlers such as &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go#L67&#34;&gt;PostReadings&lt;/a&gt; and &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go#L93&#34;&gt;GetLatestReadings&lt;/a&gt;, the functions accept the interface type rather than DB.  This allowed me to test the handlers using a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/fake/reading.go#L43&#34;&gt;mock&lt;/a&gt; and the &lt;a href=&#34;https://golang.org/pkg/net/http/httptest/&#34;&gt;httptest&lt;/a&gt; package in &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings_test.go#L26&#34;&gt;readings_test.go&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Rather than using a framework such as &lt;a href=&#34;https://github.com/gin-gonic/gin&#34;&gt;Gin&lt;/a&gt;, &lt;a href=&#34;https://github.com/labstack/echo&#34;&gt;Echo&lt;/a&gt;, or even &lt;a href=&#34;http://www.gorillatoolkit.org/&#34;&gt;Gorilla&lt;/a&gt; (which actually plays very well with the stdlib) I chose to stick to the standard library as much as possible for handlers.  I only used &lt;a href=&#34;https://github.com/urfave/negroni&#34;&gt;negroni&lt;/a&gt; to easily get a couple handy middleware&amp;rsquo;s for free.  I didn&amp;rsquo;t want my project code heavily dependent on a third-party framework, lest I leave the project for a bit and come back to find the library deprecated or no longer compatible with updated language versions.  This also allows easier switching between libraries that also play nice the with standard library.&lt;/p&gt;
+
+&lt;h2 id=&#34;ok-what-about-the-sensors&#34;&gt;Ok, what about the sensors?&lt;/h2&gt;
+
+&lt;p&gt;I mentioned this app&amp;rsquo;s main purpose was to gather and log sensor data.  I also mentioned some security features.  How do those work together?&lt;/p&gt;
+
+&lt;p&gt;I briefly hand-waved at the ability to verify API access via signed HTTP requests.  Once a user is logged in, they can access the &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/main.go#L66&#34;&gt;&lt;code&gt;/api/secret&lt;/code&gt;&lt;/a&gt; endpoint to get a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/secret.go#L11&#34;&gt;one-time-only private secret&lt;/a&gt;.  This can be used to access the API as their user by &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L154&#34;&gt;signing the request in a certain way&lt;/a&gt;.  The secret can also be &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/secret.go#L45&#34;&gt;rotated&lt;/a&gt; if needed.  I wrote a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/tree/v1.0/cmd/surtr&#34;&gt;CLI&lt;/a&gt; to convenience these operations.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;You may notice I named my app &lt;a href=&#34;https://en.wikipedia.org/wiki/Freyr&#34;&gt;Freyr&lt;/a&gt; and CLI &lt;a href=&#34;https://en.wikipedia.org/wiki/Surtr&#34;&gt;surtr&lt;/a&gt;.  These are references to the Norse God and jötunn adversary at Ragnarok.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Currently the MCU I use enables registering a webhook for whenever data is posted using a provided firmware function.  This webhook can send a POST request to a specified endpoint, in this case &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/main.go#L70&#34;&gt;&lt;code&gt;/api/reading&lt;/code&gt;&lt;/a&gt;.  Unfortunately, their current functionality as of the time I was doing this work didn&amp;rsquo;t provide methods for request signing, so the best that could be done is to configure the webhook to include a &lt;a href=&#34;https://github.com/serdmanczyk/Freyr/blob/v1.0/token/token.go#L107&#34;&gt;signed JWT&lt;/a&gt; and headers with the POST request.  Admittedly not the most secure method, but given the amount of free-time I had(/have) it was a compromise for now that got me going.  I mean, people would look at what I&amp;rsquo;ve done already and awe themselves with my apparent amount of free-time.&lt;/p&gt;
+
+&lt;h2 id=&#34;other-things-worth-mentioning&#34;&gt;Other things worth Mentioning&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04&#34;&gt;Free certs with LetsEncrypt!&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Automated testing (because why not) with &lt;a href=&#34;https://travis-ci.org/serdmanczyk/Freyr&#34;&gt;Travis CI&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://goreportcard.com/report/github.com/serdmanczyk/freyr&#34;&gt;A+ Go Report&lt;/a&gt; :)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://godoc.org/github.com/serdmanczyk/Freyr&#34;&gt;Godoc&lt;/a&gt; compliant&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;in-summary&#34;&gt;In Summary&lt;/h2&gt;
+
+&lt;p&gt;That&amp;rsquo;s a high level overview of the app, with a little more exposition on the Go pieces.  Hopefully this serves as a handy example to others working on similar projects.  In the future I look to add more features to this project, such as the ability to water plants and splitting the backend into smaller microservices.  All in time.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Online Class Attendance App using Flask/MongoDB</title>
       <link>http://serdmanczyk.github.io/ClassAtttendanceApp/</link>
-      <pubDate>Wed, 18 Jun 2014 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 18 Jun 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/ClassAtttendanceApp/</guid>
       <description>
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Classes.png&#34; alt=&#34;Classes HomePage&#34; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;motivation:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Motivation&lt;/h1&gt;
+&lt;h1 id=&#34;motivation&#34;&gt;Motivation&lt;/h1&gt;
 
 &lt;p&gt;My friends and I teach a parkour class at a local gymnastics gym, which we organize ourselves.  We needed a solid method for logging attendance.  There were many free solutions, but they all followed the attendance model similar to school classroom attendance: each class has assigned students and you mark attendance by checking them off as absent, tardy, attended, excused, etc.  This didn&amp;rsquo;t fit our model because we ran our class on a come-as-you-can basis.  For lack of a better solution we used an Excel Google Doc or just left our attendance logs on paper.&lt;/p&gt;
 
 &lt;p&gt;Fast forward: not long ago I decided to take MongoDB&amp;rsquo;s free &lt;a href=&#34;https://university.mongodb.com/&#34;&gt;on-line developer&amp;rsquo;s course&lt;/a&gt;.  Part of the class used a simple blog example using the &lt;a href=&#34;http://bottlepy.org/docs/dev/index.html&#34;&gt;Bottle framework&lt;/a&gt; in Python, which made me think that a Python framework / MongoDB application would suit itself extremely well to what we wanted.  So I set to working using these tools to write my own simple class attendance application in my free time.&lt;/p&gt;
 
-&lt;h1 id=&#34;overview:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Overview&lt;/h1&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
 
 &lt;p&gt;My final application is pieced together using the following components:&lt;/p&gt;
 
@@ -38,7 +182,7 @@
 &lt;li&gt;&lt;a href=&#34;http://www.openshift.com/&#34;&gt;OpenShift&lt;/a&gt; by RedHat for a free hosting solution easily managed by git and ssh.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h1 id=&#34;schema:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Schema&lt;/h1&gt;
+&lt;h1 id=&#34;schema&#34;&gt;Schema&lt;/h1&gt;
 
 &lt;p&gt;The MongoDB database schema uses four collections:&lt;/p&gt;
 
@@ -51,44 +195,44 @@
 
 &lt;p&gt;The schema for the student and classes collections are shown below.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;# Students
+&lt;pre&gt;&lt;code class=&#34;json&#34;&gt;# Students
 {
-    &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167aa7&amp;quot;),
-    &amp;quot;firstname&amp;quot; : &amp;quot;Eunice&amp;quot;,
-    &amp;quot;lastname&amp;quot; : &amp;quot;Anderson&amp;quot;,
-    &amp;quot;gender&amp;quot; : &amp;quot;female&amp;quot;,
-    &amp;quot;email&amp;quot; : &amp;quot;altheabanks@zensor.com&amp;quot;
-    &amp;quot;dob&amp;quot; : ISODate(&amp;quot;1997-09-25T00:00:00Z&amp;quot;),
-    &amp;quot;emergencyphone&amp;quot; : &amp;quot;+1 (949) 511-3347&amp;quot;,
-    &amp;quot;emergencycontact&amp;quot; : &amp;quot;Althea Banks&amp;quot;,
+    &#34;_id&#34; : ObjectId(&#34;53a0ee5b798a010258167aa7&#34;),
+    &#34;firstname&#34; : &#34;Eunice&#34;,
+    &#34;lastname&#34; : &#34;Anderson&#34;,
+    &#34;gender&#34; : &#34;female&#34;,
+    &#34;email&#34; : &#34;altheabanks@zensor.com&#34;
+    &#34;dob&#34; : ISODate(&#34;1997-09-25T00:00:00Z&#34;),
+    &#34;emergencyphone&#34; : &#34;+1 (949) 511-3347&#34;,
+    &#34;emergencycontact&#34; : &#34;Althea Banks&#34;,
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;pre&gt;&lt;code&gt;# Classes
+&lt;pre&gt;&lt;code class=&#34;json&#34;&gt;# Classes
 {
-    &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;53a0f734798a0110dc74abc1&amp;quot;),
-    &amp;quot;date&amp;quot; : ISODate(&amp;quot;2014-01-01T00:00:00Z&amp;quot;),
-    &amp;quot;coach&amp;quot; : ObjectId(&amp;quot;53a0ef10798a010f40e8cabc&amp;quot;),
-    &amp;quot;type&amp;quot; : &amp;quot;beginner&amp;quot;
-    &amp;quot;attendance&amp;quot; : [
+    &#34;_id&#34; : ObjectId(&#34;53a0f734798a0110dc74abc1&#34;),
+    &#34;date&#34; : ISODate(&#34;2014-01-01T00:00:00Z&#34;),
+    &#34;coach&#34; : ObjectId(&#34;53a0ef10798a010f40e8cabc&#34;),
+    &#34;type&#34; : &#34;beginner&#34;
+    &#34;attendance&#34; : [
         {
-            &amp;quot;student&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167ab6&amp;quot;)
+            &#34;student&#34; : ObjectId(&#34;53a0ee5b798a010258167ab6&#34;)
         },
         {
-            &amp;quot;payment&amp;quot; : {
-                &amp;quot;amount&amp;quot; : 15,
-                &amp;quot;method&amp;quot; : &amp;quot;credit&amp;quot;,
-                &amp;quot;purchased&amp;quot; : &amp;quot;drop in&amp;quot;
+            &#34;payment&#34; : {
+                &#34;amount&#34; : 15,
+                &#34;method&#34; : &#34;credit&#34;,
+                &#34;purchased&#34; : &#34;drop in&#34;
             },
-            &amp;quot;student&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167ab5&amp;quot;)
+            &#34;student&#34; : ObjectId(&#34;53a0ee5b798a010258167ab5&#34;)
         },
         {
-            &amp;quot;payment&amp;quot; : {
-                &amp;quot;amount&amp;quot; : 0,
-                &amp;quot;method&amp;quot; : &amp;quot;punched&amp;quot;,
-                &amp;quot;purchased&amp;quot; : null
+            &#34;payment&#34; : {
+                &#34;amount&#34; : 0,
+                &#34;method&#34; : &#34;punched&#34;,
+                &#34;purchased&#34; : null
             },
-            &amp;quot;student&amp;quot; : ObjectId(&amp;quot;53a0ee5b798a010258167aaf&amp;quot;)
+            &#34;student&#34; : ObjectId(&#34;53a0ee5b798a010258167aaf&#34;)
         },
         ...
     ]
@@ -97,13 +241,13 @@
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Schema.png&#34; alt=&#34;Schema Diagram&#34; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;screenshots:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Screenshots&lt;/h1&gt;
+&lt;h1 id=&#34;screenshots&#34;&gt;Screenshots&lt;/h1&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Class.png&#34; alt=&#34;Class Page&#34; /&gt;
 &lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/Students.png&#34; alt=&#34;Students Page&#34; /&gt;
 &lt;img src=&#34;http://serdmanczyk.github.io/images/classattendance/edit_student.png&#34; alt=&#34;Edit Student Page&#34; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;demo-and-source-code:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Demo and Source Code&lt;/h1&gt;
+&lt;h1 id=&#34;demo-and-source-code&#34;&gt;Demo and Source Code&lt;/h1&gt;
 
 &lt;p&gt;&lt;a href=&#34;http://classdemo-evargreen.rhcloud.com/&#34; class=&#34;btn btn-success&#34;&gt;Live Demo&lt;/a&gt;    &lt;a href=&#34;https://github.com/serdmanczyk/parkour_class_attendance_app&#34; class=&#34;btn btn-success&#34;&gt;GitHub Repository&lt;/a&gt;&lt;/p&gt;
 
@@ -111,7 +255,7 @@
 
 &lt;p&gt;All source code including provisions for OpenShift is available on GitHub.  Fork it and build it into your own class app!&lt;/p&gt;
 
-&lt;h1 id=&#34;summary:06e3b8cf457e2107d1200d1c47e493de&#34;&gt;Summary&lt;/h1&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
 
 &lt;p&gt;This is just a quick base application I programmed for fun to get practice using new frameworks and technologies.  Future work includes adding more feedback to users when errors happend server-side.  Currently there&amp;rsquo;s no real error checking and only minor form validation.  If there&amp;rsquo;s an exception flask returns a feedback page, if a submit fails the new data simply fails to show up.  I would also add a page to manage coaches as well as an ability to view charts of attendance and revenue over time.  I may use a future post to demonstrate using MapReduce with MongoDB to retrieve related data from two collections in one call, similar to a SQL Join.&lt;/p&gt;
 </description>
@@ -120,20 +264,20 @@
     <item>
       <title>XBee API Mode Tutorial Using Python and Arduino</title>
       <link>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</link>
-      <pubDate>Sun, 01 Jun 2014 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 01 Jun 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/XBeeAPI-PythonArduino-Tutorial/</guid>
       <description>
 
-&lt;p&gt;&lt;pre&gt;
+&lt;pre&gt;
 Disclaimer:  This is meant to be a tutorial.
 Primarily this is intended to educate with basic XBee
 API mode setup, and how the XBee frame format works.
-If you&amp;rsquo;re looking for a library, I recommend for &lt;a href=&#34;https://pypi.python.org/pypi/XBee&#34;&gt;XBee&lt;/a&gt; for
-Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#34;&gt;xbee-arduino&lt;/a&gt; for&amp;hellip; yeah.
-&lt;/pre&gt;&lt;/p&gt;
+If you&#39;re looking for a library, I recommend for [XBee][pyxbee] for
+Python and checkout [xbee-arduino][arxbee] for... yeah.
+&lt;/pre&gt;
 
-&lt;h2 id=&#34;introduction:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Introduction&lt;/h2&gt;
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
 
 &lt;p&gt;This post is a tutorial, with example code, covering how to communicate using XBee 802.15.4 (Series 1) radios in API mode using Python and Arduino.  I decided to write these tutorials because I couldn&amp;rsquo;t find a substantial amount of simple examples when I decided to use XBee&amp;rsquo;s in API mode while working on my Masters thesis.  It&amp;rsquo;s my hopes this tutorial can help other people working on applications similar to mine get off the ground and running faster.&lt;/p&gt;
 
@@ -141,7 +285,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;This tutorial does assume you are familiar with Digi X-CTU and Arduino software.  You will be instructed what to do in X-CTU and Arduino (e.g. &amp;ldquo;compile&amp;rdquo;, &amp;ldquo;change these settings&amp;rdquo;), but will not be instructed how to do it (e.g. &amp;ldquo;push the blue button&amp;rdquo;, &amp;ldquo;go to menu File-&amp;gt;&amp;rdquo;)&lt;/p&gt;
 
-&lt;h2 id=&#34;requisite-hardware:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Hardware&lt;/h2&gt;
+&lt;h2 id=&#34;requisite-hardware&#34;&gt;Requisite Hardware&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;2 XBee 802.15.4 Series 1 radios&lt;/li&gt;
@@ -153,7 +297,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;I recommend the &lt;a href=&#34;http://amzn.com/B00B6SF2C6&#34;&gt;Parallax XBee Wireless Pack&lt;/a&gt;, but there are also several other options on &lt;a href=&#34;https://www.sparkfun.com&#34;&gt;SparkFun&lt;/a&gt;, &lt;a href=&#34;https://www.adafruit.com&#34;&gt;Adafruit&lt;/a&gt;, &lt;a href=&#34;http://www.makershed.com/SearchResults.asp?Search=xbee&#34;&gt;Maker Shed&lt;/a&gt; and other hobby electronics stores.  Many of them are very similar to the pieces used in this post.&lt;/p&gt;
 
-&lt;h2 id=&#34;requisite-software:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Requisite Software&lt;/h2&gt;
+&lt;h2 id=&#34;requisite-software&#34;&gt;Requisite Software&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/xctu&#34;&gt;Digi X-CTU&lt;/a&gt;&lt;/li&gt;
@@ -163,11 +307,11 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 &lt;li&gt;&lt;a href=&#34;http://arduino.cc/en/main/software&#34;&gt;Arduino Software&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;why-xbee-802-15-4:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
+&lt;h2 id=&#34;why-xbee-802-15-4&#34;&gt;Why XBee 802.15.4?&lt;/h2&gt;
 
 &lt;p&gt;XBee radios are handy in embedded applications because they enable wireless communications with relatively low power compared to Wi-Fi, bluetooth, or cellular technologies at the cost of slower speed.  XBee 802.15.4 (Series 1) provides simple OSI layer one and two functionality on the module.  Zigbee radios (XBee Series 2) provide an additional networking layer that can handle cool things like automatic mesh networking, however, Zigbee mesh networks are limited to a maximum of 10 nodes.  Zigbee radios can also operate in API mode, frame packaging is the same, and the frames used for Zigbee are very similar.  This tutorial covers XBee 80.15.4 because their frames are simpler for beginners and are all we need to cover the basics.&lt;/p&gt;
 
-&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
+&lt;h2 id=&#34;why-xbee-api-mode-a-brief-review&#34;&gt;Why XBee API mode? A Brief Review&lt;/h2&gt;
 
 &lt;p&gt;Using API mode to communicate has a few advantages compared to other XBee configuration options:&lt;/p&gt;
 
@@ -218,7 +362,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;That covers the basics of API frames / the boring part.  Now let&amp;rsquo;s actually have some fun.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
+&lt;h2 id=&#34;part-one-initial-setup-and-communication-in-transparent-mode&#34;&gt;Part One: Initial Setup and communication in Transparent Mode&lt;/h2&gt;
 
 &lt;p&gt;For all parts of this tutorial we&amp;rsquo;ll have two XBee radios with different settings.  To make things easier we&amp;rsquo;ll give them names.  For the rest of this tutorial &amp;ldquo;Atreyu&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our computer and &amp;ldquo;Falcor&amp;rdquo; will refer to the XBee we&amp;rsquo;re connecting to our Arduino.&lt;/p&gt;
 
@@ -267,7 +411,7 @@ Python and checkout &lt;a href=&#34;https://github.com/andrewrapp/xbee-arduino&#
 
 &lt;p&gt;Congratulations!  You&amp;rsquo;ve successfully setup and communicated with the XBee&amp;rsquo;s in transparent mode.  Now we&amp;rsquo;re ready to switch Atreyu into API mode and start communicating using Python in part two.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
+&lt;h2 id=&#34;part-two-communicating-from-a-pc-w-api-mode-using-python&#34;&gt;Part Two: Communicating from a PC w/API mode using Python&lt;/h2&gt;
 
 &lt;p&gt;Now that we have things setup and we&amp;rsquo;ve verified they can communicate, we can switch our first XBee into API mode and begin sending messages with it via Python. Re-configure the following parameter on Atreyu to enable API mode.&lt;/p&gt;
 
@@ -297,28 +441,28 @@ Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
 
 &lt;p&gt;You did it!  What exactly did we do?  Let&amp;rsquo;s start examining the code by looking at the body of main.py.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    xbee = XBee.XBee(&amp;quot;COM3&amp;quot;)  # Your serial port name here
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;    xbee = XBee.XBee(&#34;COM3&#34;)  # Your serial port name here
 
     # A simple string message
-    sent = xbee.SendStr(&amp;quot;Hello World&amp;quot;)
+    sent = xbee.SendStr(&#34;Hello World&#34;)
     sleep(0.25)
     Msg = xbee.Receive()
     if Msg:
         content = Msg[7:-1].decode(&#39;ascii&#39;)
-        print(&amp;quot;Msg: &amp;quot; + content)
+        print(&#34;Msg: &#34; + content)
 
     # A message that requires escaping
-    xbee.Send(bytearray.fromhex(&amp;quot;7e 7d 11 13 5b 01 01 01 01 01 01 01&amp;quot;))
+    xbee.Send(bytearray.fromhex(&#34;7e 7d 11 13 5b 01 01 01 01 01 01 01&#34;))
     sleep(0.25)
     Msg = xbee.Receive()
     if Msg:
         content = Msg[7:-1]
-        print(&amp;quot;Msg: &amp;quot; + xbee.format(content))
+        print(&#34;Msg: &#34; + xbee.format(content))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;As can be seen, we sent and received two messages.  The first messages contents were simply &amp;ldquo;Hello World&amp;rdquo; in ascii encoding.  The second message is a bit more obscure, it is formatted to demonstrate API mode character escaping which we&amp;rsquo;ll get more into soon.  Now, let&amp;rsquo;s get into the pieces that are the heart of this tutorial.  Lets start with the XBee &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class XBee():
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;class XBee():
     ...
     def __init__(self, serialport, baudrate=9600):
         self.serial = serial.Serial(port=serialport, baudrate=baudrate)
@@ -328,7 +472,7 @@ Msg: 7e 7d 11 13 5b 01 01 01 01 01 01 01
 
 &lt;p&gt;Now lets look at the interesting stuff, starting with the SendStr() method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
+&lt;pre&gt;&lt;code class=&#34;python&#34;&gt;    def SendStr(self, msg, addr=0xFFFF, options=0x01, frameid=0x00):
         return self.Send(msg.encode(&#39;utf-8&#39;), addr, options, frameid)
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -500,7 +644,7 @@ start delimiter |  |  |     |  |  |  |  |                                       
 
 &lt;p&gt;That concludes all the example pieces to do basic message sending and receiving in API mode using Python.  Next, we&amp;rsquo;ll switch worlds into C++ code to handle message reception on an Arduino.&lt;/p&gt;
 
-&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
+&lt;h2 id=&#34;part-three-communicating-from-an-arduino-w-api-mode&#34;&gt;Part Three: Communicating from an Arduino w/API mode&lt;/h2&gt;
 
 &lt;p&gt;Now we&amp;rsquo;ll need to re-connect Falcor to our computer briefly to reset the following parameters in X-CTU:&lt;/p&gt;
 
@@ -740,7 +884,7 @@ void setup(void)
 
 &lt;p&gt;That sums up all the main parts of the XBee example code.&lt;/p&gt;
 
-&lt;h2 id=&#34;review:26789ce4bdeeb43961eb5aa29ffc85c8&#34;&gt;Review&lt;/h2&gt;
+&lt;h2 id=&#34;review&#34;&gt;Review&lt;/h2&gt;
 
 &lt;p&gt;That covers a basic example of programming for XBee 802.15.4 radios configured in API mode.  I found API mode very helpful when programming for my Masters thesis, which you should check out the &lt;a href=&#34;https://github.com/serdmanczyk/masters-thesis&#34;&gt;source code for&lt;/a&gt; if you would like to see an example of receiving, parsing, and sending many different API frame types in an actual application.  Hopefully this tutorial and example code enable you to get off the ground running with your application, or better understand some feature of Python, Arduino, XBee, serial communications, etc.  If you&amp;rsquo;ve encounter any trouble running the examples, or have any questions / comments / concerns please post them in the comments so others with similar problems can see too :).&lt;/p&gt;
 </description>
@@ -749,12 +893,12 @@ void setup(void)
     <item>
       <title>Master&#39;s Thesis</title>
       <link>http://serdmanczyk.github.io/MSEEThesis/</link>
-      <pubDate>Wed, 28 May 2014 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 28 May 2014 00:00:00 UTC</pubDate>
       
       <guid>http://serdmanczyk.github.io/MSEEThesis/</guid>
       <description>
 
-&lt;h2 id=&#34;intro:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Intro&lt;/h2&gt;
+&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 
 &lt;p&gt;I’ve decided to begin blogging my various endeavors in software development and electrical engineering hackery. To kick it off, I’m writing a post describing the work I did for my Masters of Science in Electrical Engineering thesis. This post will start it off with a brief introduction/overview, then I’ll cover individual aspects of the project.&lt;/p&gt;
 
@@ -792,7 +936,7 @@ void setup(void)
 
 &lt;p&gt;That concludes the basic, top-level overview, now let&amp;rsquo;s delve into how I handled the networking layer in my application.&lt;/p&gt;
 
-&lt;h2 id=&#34;networking:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Networking&lt;/h2&gt;
+&lt;h2 id=&#34;networking&#34;&gt;Networking&lt;/h2&gt;
 
 &lt;!-- EMBED: http://instagram.com/p/gZgK3NFzgv/ --&gt;
 
@@ -842,7 +986,7 @@ void setup(void)
 
 &lt;p&gt;Now that networking is covered, our next layer to cover is using this to communicate RSSI among all of the nodes and using that to evaluate communications strength amongst the system.&lt;/p&gt;
 
-&lt;h2 id=&#34;rss-rssi-and-syncing-measurements:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
+&lt;h2 id=&#34;rss-rssi-and-syncing-measurements&#34;&gt;RSS, RSSI, and Syncing Measurements&lt;/h2&gt;
 
 &lt;p&gt;So, what is RSS? RSS is an acronym for &lt;a href=&#34;http://en.wikipedia.org/wiki/Signal_strength&#34;&gt;Received Signal Strength&lt;/a&gt; which is a metric used to represent how strong a radio signal is when a message is received on a listening device. In lower powered applications such as with embedded radios, it can commonly be measured as the log base 10 of the ratio of the received signal power to 1 milliwatt, aka &lt;a href=&#34;http://www.rapidtables.com/electric/dBm.htm&#34;&gt;Decibel-milliwatt&lt;/a&gt; (dBm).&lt;/p&gt;
 
@@ -862,7 +1006,7 @@ void setup(void)
 
 &lt;p&gt;So that’s how I handled monitoring and syncing signal strength between nodes in my application’s system. This functionality is critical as one of the primary objectives in the system is to maintain distance between nodes in order to maximize communication’s strength. In my  into the primary logical functions of my system: deploying nodes as needed, maintaining distance between nodes, and healing the tether when nodes go down.&lt;/p&gt;
 
-&lt;h2 id=&#34;node-deployment:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Node Deployment&lt;/h2&gt;
+&lt;h2 id=&#34;node-deployment&#34;&gt;Node Deployment&lt;/h2&gt;
 
 &lt;p&gt;When it came to the system’s responsibilities of deployment, distance management, and recovery I had to make a choice with each of how I would split that responsibility among the system parts. Should the logic for deployment be a distributed protocol among the nodes? What about healing and distance management, is that something nodes should defer to the base station? In the case of deployment, the choice of centralizing the logic to the base station was an easy one.&lt;/p&gt;
 
@@ -925,7 +1069,7 @@ void setup(void)
 
 &lt;p&gt;That sums up the deployment process, which is the simplest of the three system tasks. Now let&amp;rsquo;s go over the distance maintenance algorithm.&lt;/p&gt;
 
-&lt;h2 id=&#34;distance-maintenance:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Distance Maintenance&lt;/h2&gt;
+&lt;h2 id=&#34;distance-maintenance&#34;&gt;Distance Maintenance&lt;/h2&gt;
 
 &lt;p&gt;I chose to make the distance maintenance algorithm a distributed one. The phrase ‘distributed algorithm’ tends to invoke thoughts of complexity. Implementing a distributed algorithm may require additional code to handle concurrency, error correction, message passing, etc. however in the case of my system, distributed means that I could avoid that complexity as well as increase the speed of response.&lt;/p&gt;
 
@@ -956,7 +1100,7 @@ void setup(void)
 
 &lt;p&gt;So that covers how I implemented a simple, distributed, emergent algorithm to allow the mobile nodes in the system of my thesis to control their distance to each other. Now let&amp;rsquo;s look at the final and most difficult piece: handling recovery when nodes area lost.&lt;/p&gt;
 
-&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
+&lt;h2 id=&#34;healing-the-tether-when-nodes-are-lost&#34;&gt;Healing the Tether when Nodes are Lost&lt;/h2&gt;
 
 &lt;p&gt;If a node is lost, the nodes need not just to intelligently reconnect, they most likely also need to maneuver to be back in range of a healthy node. Once again there came the choice of whether to handle this distributively or centrally, and I once again chose the former.&lt;/p&gt;
 
@@ -993,7 +1137,7 @@ void setup(void)
 
 &lt;p&gt;That gives a general overview of how my application handles situations where a node is lost. Once again not too complicated given the other layers are designed well.&lt;/p&gt;
 
-&lt;h2 id=&#34;summary:87835e7e612fcf69f4ed77ed98e6b1e2&#34;&gt;Summary&lt;/h2&gt;
+&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
 
 &lt;p&gt;Thus concludes the &amp;lsquo;blog-ification&amp;rsquo; of the work I did on my thesis.  I spared intricate details on coding and such, because that would drag on longer than I would wish for what I wanted to get across.  I will give a post soon on the basics of using API mode with XBees using Python and Arduino that will include code from this project.  Hopefully the general overview of how I implemented a system of mobile nodes/a base station to provide an automated wireless communications tether can be helpful to others with a similar project and/or may have just been entertaining to read.&lt;/p&gt;
 

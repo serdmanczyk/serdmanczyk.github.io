@@ -1,1 +1,0 @@
-# serdmanczyk.github.io

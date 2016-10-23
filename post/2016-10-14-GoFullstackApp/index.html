@@ -1,0 +1,324 @@
+  <!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> A fullstack Go &#43; ReactJS App deployed with Docker &middot; Steven Erdmanczyk Jr. </title>
+    
+    <link rel="stylesheet" type="text/css" href="http://serdmanczyk.github.io//css/uno.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://serdmanczyk.github.io//css/lightGallery.css" />
+    
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/monokai_sublime.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    
+    <link href="" rel="alternate" type="application/rss+xml" title="Steven Erdmanczyk Jr." />
+    
+    <script src="http://serdmanczyk.github.io//js/jquery.min.js"></script>
+    <script src="http://serdmanczyk.github.io//js/main.min.js">
+    </script>
+</head>
+
+  <body>
+    <div id="scriptHeader">
+    <span class="mobile btn-mobile-menu">
+            <i class="fa fa-bars btn-mobile-menu__icon"></i>
+            <i class="fa fa-times btn-mobile-close__icon hidden"> </i>
+    </span>
+    <header class="
+        
+            panel-cover panel-cover--collapsed
+        "  style="background-image: url(/images/background.jpg)" >
+    <div class="panel-main">
+        <div class="panel-main__inner panel-inverted">
+            <div class="panel-main__content"> 
+                <a href="http://serdmanczyk.github.io//" title="link to homepage for Steven Erdmanczyk Jr."> <img src="/images/avatar@2x.png" width="80" alt="Steven Erdmanczyk Jr. logo" class="panel-cover__logo logo" /> </a> 
+                <h1 class="panel-cover__title panel-title">
+                    <a href="http://serdmanczyk.github.io//"  title="link to homepage for Steven Erdmanczyk Jr.">Steven Erdmanczyk Jr.</a>
+                </h1>
+                <hr class="panel-cover__divider" />
+                <p class="panel-cover__description">  software engineer / adventurer  </p>
+                <hr class="panel-cover__divider panel-cover__divider--secondary" />
+                <div class="navigation-wrapper">
+                    <nav class="cover-navigation cover-navigation--primary">
+                        <ul class="navigation">
+                            <li class="navigation__item"><a href="http://serdmanczyk.github.io/#blog" title="link to Steven Erdmanczyk Jr. blog" class="blog-button">Blog</a> </li></br>
+                            
+                            
+                       </ul>
+                    </nav> <nav class="cover-navigation navigation--social">
+    <ul class="navigation"> 
+        
+        <li class="navigation__item">
+            <a href="http://twitter.com/serdmanczyk" title="@serdmanczyk on Twitter"> <i class='fa fa-twitter'></i> <span class="label">Twitter</span> </a>
+        </li>   
+        
+        <li class="navigation__item">
+            <a href="https://github.com/serdmanczyk" title="serdmanczyk on github"> <i class='fa fa-github'></i> <span class="label">Github</span> </a>
+        </li>  </br>  
+        
+        <li class="navigation__item">
+            <a href="https://www.linkedin.com/in/sjerdmanczykjr" title="Linkedin"> <i class='fa fa-linkedin'></i> <span class="label">Linkedin</span> </a>
+        </li>  
+        
+        <li class="navigation__item">
+            <a href="mailto:serdmanczyk@gmail.com" title="Email serdmanczyk@gmail.com"> <i class='fa fa-envelope-o'></i> <span class="label">Email</span> </a>
+        </li>  </ul>
+</nav>
+ </div>
+            </div>
+        </div>
+        <div class="panel-cover--overlay"></div>
+    </div>
+</header>
+</div>
+<noscript>
+    <style>
+        #scriptHeader {display:none;}
+        .navigation-wrapper{
+            display: block;
+            top: 0;
+        }
+    </style>
+
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url(/images/background.jpg)">
+        <div class="panel-main">
+            <div class="panel-main__inner panel-inverted">
+                <div class="panel-main__content"> 
+                    <a href="http://serdmanczyk.github.io//" title="link to homepage for Steven Erdmanczyk Jr."> <img src="/images/avatar@2x.png" width="80" alt="Steven Erdmanczyk Jr. logo" class="panel-cover__logo logo" /> </a> 
+                    <h1 class="panel-cover__title panel-title">
+                        <a href="http://serdmanczyk.github.io//"  title="link to homepage for Steven Erdmanczyk Jr.">Steven Erdmanczyk Jr.</a>
+                    </h1>
+                    <hr class="panel-cover__divider" />
+                    <p class="panel-cover__description">  software engineer / adventurer  </p>
+                    <hr class="panel-cover__divider panel-cover__divider--secondary" />
+                    <div class="navigation-wrapper">
+                        <nav class="cover-navigation cover-navigation--primary">
+                            <ul class="navigation">
+                                <li class="navigation__item"><a href="http://serdmanczyk.github.io//#blog" title="link to Steven Erdmanczyk Jr. blog" class="blog-button">Blog</a> </li></br>
+                                
+                                
+                           </ul>
+                        </nav> <nav class="cover-navigation navigation--social">
+    <ul class="navigation"> 
+        
+        <li class="navigation__item">
+            <a href="http://twitter.com/serdmanczyk" title="@serdmanczyk on Twitter"> <i class='fa fa-twitter'></i> <span class="label">Twitter</span> </a>
+        </li>   
+        
+        <li class="navigation__item">
+            <a href="https://github.com/serdmanczyk" title="serdmanczyk on github"> <i class='fa fa-github'></i> <span class="label">Github</span> </a>
+        </li>  </br>  
+        
+        <li class="navigation__item">
+            <a href="https://www.linkedin.com/in/sjerdmanczykjr" title="Linkedin"> <i class='fa fa-linkedin'></i> <span class="label">Linkedin</span> </a>
+        </li>  
+        
+        <li class="navigation__item">
+            <a href="mailto:serdmanczyk@gmail.com" title="Email serdmanczyk@gmail.com"> <i class='fa fa-envelope-o'></i> <span class="label">Email</span> </a>
+        </li>  </ul>
+</nav>
+ </div>
+                </div>
+            </div>
+            <div class="panel-cover--overlay"></div>
+        </div>
+    </header>
+</noscript>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner">
+        <div class="post">
+          <h1>A fullstack Go &#43; ReactJS App deployed with Docker</h1>
+          <span class="post-date">Sun, Oct 23, 2016</span>
+          
+
+<h2 id="what">What?</h2>
+
+<p>I&rsquo;ve written a fullstack app: Go backend, ReactJS web frontend, deployed using Docker-Compose.</p>
+
+<p>I call it Freyr, obligatory screenshots:</p>
+
+<p><img src="https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.17.39.png" alt="Screenshot 2016-05-09 23.17.39.png" />
+<img src="https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.17.48.png" alt="Screenshot 2016-05-09 23.17.48.png" />
+<img src="https://github.com/serdmanczyk/Freyr/raw/v1.0/repo_files/Screenshot%202016-05-09%2023.18.04.png" alt="Screenshot 2016-05-09 23.18.04.png" /></p>
+
+<p>You can read more about the app itself on its <a href="https://github.com/serdmanczyk/Freyr/tree/v1.0">github page</a>.  You can even view the app actually running at <a href="https://freyr.erdmanczyk.com/latest">frey.erdmanczyk.com</a>.  In this post I&rsquo;ll share an overview of the app&rsquo;s design.</p>
+
+<p>It&rsquo;s yet another &lsquo;arduino&rsquo; (in this case a <a href="https://docs.particle.io/datasheets/core-datasheet/">Particle Core</a>) plant sensor project: meausuring temperature, humidity, light, etc. with sensors and an MCU and then sending it to the cloud.  Unlike many other projects, however, the cloud server is custom built.</p>
+
+<h2 id="why">Why?</h2>
+
+<p>I cover the &lsquo;why&rsquo; of the app on the github page, but why this post?</p>
+
+<p>If you&rsquo;re looking to write an app in Go, there is hardly a lack of resources for learning.  Be it tutorials, examples, existing libraries, etc. Go has a rich community.</p>
+
+<p>My goal with this post isn&rsquo;t to make a mega-tutorial covering all the how-to&rsquo;s of what I did in this project, but to provide a simple example of pulling those components together into a Thing™.</p>
+
+<p>Rather than an exhaustive overview of how to build this from the ground up, this will instead be a high-level overview of the app, its components, and their purposes.  I&rsquo;ll make some assumptions that the reader understands how the underlying technology works, but if you see something cool and want to know more feel free to comment/e-mail ☺.</p>
+
+<h2 id="how-does-this-work">How does this work?</h2>
+
+<p><img src="/images/deploygoapp/layout.png" alt="App layout" /></p>
+
+<ul>
+<li>Deployed via docker-compose</li>
+<li>Nginx gateway</li>
+<li>ReactJS frontend</li>
+<li>Go backend w/ Postgres database</li>
+<li>Google oauth authentication, <a href="https://jwt.io/">JWT</a> managed sessions, HMAC signed API access</li>
+</ul>
+
+<h2 id="deployment">Deployment</h2>
+
+<p>Docker-compose was great because I could script my app environments.  This made spinning up and tearing down the apps on the fly super easy.</p>
+
+<p>Another benefit was the provider I used for this project, <a href="https://www.digitalocean.com/">DigitalOcean</a>, has a <a href="https://docs.docker.com/machine/drivers/digital-ocean/">docker-machine driver</a>.  I created my VM with docker-machine, then could use the same docker client commands to deploy my app in production as I do to test on my local machine.</p>
+
+<p>The repository has four Docker Compose files:</p>
+
+<ul>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.yml">docker-compose.yml</a>: Production deployment, pulls all files into the images</li>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.debug.yml">docker-compose.debug.yml</a>: Rather than copying in files, mounts directories into the container to speed launching docker as well as allow live editing of things such as UI files.</li>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.integration.yml">docker-compose.integration.yml</a>: Runs integration tests, organized as unit tests that require external resources such as database connections.</li>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/docker-compose.acceptance.yml">docker-compose.acceptance.yml</a>: Runs full-path acceptance tests, performing API calls and asserting results</li>
+</ul>
+
+<p>I used a <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/Makefile">Makefile</a> to simplify some commonly used commands e.g. running tests, building binaries and deploying.</p>
+
+<h2 id="nginx">Nginx</h2>
+
+<p>My app doesn&rsquo;t need any load balancing yet.  Rather, at this stage I employ Nginx for other features including:</p>
+
+<ul>
+<li>Terminating SSL</li>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L29">Redirecting HTTP -&gt; HTTPS</a></li>
+<li>Serving static files and <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L44">handling 304</a> &lsquo;Content Not Modifed&rsquo; responses</li>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L12">Gzipping responses</a> when applicable</li>
+<li><a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L49">Routing &lsquo;/api/&rsquo; requests</a> to the backend.</li>
+</ul>
+
+<p>I&rsquo;m admittedly not an ops or Nginx configuration expert, so I owe a lot to The Google and Stackoverflow for getting this working.</p>
+
+<p>All nginx config is in the <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf">nginx/conf</a> directory.</p>
+
+<h2 id="reactjs-frontend-some-d3-js">ReactJS Frontend (+ some D3.js)</h2>
+
+<p>I picked ReactJS mainly because of how simple it was to get up and going vs. other frameworks.  I wanted to write Go code, I didn&rsquo;t want to spend my time learning what the perfect frontend framework is.  The less time for me spent on the frontend the better, but I also didn&rsquo;t want to half-ass it&hellip;  too badly.</p>
+
+<p>All ReactJS and other static files are packed with Nginx in the <a href="https://github.com/serdmanczyk/Freyr/tree/v1.0/nginx/static">nginx/static</a> directory.  I used the free <a href="https://startbootstrap.com/template-overviews/grayscale/">grayscale</a> bootsrap theme for CSS/layout.  The background picture I actually <a href="https://www.flickr.com/photos/erby/19310748252/in/album-72157655281974332/">took myself</a> on a <a href="https://www.flickr.com/photos/erby/albums/72157655281974332">hike</a>.</p>
+
+<p>I use Webpack to build the app files into a single bundle.js.  My development docker-compose file was handy working on this because I could set webpack to watch changes and rebuild on the fly, and updating my changes in the container.</p>
+
+<p>The web page is a single-page app.  All paths on Nginx not matching <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L49"><code>/api</code></a> or a <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/conf/nginx.conf#L46">valid path in the content directory</a> serve the <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/nginx/static/index.html">index.html</a> file.  This allows users to return to &lsquo;pages&rsquo; within the app courtesy of react-router&rsquo;s functionality.  To demonstrate try going to the <a href="https://freyr.erdmanczyk.com">demo</a>, logging in as the demo user, navigating to a chart, and then copying and pasting the url into a new browser tab.</p>
+
+<p>The app also includes charts, for which I chose <a href="https://d3js.org/">d3.js</a>.  It&rsquo;s easy to make fun of Javascript, but there are those who do make good things with it, and D3.js is one of those things.  It took some magic to get d3 to work with React, because of how React uses a virtual DOM representation, but some code from <a href="https://github.com/Olical/react-faux-dom">react-faux-dom</a> came to the rescue.</p>
+
+<h2 id="go-backend">Go backend</h2>
+
+<p>Go powers the backend, the meat of the project, powering:</p>
+
+<ul>
+<li>Negotiating <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/oauth/oauth.go#L66">oauth</a> with <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/oauth/google_oauth.go#L22">Google</a></li>
+<li>Issuing signed <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/token/token.go#L39">JWT&rsquo;s</a> to <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L54">authenticated users</a></li>
+<li>Authorizing <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/models/secret.go#L25">HMAC signed</a> web requests for <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L93">API access</a></li>
+<li>Receiving, storing, and serving <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go">sensor readings</a></li>
+</ul>
+
+<p>This was the part I really cared about, by trade I consider myself a backend developer.</p>
+
+<p>I won&rsquo;t do the intro to &lsquo;What Go Is™&rsquo; that seems obligatory on every blog post.</p>
+
+<p>I will say I have really enjoyed programming in Go.  Having a background in C, then C++, then Python working in Go has been a happy combination of what I&rsquo;ve enjoyed between those worlds.  It&rsquo;s got some problems to fix, but it gets a lot of things satisfyingly right.</p>
+
+<p>I could spend a whole couple blog posts talking about how I designed the Go backend, but instead I&rsquo;ll just point at some key design features I chose writing it:</p>
+
+<ul>
+<li>Using interfaces to model data sources: separating concerns in code, enabling mocking for unit tests, and allowing extensible swapping of data sources.</li>
+<li>No global config or config loading in libraries, only loading configuration in main and passing to components via parameters, which also enables easier unit testing.</li>
+<li>Sticking to the standard lib as much as possible (e.g. <a href="https://golang.org/pkg/net/http/">net/http</a>), making the code more reusable and less dependent on third party libraries.</li>
+<li>Using <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L40">contexts</a> in http handlers.  I used the <a href="https://github.com/cyclopsci/apollo">apollo</a> library for chaining, but need to switch to instead conform to context adaptations in Go 1.7+.</li>
+</ul>
+
+<p>One example of how I used interfaces is with the <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/models/readings.go#L17">models.ReadingStore</a> which is implemented by the <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/database/reading.go#L9">DB type</a>.  When implementing handlers such as <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go#L67">PostReadings</a> and <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings.go#L93">GetLatestReadings</a>, the functions accept the interface type rather than DB.  This allowed me to test the handlers using a <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/fake/reading.go#L43">mock</a> and the <a href="https://golang.org/pkg/net/http/httptest/">httptest</a> package in <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/readings_test.go#L26">readings_test.go</a>.</p>
+
+<p>Rather than using a framework such as <a href="https://github.com/gin-gonic/gin">Gin</a>, <a href="https://github.com/labstack/echo">Echo</a>, or even <a href="http://www.gorillatoolkit.org/">Gorilla</a> (which actually plays very well with the stdlib) I chose to stick to the standard library as much as possible for handlers.  I only used <a href="https://github.com/urfave/negroni">negroni</a> to easily get a couple handy middleware&rsquo;s for free.  I didn&rsquo;t want my project code heavily dependent on a third-party framework, lest I leave the project for a bit and come back to find the library deprecated or no longer compatible with updated language versions.  This also allows easier switching between libraries that also play nice the with standard library.</p>
+
+<h2 id="ok-what-about-the-sensors">Ok, what about the sensors?</h2>
+
+<p>I mentioned this app&rsquo;s main purpose was to gather and log sensor data.  I also mentioned some security features.  How do those work together?</p>
+
+<p>I briefly hand-waved at the ability to verify API access via signed HTTP requests.  Once a user is logged in, they can access the <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/main.go#L66"><code>/api/secret</code></a> endpoint to get a <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/secret.go#L11">one-time-only private secret</a>.  This can be used to access the API as their user by <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/middleware/authorized.go#L154">signing the request in a certain way</a>.  The secret can also be <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/routes/secret.go#L45">rotated</a> if needed.  I wrote a <a href="https://github.com/serdmanczyk/Freyr/tree/v1.0/cmd/surtr">CLI</a> to convenience these operations.</p>
+
+<p><em>You may notice I named my app <a href="https://en.wikipedia.org/wiki/Freyr">Freyr</a> and CLI <a href="https://en.wikipedia.org/wiki/Surtr">surtr</a>.  These are references to the Norse God and jötunn adversary at Ragnarok.</em></p>
+
+<p>Currently the MCU I use enables registering a webhook for whenever data is posted using a provided firmware function.  This webhook can send a POST request to a specified endpoint, in this case <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/main.go#L70"><code>/api/reading</code></a>.  Unfortunately, their current functionality as of the time I was doing this work didn&rsquo;t provide methods for request signing, so the best that could be done is to configure the webhook to include a <a href="https://github.com/serdmanczyk/Freyr/blob/v1.0/token/token.go#L107">signed JWT</a> and headers with the POST request.  Admittedly not the most secure method, but given the amount of free-time I had(/have) it was a compromise for now that got me going.  I mean, people would look at what I&rsquo;ve done already and awe themselves with my apparent amount of free-time.</p>
+
+<h2 id="other-things-worth-mentioning">Other things worth Mentioning</h2>
+
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04">Free certs with LetsEncrypt!</a></li>
+<li>Automated testing (because why not) with <a href="https://travis-ci.org/serdmanczyk/Freyr">Travis CI</a></li>
+<li><a href="https://goreportcard.com/report/github.com/serdmanczyk/freyr">A+ Go Report</a> :)</li>
+<li><a href="https://godoc.org/github.com/serdmanczyk/Freyr">Godoc</a> compliant</li>
+</ul>
+
+<h2 id="in-summary">In Summary</h2>
+
+<p>That&rsquo;s a high level overview of the app, with a little more exposition on the Go pieces.  Hopefully this serves as a handy example to others working on similar projects.  In the future I look to add more features to this project, such as the ability to water plants and splitting the backend into smaller microservices.  All in time.</p>
+
+        </div>
+        <div class="sharing">
+<a href="https://twitter.com/intent/tweet?status=A%20fullstack%20Go%20%2b%20ReactJS%20App%20deployed%20with%20Docker-http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-10-14-GoFullstackApp%2f" target="_blank" title="Follow me on Twitter" class="twitter">
+<span class="fa fa-twitter-square fa-3x"></span></a>
+<a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-10-14-GoFullstackApp%2f" target="_blank" title="Join me on Facebook" class="facebook">
+<span class="fa fa-facebook-square fa-3x"></span></a>
+<a href="https://plus.google.com/share?url=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-10-14-GoFullstackApp%2f" target="_blank" title="Google+" class="googleplus">
+<span class="fa fa-google-plus-square fa-3x"></span></a>
+<a href="http://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-10-14-GoFullstackApp%2f&title=A%20fullstack%20Go%20%2b%20ReactJS%20App%20deployed%20with%20Docker" target="_blank" title="LinkedIn" class="linkedin">
+<span class="fa fa-linkedin-square fa-3x"></span></a>
+<a href="http://www.reddit.com/submit?url=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-10-14-GoFullstackApp%2f" target="_blank" title="Reddit" class="reddit"><span class="fa fa-reddit-square fa-3x"></span></a>
+<a href="http://www.stumbleupon.com/submit?url=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-10-14-GoFullstackApp%2f" target="_blank" title="StumbleUpon" class="stumbleupon"><span class="fa fa-stumbleupon fa-3x">
+</span></a>
+</div>
+        
+
+
+<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+  var disqusUsername = "serdmanczyk";
+
+  (function() { 
+  var d = document, s = d.createElement('script');
+
+  s.src = '//' + disqusUsername + '.disqus.com/embed.js';
+
+  s.setAttribute('data-timestamp', +new Date());
+  (d.head || d.body).appendChild(s);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+      </div>
+    </div>
+
+  </body>
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51048910-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</html>

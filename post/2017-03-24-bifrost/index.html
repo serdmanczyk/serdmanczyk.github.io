@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Steven Erdmanczyk Jr.">
+<meta name="description" content="software engineer / adventurer">
+<meta name="generator" content="Hugo 0.26" />
+<title>Bifröst - a queryable in-process worker queue (golang)</title>
+<link rel="shortcut icon" href="http://localhost/images/favicon.ico">
+<link rel="stylesheet" href="http://localhost/css/style.css">
+<link rel="stylesheet" href="http://localhost/css/highlight.css">
+
+
+
+<link rel="stylesheet" href="http://localhost/css/monosocialiconsfont.css">
+
+
+
+<link href="http://localhost/index.xml" rel="alternate" type="application/rss+xml" title="Steven Erdmanczyk Jr." />
+
+
+<meta property="og:title" content="Bifröst - a queryable in-process worker queue (golang)" />
+<meta property="og:description" content="When you give a mouse a cookie, he writes a job queue I was working on Freyr, and decided I wanted to implement the ability to post a list of readings. The first things that pop to mind when implementing such a handler are that you want to guard against the following:
+ Requests that are too large (default in go net/http) DDOS attacks, mitigable by rate limiting (external library) Prevent the user from waiting on multiple database writes  I could of course have just gotten away with accepting a list of readings, posting them to the database in order (or as one INSERT statement), and called it a day." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost/post/2017-03-24-bifrost/" />
+
+
+
+<meta property="article:published_time" content="2017-03-24T20:00:01-07:00"/>
+<meta property="article:modified_time" content="2017-03-24T20:00:01-07:00"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="Bifröst - a queryable in-process worker queue (golang)">
+<meta itemprop="description" content="When you give a mouse a cookie, he writes a job queue I was working on Freyr, and decided I wanted to implement the ability to post a list of readings. The first things that pop to mind when implementing such a handler are that you want to guard against the following:
+ Requests that are too large (default in go net/http) DDOS attacks, mitigable by rate limiting (external library) Prevent the user from waiting on multiple database writes  I could of course have just gotten away with accepting a list of readings, posting them to the database in order (or as one INSERT statement), and called it a day.">
+
+
+<meta itemprop="dateModified" content="2017-03-24T20:00:01-07:00" />
+<meta itemprop="wordCount" content="203">
+
+
+
+<meta itemprop="keywords" content="" />
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Bifröst - a queryable in-process worker queue (golang)"/>
+<meta name="twitter:description" content="When you give a mouse a cookie, he writes a job queue I was working on Freyr, and decided I wanted to implement the ability to post a list of readings. The first things that pop to mind when implementing such a handler are that you want to guard against the following:
+ Requests that are too large (default in go net/http) DDOS attacks, mitigable by rate limiting (external library) Prevent the user from waiting on multiple database writes  I could of course have just gotten away with accepting a list of readings, posting them to the database in order (or as one INSERT statement), and called it a day."/>
+
+
+    </head>
+<body>
+    <nav class="main-nav">
+	
+		<a href='http://localhost/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+
+	
+		<a class="cta" href="http://localhost/index.xml">Subscribe</a>
+	
+</nav>
+
+    <section id="wrapper">
+        
+        
+<article class="post">
+    <header>
+        <h1>Bifröst - a queryable in-process worker queue (golang)</h1>
+        <h2 class="headline">
+        March 24, 2017
+        <br>
+        
+        </h2>
+    </header>
+    <section id="post-body">
+        
+
+<h2 id="when-you-give-a-mouse-a-cookie-he-writes-a-job-queue">When you give a mouse a cookie, he writes a job queue</h2>
+
+<p>I was working on Freyr, and decided I wanted to implement the ability to post a list of readings.  The first things that pop to mind when implementing such a handler are that you want to guard against the following:</p>
+
+<ul>
+<li>Requests that are too large (default in go net/http)</li>
+<li>DDOS attacks, mitigable by rate limiting (external library)</li>
+<li>Prevent the user from waiting on multiple database writes</li>
+</ul>
+
+<p>I could of course have just gotten away with accepting a list of readings, posting them to the database in order (or as one INSERT statement), and called it a day.  But implementing a method of dispatching work into the background was just too enticing.</p>
+
+<h1 id="why-not-goroutines">Why not goroutines?</h1>
+
+<p>I also could have just dispatch a goroutine doing the database insert, returned a 204, and called it a day.  But how would the user get status?</p>
+
+<p>There&rsquo;s also the risk of launching too many goroutines and running out of memory.  Not likely in my project, but another I didn&rsquo;t want to sit in.</p>
+
+<p>Using a job queue and a set number of workers, you rate the amount of work that can execute at a given time.</p>
+
+    </section>
+</article>
+
+<footer id="post-meta" class="clearfix">
+    <a href="https://twitter.com/serdmanczyk">
+    <img class="avatar" src="http://localhost/images/avatar.png">
+    <div>
+        <span class="dark">Steven Erdmanczyk Jr.</span>
+        <span></span>
+    </div>
+    </a>
+    <section id="sharing">
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2flocalhost%2fpost%2f2017-03-24-bifrost%2f - Bifr%c3%b6st%20-%20a%20queryable%20in-process%20worker%20queue%20%28golang%29 by @serdmanczyk"><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+    </section>
+</footer>
+
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "stevenerdmanczyk" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        <li>
+            <a href="/post/2016-10-14-gofullstackapp/">A fullstack Go &#43; ReactJS App deployed with Docker<aside class="dates">Oct 23 2016</aside></a>
+        </li>
+    
+        <li>
+            <a href="/post/2016-03-11-pythonobservermetaclass/">Python Observer Metaclass<aside class="dates">Mar 10 2016</aside></a>
+        </li>
+    
+        <li>
+            <a href="Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11 2015</aside></a>
+        </li>
+    
+        <li>
+            <a href="/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25 2015</aside></a>
+        </li>
+    
+        <li>
+            <a href="ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="BlogStarts/">Developer Blog Begins<aside class="dates">May 29 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="MSEEThesis/">Master&#39;s Thesis<aside class="dates">May 28 2014</aside></a>
+        </li>
+    
+</ul>
+
+
+
+        <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="serdmanczyk@gmail.com">
+        email
+    </a>
+    
+    <a class="symbol" href="serdmanczyk">
+        github
+    </a>
+    
+    <a class="symbol" href="sjerdmanczykjr">
+        linkedin
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Steven Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://localhost/js/main.js"></script>
+<script src="http://localhost/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+</body>
+</html>

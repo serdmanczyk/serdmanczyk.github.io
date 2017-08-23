@@ -7,7 +7,7 @@
 <meta name="author" content="Steven Erdmanczyk Jr.">
 <meta name="description" content="software engineer / adventurer">
 <meta name="generator" content="Hugo 0.26" />
-<title>Developer Blog Begins</title>
+<title>Python Observer Metaclass</title>
 <link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
 <link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
 <link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
@@ -21,19 +21,15 @@
 <link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Steven Erdmanczyk Jr." />
 
 
-<meta property="og:title" content="Developer Blog Begins" />
-<meta property="og:description" content="Maybe people will read this." />
+<meta property="og:title" content="Python Observer Metaclass" />
+<meta property="og:description" content="A BaseObject.GetTypeMaker().create(&#34;sqare&#34;) peg in a type(&#34;round&#34;, (), {}) hole" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://serdmanczyk.github.io/BlogStarts/" />
+<meta property="og:url" content="http://serdmanczyk.github.io/post/2016-03-11-PythonObserverMetaclass/" />
 
 
 
-<meta property="article:published_time" content="2014-05-29T00:00:00&#43;00:00"/>
-<meta property="article:modified_time" content="2014-05-29T00:00:00&#43;00:00"/>
-
-
-
-
+<meta property="article:published_time" content="2016-03-10T17:24:01-08:00"/>
+<meta property="article:modified_time" content="2016-03-10T17:24:01-08:00"/>
 
 
 
@@ -43,19 +39,23 @@
 
 
 
-<meta itemprop="name" content="Developer Blog Begins">
-<meta itemprop="description" content="Maybe people will read this.">
 
 
-<meta itemprop="dateModified" content="2014-05-29T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="159">
+
+
+<meta itemprop="name" content="Python Observer Metaclass">
+<meta itemprop="description" content="A BaseObject.GetTypeMaker().create(&#34;sqare&#34;) peg in a type(&#34;round&#34;, (), {}) hole">
+
+
+<meta itemprop="dateModified" content="2016-03-10T17:24:01-08:00" />
+<meta itemprop="wordCount" content="541">
 
 
 
 <meta itemprop="keywords" content="" />
 
-<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Developer Blog Begins"/>
-<meta name="twitter:description" content="Maybe people will read this."/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Python Observer Metaclass"/>
+<meta name="twitter:description" content="A BaseObject.GetTypeMaker().create(&#34;sqare&#34;) peg in a type(&#34;round&#34;, (), {}) hole"/>
 <meta name="twitter:site" content="@https://twitter.com/serdmanczyk"/>
 
 
@@ -78,26 +78,52 @@
         
 <article class="post">
     <header>
-        <h1>Developer Blog Begins</h1>
+        <h1>Python Observer Metaclass</h1>
         <h2 class="headline">
-        May 29, 2014
+        March 10, 2016
         <br>
         
         </h2>
     </header>
     <section id="post-body">
-        <p>So I&rsquo;ve decided to start a developer&rsquo;s blog.  My first motivation in doing this was to share information on side projects as I continue to hobby in hacking/making things with electronics in my free time.  Hopefully things I do/make would inspire other people to do similar or greater things.  My second motivation is to also use it as a place to showcase software engineering side projects for others to read and build off of as well as for professional exposure.</p>
+        
 
-<p>To start, I&rsquo;ve blogged up an overview of the work I did on my Masters thesis in Electrical Engineering just to oil the gears.  Coming soon I am also planning posts on:</p>
+<h2 id="why">Why?</h2>
 
-<ul>
-<li>Communicating using XBee radios in API mode with Python and Arduino(C++)</li>
-<li>A basic class attendance tracking application using Python, Flask, and MongoDB</li>
-<li>A pure python implementation of k-means++ with optional equal size clusters output (pending approval)</li>
-<li>A pure Python Expectation Maximization implementation</li>
-</ul>
+<p>Looking back and grimacing at my Master&rsquo;s thesis code written in the halcyon days of graduate school when I had just started learning Python, I thought it would be a rewarding process to try and re-write it using better coding practices.</p>
 
-<p>Good stuff is to come!</p>
+<p>I was wrong.</p>
+
+<p>At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.  So I decided to scrap and let the dead horse lay.</p>
+
+<p>One thing I got out of the endeavor, though, was I crafted a nifty way to implement an observer class in Python using meta-programming techniques.</p>
+
+<p>If you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/gofpatterns.aspx">gang of four</a>, you&rsquo;re familiar with the <a href="http://www.blackwasp.co.uk/Observer.aspx">observer</a> pattern.  The basic principle is objects can subscribe to other object&rsquo;s events and when a particular event happens an object can notify its subscribers.</p>
+
+<p>The thing about gang of four patterns is given different idioms between languages some of the patterns don&rsquo;t translate as gracefully into all languages, or at the least, wouldn&rsquo;t be implemented the same way.  This was a fun endeavor, but I wouldn&rsquo;t reccomend it in the real world.</p>
+
+<p>Regardless, because meta-programming is interesting and fun I thought this endeavour worth sharing at least as another example of Python meta-class mechanics.</p>
+
+<script src="https://gist.github.com/serdmanczyk/6a22cb9868162d0d47bb.js"></script>
+
+<h2 id="what-s-happening">What&rsquo;s happening?</h2>
+
+<p>The functions decorated by <code>observers</code> are given an attribute marking what
+they observe.</p>
+
+<p>Since <code>Friend</code>&rsquo;s metaclass is <code>Observer</code> the <code>Observer</code> <code>__call__</code> method intercepts the class creation before <code>Friend</code>&rsquo;s <code>__init__</code> method.</p>
+
+<p>The <code>__call__</code> method on <code>Observer</code> finds all functions marked as observers and stores them in a dictionary alongside their parameter specs and adds this dictionary as an attribute to the class.  It then adds a function <code>receive</code> which is the observers receive method used by communicating classes and function to pass messages.</p>
+
+<p><code>__call__</code> calls <code>Super</code> with the modified <code>cls</code>, which invokes <code>Friend</code>&rsquo;s <code>__init__</code> method, continuing our normal program.</p>
+
+<p>Anytime receive is called, it&rsquo;s passed a parameter of message type (as string), and a **splat of the message into function arguments.  The <code>receive</code> method intelligently maps the message arguments to the functions arg spec, and invokes the mapped receiving function.</p>
+
+<p>In a real use case the instance generated from Friend would be passed as a subscriber to the object needing to publish state, which would notify Friend when actions happen.  My intention with this class was my parser for XBee messages in my thesis code would notify the handler classes when messages were received, and the observing handlers would route messages accordingly via this pattern.</p>
+
+<h2 id="a-square-peg-in-a-round-hole">A Square Peg in a Round Hole</h2>
+
+<p>One fallacy with this method is that <em>only the first</em> instance of <code>Friend</code> will receive messages since <code>__call__</code> only builds the observing function map on creation of the class, so latter instance&rsquo;s won&rsquo;t get their functions mapped.  There are a couple of solutions to mitigate this, but they call on more code and more rabbit holes to dig down.  At this point I felt the problem further vindicated my hunch that trying to create a generalized meta-class for the observer pattern in Python was fitting a square peg in a round hole.  Nonetheless, it was a fun opportunity to mess with meta-classes and get a better idea of what uses they have.</p>
 
     </section>
 </article>
@@ -111,7 +137,7 @@
     </div>
     
     <section id="sharing">
-        <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fBlogStarts%2f - Developer%20Blog%20Begins "><span class="icon-twitter"> tweet</span></a>
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2016-03-11-PythonObserverMetaclass%2f - Python%20Observer%20Metaclass "><span class="icon-twitter"> tweet</span></a>
 
 <a class="facebook" href="#" onclick="
     window.open(
@@ -156,10 +182,6 @@
         </li>
     
         <li>
-            <a href="/post/2016-03-11-PythonObserverMetaclass/">Python Observer Metaclass<aside class="dates">Mar 10 2016</aside></a>
-        </li>
-    
-        <li>
             <a href="/post/2015-06-11-Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11 2015</aside></a>
         </li>
     
@@ -173,6 +195,10 @@
     
         <li>
             <a href="XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="BlogStarts/">Developer Blog Begins<aside class="dates">May 29 2014</aside></a>
         </li>
     
         <li>

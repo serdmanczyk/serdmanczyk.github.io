@@ -1,38 +1,36 @@
-$(document).ready(function() {
-
-  $('body').removeClass('no-js');
-
-  $('a.blog-button').click(function() {
-    if ($('.panel-cover').hasClass('panel-cover--collapsed')) return;
-    currentWidth = $('.panel-cover').width();
-    if (currentWidth < 960) {
-      $('.panel-cover').addClass('panel-cover--collapsed');
-      $('.content-wrapper').addClass('animated slideInRight');
-    } else {
-      $('.panel-cover').css('max-width',currentWidth);
-      $('.panel-cover').animate({'max-width': '530px', 'width': '40%'}, 400, swing = 'swing', function() {} );
-    }
-  });
-
-  if (window.location.hash && window.location.hash == "#blog") {
-    $('.panel-cover').addClass('panel-cover--collapsed');
-  }
-
-  if (window.location.pathname.substring(0, 5) == "/tag/") {
-    $('.panel-cover').addClass('panel-cover--collapsed');
-  }
-
-  $('.btn-mobile-menu').click(function() {
-    $('.navigation-wrapper').toggleClass('visible animated bounceInDown');
-    $('.btn-mobile-menu__icon').toggleClass('hidden');
-    $('.btn-mobile-close__icon').toggleClass('hidden');
-  });
-
-  $('.navigation-wrapper .blog-button').click(function() {
-    $('.navigation-wrapper').toggleClass('visible');
-    $('.btn-mobile-menu__icon').toggleClass('hidden');
-    $('.btn-mobile-close__icon').toggleClass('hidden');
-  });
-});
-
-
+// To make images retina, add a class "2x" to the img element
+// and add a <image-name>@2x.png image. Assumes jquery is loaded.
+ 
+function isRetina() {
+	var mediaQuery = "(-webkit-min-device-pixel-ratio: 1.5),\
+					  (min--moz-device-pixel-ratio: 1.5),\
+					  (-o-min-device-pixel-ratio: 3/2),\
+					  (min-resolution: 1.5dppx)";
+ 
+	if (window.devicePixelRatio > 1)
+		return true;
+ 
+	if (window.matchMedia && window.matchMedia(mediaQuery).matches)
+		return true;
+ 
+	return false;
+};
+ 
+ 
+function retina() {
+	
+	if (!isRetina())
+		return;
+	
+	$("img.2x").map(function(i, image) {
+		
+		var path = $(image).attr("src");
+		
+		path = path.replace(".png", "@2x.png");
+		path = path.replace(".jpg", "@2x.jpg");
+		
+		$(image).attr("src", path);
+	});
+};
+ 
+$(document).ready(retina);

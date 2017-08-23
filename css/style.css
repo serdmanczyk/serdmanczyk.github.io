@@ -139,7 +139,7 @@ nav.main-nav a.cta {
 }
 
 #wrapper {
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 60px 40px 100px 40px;
 }
@@ -632,7 +632,7 @@ h2.month {
 
 /* Media Queries */
 @media screen and (max-width: 540px) {
-	#wrapper { padding:20px 20px 20px 20px;}
+	#wrapper { padding:20px 20px 20px 20px; max-width: 600px;}
 	#header { margin-bottom: 60px; border-bottom: 1px solid #eee; }
 	.post { margin: 40px 0; }
 	#footer { margin-top: 60px; }
@@ -649,4 +649,29 @@ h2.month {
 	.post h2.headline { font-size: 13px; }
 	.post h1 { font-size:24px; }
 	.post h2 { font-size:20px; }
+}
+
+
+#social {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+a.symbol {
+    color: #cdd4da;
+    font-size: 2rem;
+    text-decoration: none;
+    margin-right: 0.3rem;
+}
+
+a.symbol:hover {
+    color: #BCD4DA;
+}
+
+code { 
+	font-family:Menlo, Monaco, Courier; 
+	background-color:#EEE; font-size:14px; 
+	padding: 4px; 
+	font-weight: 600;
 }

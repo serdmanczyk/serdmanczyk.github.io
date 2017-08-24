@@ -6,17 +6,17 @@
     <description>Recent content in Posts on Steven Erdmanczyk Jr.</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 24 Mar 2017 20:00:01 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 24 Aug 2017 20:00:01 -0700</lastBuildDate>
     
 	<atom:link href="http://serdmanczyk.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Bifröst - a queryable in-process worker queue (golang)</title>
-      <link>http://serdmanczyk.github.io/post/2017-03-24-Bifrost/</link>
-      <pubDate>Fri, 24 Mar 2017 20:00:01 -0700</pubDate>
+      <link>http://serdmanczyk.github.io/post/2017-08-24-Bifrost/</link>
+      <pubDate>Thu, 24 Aug 2017 20:00:01 -0700</pubDate>
       
-      <guid>http://serdmanczyk.github.io/post/2017-03-24-Bifrost/</guid>
+      <guid>http://serdmanczyk.github.io/post/2017-08-24-Bifrost/</guid>
       <description>Tl;DR I wrote a simple in-memory job queue for golang. All it does is spin up a set of background worker goroutines, then accepts sending anything that implements interface type JobRunner interface {Run() error}) to the workers as jobs.
 Other features:
  Query jobs based on job ID Returned &amp;lsquo;tracker&amp;rsquo; that can be used to check status or wait on completion Job status is JSON serializable, REST API friendly  Check out the project on Github: Bifröst - Golang query-able job queue.</description>

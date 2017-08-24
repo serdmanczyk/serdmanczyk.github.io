@@ -49,10 +49,10 @@ You can read more about the app itself on its github page. You can even view the
     
     <item>
       <title>Python Observer Metaclass</title>
-      <link>http://serdmanczyk.github.io/post/2016-03-11-PythonObserverMetaclass/</link>
-      <pubDate>Thu, 10 Mar 2016 17:24:01 -0800</pubDate>
+      <link>http://serdmanczyk.github.io/post/2016-03-12-PythonObserverMetaclass/</link>
+      <pubDate>Sat, 12 Mar 2016 17:24:01 -0800</pubDate>
       
-      <guid>http://serdmanczyk.github.io/post/2016-03-11-PythonObserverMetaclass/</guid>
+      <guid>http://serdmanczyk.github.io/post/2016-03-12-PythonObserverMetaclass/</guid>
       <description>Why? Looking back and grimacing at my Master&amp;rsquo;s thesis code written in the halcyon days of graduate school when I had just started learning Python, I thought it would be a rewarding process to try and re-write it using better coding practices.
 I was wrong.
 At first I found a few interesting ways to re-architect the code, but when that dust clear I realized I would just be spending hours re-implementing mundane details.</description>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Steven Erdmanczyk Jr.">
+<meta name="description" content="software engineer / adventurer">
+<meta name="generator" content="Hugo 0.26" />
+<title>One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them</title>
+<link rel="shortcut icon" href="http://serdmanczyk.github.io/images/favicon.ico">
+<link rel="stylesheet" href="http://serdmanczyk.github.io/css/style.css">
+<link rel="stylesheet" href="http://serdmanczyk.github.io/css/highlight.css">
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+
+
+
+<link href="http://serdmanczyk.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Steven Erdmanczyk Jr." />
+
+
+<meta property="og:title" content="One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them" />
+<meta property="og:description" content="Hosting my hobby projects on separate subdomains with one server, traefik and docker/docker-compose" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://serdmanczyk.github.io/post/2017-08-25-Server/" />
+
+
+
+<meta property="article:published_time" content="2017-08-25T20:00:01-07:00"/>
+<meta property="article:modified_time" content="2017-08-25T20:00:01-07:00"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them">
+<meta itemprop="description" content="Hosting my hobby projects on separate subdomains with one server, traefik and docker/docker-compose">
+
+
+<meta itemprop="dateModified" content="2017-08-25T20:00:01-07:00" />
+<meta itemprop="wordCount" content="903">
+
+
+
+<meta itemprop="keywords" content="" />
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them"/>
+<meta name="twitter:description" content="Hosting my hobby projects on separate subdomains with one server, traefik and docker/docker-compose"/>
+<meta name="twitter:site" content="@https://twitter.com/serdmanczyk"/>
+
+
+    </head>
+<body>
+    <nav class="main-nav">
+	
+		<a href='http://serdmanczyk.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+
+	
+		<a class="cta" href="http://serdmanczyk.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+    <section id="wrapper">
+        
+        
+<article class="post">
+    <header>
+        <h1>One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them</h1>
+        <h2 class="headline">
+        August 25, 2017
+        <br>
+        
+        </h2>
+    </header>
+    <section id="post-body">
+        
+
+<p>Yes that title is a Lord of the Rings reference.</p>
+
+<p>I&rsquo;ve settled on a solution for hosting my personal projects that strikes(for me) a happy balance of cheap, configurable, and easy.</p>
+
+<p>The setup is simple:</p>
+
+<ul>
+<li>A single VM running docker</li>
+<li>A domain with DNS A records pointing it and sub-domains at the VM&rsquo;s IP</li>
+<li>A container running <a href="https://traefik.io/">Traefik</a> monitoring docker</li>
+<li>For each new project: apply the appropriate docker container labels so Traefik knows how to route its traffic based on sub-domain.</li>
+</ul>
+
+<p>I&rsquo;ve dubbed my setup <a href="https://en.wikipedia.org/wiki/Yggdrasil">Yggdrasil</a> after the tree that joins the nine worlds in Norse mythology.</p>
+
+<p><img src="/images/yggdrasil/yggdrasil.png" alt="yggdrasil" /></p>
+
+<h3 id="pro-s">Pro&rsquo;s</h3>
+
+<p>The main advantage to this implementation is that it&rsquo;s only one server.  I pay as little as possible for hosting, but while still maintaining a large degree of control (ssh access, etc.).</p>
+
+<ul>
+<li>Cheap</li>
+<li>Flexible</li>
+<li>Docker isolation</li>
+<li>Automatic SSL certs</li>
+<li>Fast/minimal spin-up for a new project</li>
+</ul>
+
+<h3 id="con-s">Con&rsquo;s</h3>
+
+<p>The main downside to the current implementation is that <em>it&rsquo;s only one serevr</em>.  Once the number of people accessing my demo&rsquo;s scales up, the server will be overloaded.  For now I&rsquo;m pretty unpopular, so yay&hellip;</p>
+
+<p>Luckily this approach can also be applied to a Kubernetes cluster.  I&rsquo;ll cross that bridge when I get to it.</p>
+
+<ul>
+<li>Doesn&rsquo;t scale</li>
+<li>Could be <em>more</em> automatic</li>
+<li>Docker knowledge required to manage</li>
+</ul>
+
+<h2 id="the-setup">The Setup</h2>
+
+<h3 id="hosting">Hosting</h3>
+
+<p>For my hosting I use a single VM (droplet) hosted by Digital Ocean.  At $5/month it&rsquo;s one of the cheapest offerings you can find.  There may be something cheaper but I&rsquo;m happy for now.</p>
+
+<p>I created my VM using docker-machine (<a href="https://www.digitalocean.com/community/tutorials/how-to-provision-and-manage-remote-docker-hosts-with-docker-machine-on-ubuntu-16-04">Digital Ocean instructions</a>).  This auto-spins up a VM running the docker-daemon and makes it simple to dive in interacting with the daemon remotely using <code>docker</code> commands.</p>
+
+<h3 id="dns">DNS</h3>
+
+<p>All of my projects are hosted as sub-domains of <code>erdmanczyk.com</code> (I personally purchased my domain from <a href="https://www.gandi.net/">ghandi.net</a>).</p>
+
+<p>I wanted <em>all</em> requests for <code>erdmanczyk.com</code> and subdomains to route to my single Digital Ocean droplet, so I configured <code>@</code> and <code>*</code>(wildcard) A records for its IP address.</p>
+
+<ul>
+<li><code>@</code> routes requests for <code>erdmanczyk.com</code></li>
+<li><code>*</code> requests for any subdomains e.g. <code>foo.erdmanczyk.com</code>, <code>bar.erdmanczyk.com</code>.</li>
+</ul>
+
+<p>How to do that with your DNS provider will vary, but for those using ghandi.net here&rsquo;s <a href="https://wiki.gandi.net/en/dns/zone/a-record">A-record</a> instructions.</p>
+
+<h3 id="traefik-reverse-proxy">Traefik Reverse Proxy</h3>
+
+<p>At the heart of it all is the <a href="https://traefik.io/">Traefik</a> reverse proxy and docker.</p>
+
+<p>Traefik is an open source reverse proxy written in Go chosen for a couple features that empower this setup:</p>
+
+<ul>
+<li>Automatically obtaining/renewing (free) SSL certs for backends via LetsEncrypt</li>
+<li>Route requests to exposed containers based on container labels</li>
+</ul>
+
+<p>The first means free SSL certificates and nearly zero effort to manage them.  The latter means if I want a project on a new sub-domain I simply apply the correct host label to the container I want to expose, then traefik will automatically handle routing requests for the new <code>&lt;foo&gt;.erdmanczyk.com</code> subdomain to that container.</p>
+
+<p>Less ops, more time writing code.</p>
+
+<p>Traefik itself is also runs in a docker container, with a minimal configuration file.</p>
+
+<p>Luckily I didn&rsquo;t need how to configure Traefik for this setup myself, the work below is piggybacked from the repo <a href="https://github.com/containerize-my-server/reverse-proxy">containerize-my-server/reverse-proxy</a>.  Forked into <a href="https://github.com/serdmanczyk/reverse-proxy">my implementation</a>.</p>
+
+<p>Here&rsquo;s a snippet of the docker-compose file.</p>
+
+<pre><code class="language-json">version: '3.2'
+
+services:
+  traefik:
+    build: .
+    command: --logLevel=DEBUG
+    ports:
+      - &quot;80:80&quot;
+      - &quot;443:443&quot;
+      - &quot;8080:8080&quot;
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - reverseproxy
+    cap_drop:
+      - all
+    cap_add:
+      - net_bind_service
+
+networks:
+  reverseproxy:
+    driver: bridge
+</code></pre>
+
+<p>Of note here is a few things:</p>
+
+<ul>
+<li>The docker socket is mounted so Traefik can monitor containers spinning up/down</li>
+<li>A network is used for allowing other docker-compose configurations to connect to the same network as Traefik (so Traefik can route)
+
+<ul>
+<li><em>docker-compose by default isolates separate projects into different networks, this curcumvents that</em></li>
+</ul></li>
+</ul>
+
+<p>And the traefik configuration is in <code>config.toml</code></p>
+
+<pre><code class="language-python"># defaultEntryPoints must be at the top because it should not be in any table below
+defaultEntryPoints = [&quot;http&quot;, &quot;https&quot;]
+
+[web]
+# Port for the status page
+address = &quot;:8080&quot;
+
+# Entrypoints, http and https
+[entryPoints]
+
+# http should be redirected to https
+[entryPoints.http]
+address = &quot;:80&quot;
+[entryPoints.http.redirect]
+entryPoint = &quot;https&quot;
+
+# https is the default
+[entryPoints.https]
+address = &quot;:443&quot;
+
+[entryPoints.https.tls]
+
+# Enable ACME (Let's Encrypt): automatic SSL
+[acme]
+# caServer = &quot;https://acme-staging.api.letsencrypt.org/directory&quot;
+email = &quot;&lt;your email&gt;&quot;
+storage = &quot;acme.json&quot;
+entryPoint = &quot;https&quot;
+onDemand = false
+OnHostRule = true
+
+
+[docker]
+endpoint = &quot;unix:///var/run/docker.sock&quot;
+domain = &quot;&lt;your domain&gt;&quot;
+watch = true
+exposedbydefault = false
+</code></pre>
+
+<p>A few things of note in <code>config/toml</code>:</p>
+
+<ul>
+<li>all http is redirected to https</li>
+<li>The <code>[acme]</code> section instructs Traefik to automatically obtain/renew certs from LetsEncrypt</li>
+<li>The <code>[docker]</code> section instructs Traefik to monitor docker</li>
+</ul>
+
+<h3 id="docker-compose-my-project">Docker-Compose my project</h3>
+
+<p>The last step is to actually spin up my projects.</p>
+
+<p>For any new projects I just need to apply a few labels:</p>
+
+<ul>
+<li>traefik.enable=true</li>
+<li>traefik.backend=&lt;project name&gt;</li>
+<li>traefik.frontend.rule=Host:&lt;fully qualified domain domain&gt;</li>
+<li>traefik.docker.network=reverseproxy_reverseproxy</li>
+</ul>
+
+<p>These indicate the Traefik the network, subdomain, etc. to use for routing traffic to this instance.  It&rsquo;s also important that port 80 is exposed by the container (but not externally to the host).  The server within the container should listen on port 80 with no TLS.</p>
+
+<p>As an example, I&rsquo;ve created a template Go project with a minimal config that&rsquo;s deployable via the Yggdrasil setup.  Named <a href="https://github.com/serdmanczyk/twig">twig</a>, because of the whole Norse tree thing.  The Go server simply listens on port 80 and repeats back the route requested.  Check it out at <a href="https://twig.erdmanczyk.com">https://twig.erdmanczyk.com</a></p>
+
+<h2 id="in-summary">In summary</h2>
+
+<p>If you want something cheap but with some degree of control maybe this setup is for you.  This post is here to share to hopefully save those with the same whims some searching.</p>
+
+    </section>
+</article>
+
+<footer id="post-meta" class="clearfix">
+    
+    <img class="avatar" src="http://serdmanczyk.github.io/images/avatar.png">
+    <div>
+        <span class="dark">Steven Erdmanczyk Jr.</span>
+        <span>Software Developer</span>
+    </div>
+    
+    <section id="sharing">
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fserdmanczyk.github.io%2fpost%2f2017-08-25-Server%2f - One%20server%20to%20host%20them%20all%2c%20subdomains%20to%20find%20them%2c%20docker-compose%20to%20bring%20them%20all%2c%20and%20a%20reverse%20proxy%20to%20bind%20them "><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+    </section>
+</footer>
+
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "serdmanczyk" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        <li>
+            <a href="/post/2017-08-24-Bifrost/">Bifröst - a queryable in-process worker queue (golang)<aside class="dates">Aug 24 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/post/2016-10-14-GoFullstackApp/">A fullstack Go &#43; ReactJS App deployed with Docker<aside class="dates">Oct 23 2016</aside></a>
+        </li>
+    
+        <li>
+            <a href="/post/2016-03-12-PythonObserverMetaclass/">Python Observer Metaclass<aside class="dates">Mar 12 2016</aside></a>
+        </li>
+    
+        <li>
+            <a href="/post/2015-06-11-Python_XBee_Sounds_Library/">Notes and Chords using Python<aside class="dates">Jun 11 2015</aside></a>
+        </li>
+    
+        <li>
+            <a href="/post/2015-02-12-moving-to-seattle-hows-the-weather/">Moving to Seattle, How&#39;s the Weather? (graphs!)<aside class="dates">Feb 25 2015</aside></a>
+        </li>
+    
+        <li>
+            <a href="ClassAtttendanceApp/">Online Class Attendance App using Flask/MongoDB<aside class="dates">Jun 18 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="XBeeAPI-PythonArduino-Tutorial/">XBee API Mode Tutorial Using Python and Arduino<aside class="dates">Jun 1 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="BlogStarts/">Developer Blog Begins<aside class="dates">May 29 2014</aside></a>
+        </li>
+    
+        <li>
+            <a href="MSEEThesis/">Master&#39;s Thesis<aside class="dates">May 28 2014</aside></a>
+        </li>
+    
+</ul>
+
+
+
+        <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="mailto:serdmanczyk@gmail.com">
+        <i class="fa fa-envelope"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/serdmanczyk">
+        <i class="fa fa-github"></i>
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/sjerdmanczykjr/">
+        <i class="fa fa-linkedin"></i>
+    </a>
+    
+    <a class="symbol" href="https://stackoverflow.com/users/2406040/serdmanczyk">
+        <i class="fa fa-stack-overflow"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/serdmanczyk">
+        <i class="fa fa-twitter"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Steven Erdmanczyk Jr.
+    
+    </p>
+</footer>
+
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://serdmanczyk.github.io/js/main.js"></script>
+<script src="http://serdmanczyk.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51048910-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+</body>
+</html>

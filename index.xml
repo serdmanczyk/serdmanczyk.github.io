@@ -23,6 +23,18 @@ While I&amp;rsquo;m not spending free time with my son, wife, or dog I sometimes
     </item>
     
     <item>
+      <title>One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them</title>
+      <link>http://serdmanczyk.github.io/post/2017-08-25-Server/</link>
+      <pubDate>Fri, 25 Aug 2017 20:00:01 -0700</pubDate>
+      
+      <guid>http://serdmanczyk.github.io/post/2017-08-25-Server/</guid>
+      <description>Yes that title is a Lord of the Rings reference.
+I&amp;rsquo;ve settled on a solution for hosting my personal projects that strikes(for me) a happy balance of cheap, configurable, and easy.
+The setup is simple:
+ A single VM running docker A domain with DNS A records pointing it and sub-domains at the VM&amp;rsquo;s IP A container running Traefik monitoring docker For each new project: apply the appropriate docker container labels so Traefik knows how to route its traffic based on sub-domain.</description>
+    </item>
+    
+    <item>
       <title>Bifröst - a queryable in-process worker queue (golang)</title>
       <link>http://serdmanczyk.github.io/post/2017-08-24-Bifrost/</link>
       <pubDate>Thu, 24 Aug 2017 20:00:01 -0700</pubDate>

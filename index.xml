@@ -6,21 +6,10 @@
     <description>Recent content on Steven Erdmanczyk Jr.</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 28 Aug 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 25 Aug 2017 20:00:01 -0700</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Steven James Erdmanczyk Jr.</title>
-      <link>/about/</link>
-      <pubDate>Mon, 28 Aug 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/about/</guid>
-      <description>I earned my Masters of Science in Electrical Engineering at the University of North Carolina at Charlotte. My thesis focused on networking mobile robots. I blogged about it here.
-I currently work as a Senior Automation Engineer with Disney in Seatte, WA where I focus on automating tasks on behalf of systems engineers.
-While I&amp;rsquo;m not spending free time with my son, wife, or dog I sometimes hobby with Golang, Python, and electronics/robotics.</description>
-    </item>
     
     <item>
       <title>One server to host them all, subdomains to find them, docker-compose to bring them all, and a reverse proxy to bind them</title>

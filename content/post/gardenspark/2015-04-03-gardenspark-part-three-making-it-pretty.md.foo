@@ -1,0 +1,594 @@
+---
+title: "GardenSpark: Part Three - Make the Internet Pretty"
+date:   2015-04-05
+description: We've come a long way since Geocities.
+url: gardenspark/gardenspark-part-three-making-it-pretty/
+---
+
+<pre>
+This project is undergoing a revamp.  Stay tuned for updates!
+</pre>
+
+## Intro
+
+It's been a few months since I've last done work on this project.  I've been distracted by job interviews, relocating from Charlotte to Seattle, as well as adjusting to a new job and city with my wife and pets.  Not a bad thing to be distracted by!
+
+Now that we've settled a bit, I've been able to get back into the groove.  In the past couple weeks I've been able to make a number of changes to the cloud portion of my project.  I've switched to using webhooks to consume sensor data, added Angularjs to the client framework, improved the web interface, added in-page charts, and implemented live data updates.  That's quite a mouthful!
+
+<a href="http://gardenspark-evargreen.rhcloud.com/">
+<figure class="third">
+  <img src="/images/gardenspark/postthree_home.png">
+  <img src="/images/gardenspark/postthree_temphum.png">
+  <img src="/images/gardenspark/postthree_moistlight.png">
+  <figcaption>Screenshots of the new web interface</figcaption>
+</figure>
+</a>
+## Spark Webhooks!
+
+Minor change, but now [Spark][spark] supports webhooks!  What does this mean?  Previously, to consume the data being sent into the cloud from the Spark Core, I needed to subscribe to it and consume it within my server code.  In my case I used a NodeJS implementation of the EventSource object.
+
+Now, with webhooks, you can format a request you want Spark's servers to execute against a specific web endpoint when your Spark Core publishes an event.  In my case, the core publishes my sensor data, so I could specify Spark's servers to POST the sensor data to the '/readings' endpoint on my server when data is published.  So, with about 10 minutes refactoring of code, I now had a much more elegant solution to how to get the data onto my server.  Here's the code for my webhook ([more on Spark's webhooks here][sparkwebhooks]):
+
+~~~
+{
+    "eventName": "Readings",
+    "url": "https://gardenspark-evargreen.rhcloud.com/readings",
+    "requestType": "POST",
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "json": {
+        "magicpasscode" : "XXX___SECRET___XXX"
+    },
+    "mydevices": true
+}
+~~~
+
+
+## Implementing Angularjs
+
+That minor change out of the way, the next change I made was transitioning from rendering the web page content server side using [Jade][jade] to loading it dynamically client side via Angularjs.  Loading data client side has a number of advantages:
+
+- Faster page loading (data loads async)
+- Less strain on server from rendering
+- More dynamic content
+- Easier transitioning between different data presentation models (tables, charts, etc.)
+
+My prime motivation for choosing Angular as a client framework is that it easily binds data between scripts and html elements via explicit two-way bindings.  This removes the complicated (and ugly code generating) step of having to inspect the DOM to update elements every time data updates.
+
+If you're looking to implement Angular yourself I recommend starting with the [w3schools tutorial][w3schoolsangular].
+
+So the process of transitioning to Angularjs was as simple as a couple iterative steps:
+
+1. Refactor jade templates to remove dependencies on variables
+2. Implement AngularJS (create app, controllers, etc.)
+3. Integrate Angular data-binding into templates
+3. Use Angular to dynamically data
+    - Front page with latest reading
+    - Readings page with query specified start and end data
+
+At this point I have this for my angular app code:
+
+~~~
+var app = angular.module('gardenSpark', ['']);
+
+app.controller('readingsController', function ($scope, $http) {
+   $scope.readings = [];
+   $scope.endDate = moment()
+      .set('second', 0)
+      .set('millisecond', 0)
+      .toDate();
+   $scope.startDate = moment()
+      .subtract(1, 'day')
+      .set('second', 0)
+      .set('millisecond', 0)
+      .toDate();
+
+   $scope.refresh = function() {
+     $http({
+         method: 'GET',
+         url: '/readings',
+         params : {
+            'start' : $scope.startDate.toISOString(),
+            'end' : $scope.endDate.toISOString()
+         },
+         data:''
+     }).success(function(data){
+        $scope.readings = data;
+     });
+   };
+
+   $scope.refresh();
+ });
+
+app.controller('latestController', function ($scope, $http){
+  $scope.reading = {};
+
+     $http.get('/latest').success(function(data){
+        $scope.reading = data;
+     });
+});
+~~~
+
+And these pieces for my web page templates (in jade):
+
+~~~
+{% raw %} 
+div(ng-controller="latestController")
+	h2 GardenSpark
+	pre
+		| ---
+		|	Timestamp: {{reading.timestamp | date:'medium'}}
+		|	Air_Temperature: {{reading.airtemp}}
+		|	Soil_Temperature: {{reading.soiltemp}}
+		|	Humidity: {{reading.humidity}}
+		|	Soil_Moisture: {{reading.soilmoist}}
+		|	Light: {{reading.light}}
+
+div(ng-controller="readingsController")
+	input(type="datetime-local" ng-model="startDate")
+	input(type="datetime-local" ng-model="endDate")
+	button(ng-click="refresh()") refresh
+	table
+		tr
+			th Timestamp
+			th Air Temperature
+			th Soil Temperature
+			th Humidity
+			th Soil Moisture
+			th Light
+		tr(ng-repeat="reading in readings")
+			td {{reading.timestamp | date:'medium'}}
+			td {{reading.airtemp}}
+			td {{reading.soiltemp}}
+			td {{reading.humidity}}
+			td {{reading.soilmoist}}
+			td {{reading.light}}
+{% endraw %}
+~~~
+
+Now my start date and end date is bound to the datetime picker elements, which make it easy to dynamically modify the period of time of data I'm interested in seeing on the page.
+
+## Reducing and Smoothing Large Data
+
+It was a big desire of mine to chart the data myself using client side javascript libraries.  First step before doing that was implementing an algorithm to perform reduction and smoothing on the server side to both reduce the amount of data being sent as well as lessen the load on the client scripting perfoming the plotting functionality.  I needed to select a filter that would compact-ify large sets of data while still preserving important features.
+
+I did some research on existing algorithms.  Some options included [polynomial regressions][jsregressions], bayesian algorithms, doing computations based on slope for subsets, or just averaging the data.  Polynomial algorithms wouldn't work well, because the nature of the data doesn't necessarily indicate a polynomial process depending on the time interval being interpreted.  A bayesian algorithm might be best due to the data being better modeled as a [markov process][markovprocess], but I haven't had time to implement an algorithm of that complexity.  For the time being, I've decided to simply split any large amount of data into 100 equally spaced subsets and then average the subsets.  This is probably the simplest approach, and for a set of evenly spaced data provides a decent view of trends over time.  This reduces the data to a more handle-able size but has drawbacks such as it hides peaks and the averages aren't 'true' when there are gaps in the data.  This will serve for now while the Spark Core can be expected to consistently log data at the same interval.
+
+To that end, I made the following simple module.  This runs in the order of O(n + k), where n is the number of datapoints and k is the number of dimensions of the data (in the case of this project 6 dimensions: Air Temperature, Soil Temperature, Humidity, Soil Moisture, Light, Time).
+
+~~~
+function split(a, n, processor) {
+    var len = a.length,out = [], i = 0, c = 0;
+    while (i < len) {
+        var size = Math.ceil((len - i) / n--);
+        processor(a.slice(i, i += size), c++);
+    }
+};
+
+module.exports = function(readings) {
+	if (readings.length < 100) {
+		return readings;
+	}
+
+	output = [];
+	split(readings, 100, function(subset) {
+		averaged = {};
+
+		subset.forEach(function (reading, c) {
+		    for (var key in reading){
+		    	var n;
+
+		        if (key === "timestamp"){
+					n = new Date(reading[key]).getTime();
+		        } else {
+		        	n = Number(reading[key]);
+		        }
+
+		        if (key in averaged){
+		            var o = averaged[key];
+
+		            averaged[key] = o + ((n-o)/(c+1));
+		        }else{
+		            averaged[key] = n;
+		        }
+		    };
+		});
+
+		averaged['timestamp'] = new Date(averaged['timestamp']);
+
+		output.push(averaged);
+	});
+
+	return output;
+};
+~~~
+
+
+## Self Made Charts! (sorry plotly)
+
+This was a big desire of mine.  Plotly was useful, as it was simple to get started and their API made streaming easy (also, it was free).  It's a fantastic platform, but understandably performance begins to decline when plotting large sets of data, and being able to chart configurable subsets of data on-the-fly is also fairly difficult.
+
+There's a plethora of javascript plotting libraries available now on the web, many of them based on D3.  After trying a couple, I settled on [n3-charts][n3charts]] because it works seemlessly with Angular's two-way data binding model, and the visual product appealed to me.  Adding this on top of my existing Angular code was very easy, I first removed my tables and added their linechart objects.
+
+~~~
+div(ng-controller="readingsController")
+    input(type="datetime-local" ng-model="startDate")
+    input(type="datetime-local" ng-model="endDate")
+    button(ng-click="refresh()") refresh
+        span(class="glyphicon glyphicon-leaf", aria-hidden="true")
+
+    linechart(data="readings" options="airhumoptions" mode="" width="700" height="400" style="background-color:white")
+    linechart(data="readings" options="moistlightoptions" mode="" width="700" height="400" style="background-color:white")
+~~~
+
+I also needed to update my javascript to include the options to set up the charts.  As not to intrude on the application code in my controllers, I added these as constants to the Angular app, then I only needed to import them in the controller code.
+
+~~~
+app.constant('tempHumOptions', {
+  series: [
+    {
+      y: "airtemp",
+      label: "Air Temperature",
+      color: "#0099FF",
+      axis: "y",
+      type: "line",
+      thickness: "1px",
+      dotSize: 2,
+      id: "airtemp"
+    },
+    {
+      y: "soiltemp",
+      axis: "y",
+      label: "Soil Temperature",
+      color: "#009999",
+      type: "line",
+      thickness: "1px",
+      dotSize: 2,
+      id: "soiltemp"
+    },
+    {
+      y: "humidity",
+      axis: "y2",
+      label: "Humidity",
+      color: "#6666FF",
+      type: "line",
+      thickness: "1px",
+      dotSize: 2,
+      id: "humidity"
+    }
+  ],
+  stacks: [],
+  axes: {
+    x: {type: "date", key: "timestamp"},
+    y: {type: "linear", min: 14, max: 25},
+    y2: {type: "linear", min: 0, max:100}
+  },
+  lineMode: "monotone",
+  tension: 0.7,
+  tooltip: {mode: "scrubber",interpolate:true},
+  drawLegend: true,
+  drawDots: false,
+  columnsHGap: 5
+});
+
+app.constant('moistLightOptions', {
+  series: [
+    {
+      y: "soilmoist",
+      label: "Soil Moisture",
+      color: "#996633",
+      axis: "y",
+      type: "line",
+      thickness: "1px",
+      dotSize: 2,
+      id: "soilmoist"
+    },
+    {
+      y: "light",
+      axis: "y2",
+      label: "Light",
+      color: "#B28F00",
+      type: "line",
+      thickness: "1px",
+      dotSize: 2,
+      id: "light"
+    }
+  ],
+  stacks: [],
+  axes: {
+    x: {type: "date", key: "timestamp"},
+    y: {type: "linear", min: 1, max: 2},
+    y2: {type: "linear", min: 0, max: 400}
+  },
+  lineMode: "cardinal-open",
+  tension: 0.7,
+  tooltip: {mode: "scrubber"},
+  drawLegend: true,
+  drawDots: false,
+  columnsHGap: 5
+});
+
+app.controller('readingsController', function ($scope, $http, tempHumOptions, moistLightOptions) {
+....
+   $scope.airhumoptions = tempHumOptions;
+   $scope.moistlightoptions = moistLightOptions;
+...
+});
+~~~
+
+All that done, I had fast, visually appealing charts generated on client-side code in my web page with which I can easily update to preview data from different time spans.  w00t!
+
+## Hosting Server-Sent Events
+
+So now I have charts, and my app is constantly receiving data from the core via the Spark Cloud.  Wouldn't it be cool to have the page automatically update as data is recieved?  In the past I used Server-Sent Events to consume data from the Spark Cloud, so now I decided to utilize this on the server side as a way to publish the data live to the web page.  Publishing the data is as simple as modifying my route for getting the latest data to the following:
+
+~~~
+// routes/latest.js
+...
+router.get('/', function(req,res){
+	if (req.query.one == 'true') {
+	    db.getLatest(function(data){
+			res.end(JSON.stringify(data));
+	    });
+	    return;
+	}
+
+	req.socket.setTimeout(Infinity);
+
+	var genEvent = (function () {
+		var messageCount = 0;
+		return function(data) {
+			var event = [
+				'event: newdata',
+				'id: ' + messageCount,
+				'data: ' + JSON.stringify(data),
+			].join('\n') + '\n\n';
+
+			messageCount++;
+			return event;
+		}
+	})()
+
+	spewer.on('data', function(data){
+		res.write(genEvent(data));
+    });
+
+    db.getLatest(function(data){
+		res.write(genEvent(data));
+    });
+
+	res.writeHead(200, {
+		'Content-Type': 'text/event-stream',
+		'Cache-Control': 'no-cache',
+		'Connection': 'keep-alive'
+	});
+	res.write('\n');
+});
+
+~~~
+
+The code simply sends the appropriate headers, keeps the connection open, then as new data is emitted via 'spewer' (an emitter object) it sends it to the client in the appropriate format.  I generate the function that formats the data via a closure as an elegant way to encapsulate the message count (id) of the events.
+
+With sending SSE so simple, the main question was how to pipe the data from the receiving portion of the code to the response handling portion.  Some examples will use a separate publish/subscribe system such as [redis][redis], but as cool as that would be I thought it be overkill in my case.  That would be more useful in distributed systems, or where the system is optimized for multiple processes and there is a need to pass the information between independent instances (future plans!(maybe)).  In my case, I just needed something quick and clean, and as I improve the server I could easily scale.  I simply created a singleton that subclasses the emitter object, then shared that between the modules that receive and send the data.
+
+~~~
+//  spewer.js
+"use strict"
+var util = require('util'),
+    Emitter = require('events').EventEmitter;
+
+var spewer = function spewer(){
+    Emitter.call(this);
+};
+
+util.inherits(spewer, Emitter)
+
+module.exports = new spewer();
+
+// routes/readings.js
+...
+router.post('/', function(req,res){
+    if (req.body.magicpasscode && req.body.magicpasscode == readings_secret) {
+        var readings = JSON.parse(req.body.data),
+            sparkData = {
+                "timestamp": req.body.published_at,
+                "airtemp": readings[0],
+                "soiltemp": readings[1],
+                "humidity": readings[2],
+                "soilmoist": readings[3],
+                "light": readings[4]
+            };
+
+        spewer.emit('data', sparkData);
+        db.insert(sparkData);
+    }
+
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end('');
+});
+
+~~~
+
+On the client side, I just needed to modify my controller to use the html5 EventSource object, which automagically handles connecting, re-connecting, and emitting the data.  I borrowed an angular factory from [this example][angularsse], that wraps the standard EventSource to apply the handling function within Angular's $scope ([more on why, here][angscopeally]).
+
+~~~
+// app.js
+...
+app.factory("EventSource", EventSourceNg);
+
+function EventSourceNg($rootScope) {
+  function EventSourceNg(url) {
+    this.source = new EventSource(url);
+  }
+  EventSourceNg.prototype = {
+    addEventListener: function(x, fn) {
+      this.source.addEventListener(x, function(event) {
+        $rootScope.$apply(fn.bind(null, event));
+      });
+    }
+  }
+  if (typeof(EventSource) !== "undefined") {
+    return EventSourceNg;
+  } else {
+    return undefined;
+  }
+};
+
+// controllers.js
+...
+app.controller('latestController', function ($scope, $http, EventSource){
+  $scope.reading = {};
+
+  if (typeof(EventSource) !== "undefined") {
+    var dataEvent = new EventSource('/latest');
+
+    dataEvent.addEventListener('newdata', function(event) {
+      $scope.reading = JSON.parse(event.data);
+    }, false);
+  }
+  else {
+     $http({
+           method: 'GET',
+           url: '/latest',
+           params : {
+              'one': 'true',
+           },
+           data:''
+     }).success(function(data){
+        $scope.reading = data;
+     });
+  }
+});
+~~~
+
+## Presentation with reveal.js
+
+So now I have all this cool stuff, but my web page was still lacking in terms of overall aesthetics.  There's libraries like [Twitter Bootstrap][bootstrap] to simplify getting from zero to useful in interface design, but that's better suited to a more complex interface.  For all the parts of this system, it doesn't really require a complicated interface to present the data it needs.  It needs only present one interface with current data and another interface to visualize historical data.  There's no real need for menus, columns, forms, or anything elaborate.
+
+All I really wanted was to present my information on a single web page, and allow the user to intuitively navigate between sections of the page.  Enter '[reveal.js][revealjs]', a handy framework for building 'powerpoint' presentations using html and javascript.  It's a bit of overkill for what I want, but super simple to use, so implementation cost was fairly low.  I could spend the time to figure out how to write my own custom code to do just what I need, but the time cost was more than I'm interested in.
+
+To make my page use reveal.js I simply combined everything into a single file, split the pages into 'section' elements and included the reveal.js scripts.  Which led to the following refactored jade template for my index page:
+
+~~~
+doctype
+html(ng-app="gardenSpark")
+	head
+		meta(charset="utf-8")
+
+		title GardenSpark
+
+		meta(name="description" content="DIY home garden sensor!")
+		meta(name="author" content="Steven James Erdmanczyk Jr.")
+
+		meta(name="apple-mobile-web-app-capable" content="yes")
+		meta(name="apple-mobile-web-app-status-bar-style" content="black-translucent")
+
+		meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui")
+
+		link(rel="stylesheet" href="stylesheets/reveal.css")
+		link(rel="stylesheet" href="stylesheets/theme/sky.css" id="theme")
+
+~~~
+		<link rel="stylesheet" href="stylesheets/zenburn.css">
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	body
+		.reveal
+			.slides
+				section(ng-controller="latestController")
+					h2 GardenSpark
+					pre
+						| ---
+						|	Timestamp: "{{reading.timestamp | date:'medium'}}"
+						|	Air_Temperature: {{reading.airtemp}}
+						|	Soil_Temperature: {{reading.soiltemp}}
+						|	Humidity: {{reading.humidity}}
+						|	Soil_Moisture: {{reading.soilmoist}}
+						|	Light: {{reading.light}}
+
+				section(ng-controller="readingsController")
+					section
+						h2 Temperature / Humidity
+						input(type="datetime-local" ng-model="startDate")
+						input(type="datetime-local" ng-model="endDate")
+
+						button(ng-click="refresh()") refresh
+							span(class="glyphicon glyphicon-leaf", aria-hidden="true")
+						linechart(data="readings" options="airhumoptions" mode="" width="700" height="400" style="background-color:white")
+
+					section
+						h2 Soil Moisture / Light
+
+						linechart(data="readings" options="moistlightoptions" mode="" width="700" height="400" style="background-color:white")
+
+		//- script(src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js')
+		//- script(src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js')
+		script(src='//ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js')
+		script(src="//d3js.org/d3.v3.min.js" charset="utf-8")
+		script(src='/scripts/moment.min.js')
+		script(src='/scripts/line-chart.min.js')
+		script(src='/scripts/app.js')
+		script(src='/scripts/controllers.js')
+		script(src="scripts/head.min.js")
+		script(src="scripts/reveal.js")
+
+		script(type='text/javascript').
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				loop: true,
+
+				transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					// { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					// { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					// { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+~~~
+					// { src: 'plugin/zoom-js/zoom.js', async: true },
+					// { src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+~~~
+
+Bam!  I have something pretty.
+
+## Summary
+
+I feel like I've made a lightyear jump from where I was in just a couple weeks time.  This is quite encouraging.  Now my interface is almost at 100% of where I wanted it to be.  Next step will be to update the live preview page to include guages or some sort of visualization mechanism.  Once that's done, I'm going to get back into the physical world and work on cooler things such as adding solar power, making a custom PCB, building an enclosure, and implementing an automated watering mechanism.
+
+## Helpful Resources
+
+I used quite a few resources during this phase of the project, so I figured it would be helpful to link them here for other people trying to do the same thing, sort of like a bibliography.
+
+- [Angular tutorial at w3schools][w3schoolsangular]
+- [Wrapping EventSource for Angular][angularsse]
+- [HTML5 presentations using reveal.js][revealjs]
+- [Slicing a list into N equal size pieces (Javascript)][jslistslice]
+- [Data smoothing algorithms][datasmoothing]
+- [Polynomial (and other) regressions in Javascript (library)][jsregressions]
+
+[spark]: https://www.spark.io/
+[example_link]: http://subdomain.domain.com/path
+[w3schoolsangular]: http://www.w3schools.com/angular/default.asp
+[markovprocess]: http://en.wikipedia.org/wiki/Markov_process
+[n3charts]: https://github.com/n3-charts/line-chart
+[angularsse]: https://github.com/timruffles/chat-event-source
+[angscopeally]: http://jimhoskins.com/2012/12/17/angularjs-and-apply.html
+[bootstrap]: http://getbootstrap.com/2.3.2/
+[revealjs]: http://lab.hakim.se/reveal-js/
+[sparkwebhooks]: http://docs.spark.io/webhooks/
+[jade]: http://jade-lang.com/
+[jslistslice]: http://stackoverflow.com/a/8189268/2406040
+[jsregressions]: https://github.com/Tom-Alexander/regression-js
+[datasmoothing]: http://en.wikipedia.org/wiki/Smoothing#Smoothing_algorithms
+[redis]: http://redis.io/

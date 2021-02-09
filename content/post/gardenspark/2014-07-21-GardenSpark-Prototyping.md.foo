@@ -1,0 +1,266 @@
+---
+title:  "GardenSpark: Part One - Prototype / stream to plotly"
+date:   2014-07-22
+description: An IoT weather sensor, surely no one's thought of this.
+url: gardenspark/GardenSpark-Prototyping/
+---
+
+<pre>
+This project is undergoing a revamp.  Stay tuned for updates!
+</pre>
+
+## Intro
+
+My specialty is working with software and electronics, but also being a fan of nature and reducing our footprint on earth, sometimes I feel my occupation is often contradictory to some of my philosophies.  In the interest of closing this gap and walking down the path of leveraging technology to help us live a lower impact existence, I thought a great personal project would be a system that helps use technology to connect people with growing their our own food.
+
+<table><tr><td><iframe src="http://ghbtns.com/github-btn.html?user=serdmanczyk&repo=gardenspark&type=fork&size=large" height="30" width="100" frameborder="0" scrolling="0" style="width:100px; height: 30px;" allowTransparency="true"></iframe></td><td><iframe src="http://ghbtns.com/github-btn.html?user=serdmanczyk&type=follow&size=large" height="30" width="240" frameborder="0" scrolling="0" style="width:240px; height: 30px;" allowTransparency="false"></iframe></td></tr></table>
+
+This is definitely a budding application with a few products just recently being funded on Kickstarter.  Just to list a few projects/products:
+
+- [Edyn][edyn]: (my favorite) Garden sensor and smart watering device
+- [HarvestGeek][harvestgeek]: Garden sensing and visualization (unfortunately it seems they are behind on delivering after their kickstarter was funded)
+- [GrowerBot][growerbot]: (formerly Garduino) An Arduino based plant monitoring system
+- [GardenBot][gardenbot]: Not a product, but an open source set of plant sensor designs and tutorials
+- [Streaming Data to Plotly Using the DHT22][stream_arduino_temp_humidity] - A simple example of streaming environment data to a live graph online.
+
+This is definitely an area of interest With the growing popularity of the "Internet of Things."  This will give me the opportunity to start playing around in that area, renew/refresh my embedded programming skills, and also learn and implement other new frameworks in the process.
+
+The current scope of this project goes through the following stages, with this post covering the first stage:
+
+1. Prototype integrating a micro-controller with sensors, and stream the readings to [plotly][plotly].
+2. Set up a server using [nodejs][nodejs] to consume sensor data, save data to a database, and offer a simple web interface to preview the data.
+3. Upgrade web interface to plot eye friendly charts of the data using the [D3][d3js] library.
+
+Other planned non-step dependent additions
+
+- Connect pump to mcu for automated watering based on sensor readings
+- Implement manual trigger for watering via cloud API
+- Design pretty enclosure for sensors that's environment proof  
+- Add battery/solar power to mcu.
+
+After some reading through parts used in the other projects I decided on the following hardware to start:
+
+- [Spark Core][sparkcore] for processing and internet connectivity
+    - Built-in WiFi and cloud connection libraries
+- [DHT22][DHT22] for Air Temperature / Humidity
+   - 0 to 100% humidity w/ 2 to 5% accuracy
+   - -40 to 80 °C temperature w/ +-0.5°C accuracy
+- [LM335][LM335] for measuring Soil Temperature
+   - -40C to +100°C temperature w/ +-1°C accuracy
+- [DFRobot Soil Moisture Sensor][dfrobot_soilmoisture]
+   - Analog voltage output increases with wetness
+- [TSL2561][TSL2561] for measuring Lux (Light)
+   - 0.1 - 40,000 Lux
+
+Since apparently all the other projects get their own cool titles I've dubbed the working title for my project: GardenSpark.  It goes in a garden, it uses the Spark Core, and it intends to 'spark' interest in growing your own plants and food.  Aren't I clever.
+
+## Humidity / Air Temperature
+
+![LM335 Soil Temp Sensor Circuit Schematic](/images/gardenspark/dht22.jpg)
+
+Connecting to the [DHT22][DHT22] was made super easy by using the Arduino libraries for the sensor provided by [Adafruit][adafruit_dht22].  It uses a single wire bus, so getting a reading involves setting a pin high for a specified amount of milliseconds, then switching the pin back to an input and counting on your board's timing to process the duration of highs and lows in the returned signal which contains the sensors serialized response values.  Luckily, the adafruit libraries were pretty much plug-and-play on the Spark despite being written for Arduino.  Connecting was simple:
+
+- Vin -> Spark 3.3V*
+- GND -> Spark GND
+- data pin -> Spark Digital pin (your preference)
+- data pin -> pull-up resistor -> 3.3V*
+
+## Lux (Light)
+
+![LM335 Soil Temp Sensor Circuit Schematic](/images/gardenspark/TLS2561.png)
+
+The [TSL2561][TSL2561] communicates via I2C, which the Spark Core conveniently provides on pins D0(Serial Data / SDA) and D1(Serial Clock / SCL) via their [Wire][sparkwire] library.  Also, like the DTH22, Adafruit is once again kind enough to provide a [tutorial][adafruit_tsl2561] and  [code library][adafruit_tsl2561_code] to do the communications and calculations for you.  This library was basically plug-and-play on the Spark as well, save for some modification to match the Arduino application headers and I2C library to the Spark Core.  Wiring the sensor was also easy, as it only required four pins:
+
+- Vin -> Spark Core 3.3V*
+- GND -> Spark GND
+- SDA -> Spark D0(SDA)
+- SCL -> Spark D1(SCL)
+
+## Soil Moisture
+
+![LM335 Soil Temp Sensor Circuit Schematic](/images/gardenspark/SoilMoistureSensor.png)
+
+For sensing soil moisture, instead of going through the trouble of [using nails][gardenbot_soilmoisture], I went with a pre-made sensor from [DFRobot][dfrobot_soilmoisture] to save time.  I may make my own sensor to match the final prototype enclosure.  Of course, there are no pre-defined units for how moist soil is, so the sensor only gives an analog output voltage approximately proportional to how wet the soil is.  One pitfall of the sensor documentation is that it is written specifically for Arduino users, giving the output values as:
+
+- 0-300: dry soil
+- 300-700: humid soil
+- 700-900: in water
+
+What do these values mean?  These are actually the output of AnalogRead() on the Arduino, and a look at the Arduino documentation for AnalogRead() says that the output maps values of 0 to 5V to integer values of 0 to 1023, or ~4.9mV per value.  The Spark Core is different, so our values aren't the same.  The Spark analogRead() maps values between 0 to 3.3V(instead of 5V) to integer values from 0 to 4095, or ~0.8mV per unit.  So to figure what the Spark Core reading is for those values we need to:
+
+1. convert those AnalogRead() values to the actual voltage output
+2. convert that voltage output from that of a Vin of 5V down to 3.3V
+3. convert that to the analogRead() value on the Spark Core for that voltage
+
+Our actual values come out mapped to be:
+
+~~~
+|Arduino (Vin=5V)| AnalogRead() | Vout   |Spark Core (Vin=3.3V)| Vout  |  analogRead() |
+||:-----------: | :----: || :---: | :-----------: |
+||  0           |  0     || 0     | 0             |
+||  300         |  1.465 || 0.967 | 1200          |
+||  700         |  3.418 || 2.256 | 2800          |
+||  900         |  4.395 || 2.90  | 3600          |
+~~~
+
+Of course this is all still approximate.  Dry is dry and wet is wet, but it was fun to calculate.
+
+## Soil Temperature
+
+This one was the most interesting.  I used [this tutorial][gardenbot_soiltemp] on GardenBot as a template.  It gives an excellent starting point and base info, but I found their schematics and description a bit disjointed.  Oddly, it starts off telling you to solder adjustment resistors with the sensor to go in the ground, and then proceeds later to explain why this is a bad idea (changes in soil temperature changes resistance, resistance effects calibration).  I did a bit of research to figure better resistance values and get a complete schematic, with a little help from [this post on StackExchange][calc_tempres].  After having refreshed my electronics knowledge a bit, my wiring ended up as the following schematic, which may be simpler and easier to understand than the GardenBot schematics:
+
+![LM335 Soil Temp Sensor Circuit Schematic](/images/gardenspark/LM335_Temp_Schematic.png)
+
+I chose to use a potentiometer to adjust the LM335 during the prototyping phace, and did some calculations to figure that the resistor between the output node and ground needed to be 270 ohms (not 1K) so that the LM335 would get the proper current for the temperature values I desired to read.  The capacitor is there as a noise filter.  I'll pick two resistors similar to the pot setting for the final prototype.
+
+Calculating the readings on the Spark was a bit straightforward.  It's a matter of multiplying by a constant to convert the voltage reading to kelvin then adding an offest to convert to celsius.  The sensor's output is approximately +10mv for every Kelvin.  You'll remember from the last section that the Spark readings analog input as integers between 0-4096 to correspond with voltages from 0-3.3V.  The formula for converting the analog input to Kelvin is: Kelvin = input*(3.3/4096)*100.  To convert to Celsius you simply subtract 273.15.
+
+Currently I have the LM335 connected on the breadboard and am observing it in relation to the DHT22.  Their appears to be some adjusting to do still to get it accurately calibrated, which I'll have to do when I have access to better equipment (such as at our local [Charlotte Hackerspace][hackerspace_charlotte]).  Once that's done I plan to do the further physical work to heat-shrink the sensor into a component that can be inserted into the soil.
+
+## Streaming to Plotly
+
+Connecting to the internet with the Spark is made easy out of the box, you simply set your WiFi credentials with the mobile app or the [spark cli][spark_cli] and it will automatically connect every time it runs.  Programming the MCU is made easy by their web IDE, but you can also program via USB by setting up the nodejs based spark cli, which I found very useful.  It still requires the spark cloud to compile code into a firmware binary.  The language is very similar to Arduino (which is based on [Wiring][wiring], which is base on [Processing][processing]...).
+
+For connecting the core to the plotly API, once again, a library already exists!  Plotly provides an [Arduino library][plotly_arduino], which was re-purposed ever so slightly [here][plotly_sparkcore] for the Spark Core.  It makes plotting easy by encapsulating the [Plotly REST API][plotly_rest] calls to initialize the graph and send data into an easy to use C++ class.  Unfortunately there were some errors in the HTTP POST built on the Spark Core version, but I easily corrected them (and it seems as of the time of this writing, the errors have been fixed in the repository).  Since the update interval I desired was farther apart than the plotly API allows, I also had to add code to send a [heartbeat message][plotly_heartbeat] within every minute interval to ensure plotly doesn't disconnect.  After getting the library running, I had data!  You can check out my streaming test graph (live from my house!) below (update, the stream is now coming from my intermediary nodejs server, but it's still the same data source):
+
+<iframe width="800" height="600" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~serdmanczyk/19/800/600"></iframe>
+
+## Putting it All Together
+
+With all the parts assembled, the base sketch was very simple.  To start I chose to plot data every five minutes, which would make a full 24 hours of data on the graph equal a manageable 288 points.  All I needed to do was:
+
+1. Initialize the requisite classes and variables
+2. Monitor millis() (milliseconds elapsed in program) value
+    - Every 5 minutes, read sensor data and send to plotly
+    - Every 50 seconds (within a minute): send a heartbeat to plotly so the server doesn't close the connection
+
+You'll also notice I used Spark's firmware library to set 'variables' for the sensor readings.  This enabled me to monitor readings from the sensors on the fly through [Spark's cloud API][sparl_cloud] rather than have to wait 5 minutes to check the readings being plotted, which was very handy especially because it was wireless unlike a serial connection. Here's my entire main sketch:
+
+~~~
+#include "plotly_spark.h"
+#include "plotly_defines.h"
+#include "math.h"
+#include "DHT.h"
+#include "Adafruit_TSL2561_U.h"
+
+#define TEMPPIN A0
+#define MOISTPIN A1
+#define DHTPIN D4
+#define DHTTYPE DHT22
+
+#define FIVE_MINUTES (5*60*1000)
+#define FIFTY_SECONDS (50*1000)
+
+// convert input volage reading to kelvin; 10mV = 1 K
+#define ANALOGKELVINCONVERSION 0.08056640625 // (3.3/4096)*100
+
+double Temp = 0.0;
+double SoilTemp = 0.0;
+double Humidity = 0.0;
+double Light = 0.0;
+int Moisture = 0;
+
+unsigned long lastloop = 0;
+unsigned long heartbeat = 0;
+
+char *tokens[TOKENS] = {AIRTEMPTOK, HUMIDTOK, SOILTEMPTOK, MOISTURETOK, LIGHTTOK};
+plotly graph = plotly(USERNAME, APITOKEN, tokens, PLOTNAME, TOKENS);
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
+
+void setup() {
+    tsl.enableAutoRange(true);
+    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);
+
+    tsl.begin();
+    dht.begin();
+
+    pinMode(MOISTPIN, INPUT);
+    pinMode(TEMPPIN, INPUT);
+    Spark.variable("Temperature", &Temp, DOUBLE);
+    Spark.variable("SoilTemperature", &SoilTemp, DOUBLE);
+    Spark.variable("Humidity", &Humidity, DOUBLE);
+    Spark.variable("Light", &Light, DOUBLE);
+    Spark.variable("Moisture", &Moisture, INT);
+
+    graph.fileopt = "extend";
+    graph.log_level = 4;
+    graph.maxpoints = 288;
+    graph.init();
+    graph.openStream();
+    heartbeat = millis();
+}
+
+void loop() {
+    unsigned long now = millis();
+
+    if ((now - lastloop) > FIVE_MINUTES){
+      sensors_event_t event;
+
+      tsl.getEvent(&event);
+      Light = (double)event.light;
+      Temp = (double)dht.readTemperature();
+      Humidity = (double)dht.readHumidity();
+      Moisture = map(analogRead(MOISTPIN), 0, 4096, 0, 330);
+      SoilTemp = (double)analogRead(TEMPPIN);
+      SoilTemp = (SoilTemp * ANALOGKELVINCONVERSION) - 273.15;
+
+      graph.plot(now, (float)Temp, tokens[0]);
+      graph.plot(now, (float)Humidity, tokens[1]);
+      graph.plot(now, (float)SoilTemp, tokens[2]);
+      graph.plot(now, Moisture, tokens[3]);
+      graph.plot(now, (float)Light, tokens[4]);
+
+      lastloop = now;
+  }else if((now-heartbeat) > FIFTY_SECONDS){
+      graph.heartbeat();
+      heartbeat = now;
+  }
+}
+~~~
+
+You can see the rest of the code in the ['spark only' branch of my github repo][spark_only_github].
+
+## Results
+
+Thanks to libraries and resources on the internet getting the basic sensors set up was made super easy.  Setting up the LM335 was a good refresher on basic electronics.  The Spark Core made internet connectivity very easy, and at a super affordable price (especially since mine was a birthday gift from my sister ^_^).  I still need to do some tuning to get the LM335 calibrated, and there are some bugs with the timestamp values drifting using plotly's Arduino API.  After some experimenting with nodejs, it seems much more friendly with plotly's API, so I look forward to getting the server portion going.  I also look forward to getting a database going so I can start observing patterns in the data over time.
+
+[LM335]: http://amzn.to/1qMxZGs
+[TSL2561]: http://www.adafruit.com/products/439
+[DHT22]: http://www.adafruit.com/products/385
+[dfrobot_soilmoisture]: http://amzn.com/B00B886H7S
+
+[adafruit_dht22]: https://learn.adafruit.com/dht/downloads
+[adafruit_tsl2561]: https://learn.adafruit.com/tsl2561/
+[gardenbot_soiltemp]: http://gardenbot.org/howTo/soilTemp/
+[gardenbot_soilmoisture]: http://gardenbot.org/howTo/soilMoisture/
+
+[calc_tempres]: http://bit.ly/1nJAbNY
+
+[growerbot]: http://www.growerbot.com/
+[oakland_urban-aquaponics]: http://youtu.be/3IryIOyPfTE
+[stream_arduino_temp_humidity]: http://bit.ly/1pnlyFF
+[HarvestGeek]: http://www.harvestgeek.com/
+[GardenBot]: http://gardenbot.org/
+[edyn]: http://www.edyn.com/
+
+[sparkcore]: https://www.spark.io/
+[spark_cli]: ]http://docs.spark.io/cli/
+[sparl_cloud]: http://docs.spark.io/api/#reading-data-from-a-core-variables
+
+[plotly]: https://plot.ly/
+[plotly_rest]: https://plot.ly/streaming/
+[sparkwire]: http://docs.spark.io/firmware/#communication-wire
+[plotly_arduino]: https://github.com/plotly/arduino-api
+[adafruit_tsl2561_code]: https://learn.adafruit.com/tsl2561/use
+[plotly_sparkcore]: https://github.com/krvarma/Plotly_SparkCore
+[plotly_heartbeat]: https://github.com/plotly/Streaming-Demos#advanced-streaming-concepts
+
+[wiring]: http://wiring.org.co/
+[processing]: http://processing.org/
+[nodejs]: http://nodejs.org/
+[d3js]: http://d3js.org/
+
+[spark_only_github]: https://github.com/serdmanczyk/gardenspark/tree/sparkonly
+
+[hackerspace_charlotte]: http://hackerspacecharlotte.org/

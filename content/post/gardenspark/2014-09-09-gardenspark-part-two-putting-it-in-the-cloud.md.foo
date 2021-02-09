@@ -1,0 +1,344 @@
+---
+title: "GardenSpark: Part Two - Putting It in the Cloud"
+date:   2014-09-11
+description: There's probably more water there.
+url: gardenspark/gardenspark-part-two-putting-it-in-the-cloud/
+---
+
+<pre>
+This project is undergoing a revamp.  Stay tuned for updates!
+</pre>
+
+## Intro
+
+This is the second part of my project hacking together a home plant/garden monitoring system using the [Spark Core][sparkcore], sensors, web technologies, and wizardry.  The first part involved making a prototype of Spark attached to a few sensors, then using the Spark itself to stream the sensor data to [plotly][plotly].  For my next step I wanted to put an entity in the cloud to consume the data from the Spark, store it away in a database, offer a web interface to access that stored data, as well as handle streaming that data to plotly.
+
+<table><tr><td><iframe src="http://ghbtns.com/github-btn.html?user=serdmanczyk&repo=gardenspark&type=fork&size=large" height="30" width="100" frameborder="0" scrolling="0" style="width:100px; height: 30px;" allowTransparency="true"></iframe></td><td><iframe src="http://ghbtns.com/github-btn.html?user=serdmanczyk&type=follow&size=large" height="30" width="240" frameborder="0" scrolling="0" style="width:240px; height: 30px;" allowTransparency="false"></iframe></td></tr></table>
+
+<iframe width="800" height="600" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~serdmanczyk/19/800/600"></iframe>
+
+## Sending the Data
+
+The first step was to alter the Spark sketch to send the data to an intermediary server rather than just to plotly.  I considered a couple options for delivering data such as through TCP in a proprietary format or packaged in HTTP POST requests as JSON.  I eventually decided to use the Spark firmware's ability to [publish events][spark_publish] to Spark's cloud servers which can easily be [subscribed to][spark_sse_subscribe] by HTTP via [server sent events][SSE].  Being integrated into the Spark firmware, this was simple to setup, and the connection from the core to the Spark cloud is very reliable.  This also decoupled by server code from being connected to the core, making testing simpler.  My main sketch code is now even simpler:
+
+~~~
+#include "math.h"
+#include "defines.h"
+#include "DHT.h"
+#include "Adafruit_TSL2561_U.h"
+
+unsigned long timesync = 0;
+unsigned long lastloop = 0;
+
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 42);
+
+void setup() {
+    tsl.enableAutoRange(true);            /* Auto-gain ... switches automatically between 1x and 16x */
+    tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
+    tsl.begin();
+    dht.begin();
+
+    pinMode(MOISTPIN, INPUT);
+    pinMode(TEMPPIN, INPUT);
+
+    timesync = millis();
+}
+
+void loop() {
+    unsigned long now = millis();
+
+    if ((now - lastloop) > TEN_SECONDS){
+        sensors_event_t event;
+        char data[42];
+        double AirTemp = 0.0;
+        double SoilTemp = 0.0;
+        double Humidity = 0.0;
+        double Light = 0.0;
+        double Moisture = 0;
+
+        tsl.getEvent(&event);
+        Light = (double)event.light;
+        AirTemp = (double)dht.readTemperature();
+        Humidity = (double)dht.readHumidity();
+        Moisture = ((double)map(analogRead(MOISTPIN), 0, 4096, 0, 330) / 100);  // convert to voltage
+        SoilTemp = ((double)analogRead(TEMPPIN) * ANALOGKELVINCONVERSION) + KELVINCELSIUSCONVERSION;
+
+        sprintf(data, "[%03.03f,%03.03f,%03.03f,%03.03f,%03.03f]", AirTemp, SoilTemp, Humidity, Moisture, Light);
+        Spark.publish("Readings", data, 300, PRIVATE);
+
+        lastloop = now;
+    }else if ((now - timesync) > HALF_A_DAY){
+        Spark.syncTime();
+        timesync = now;
+    }
+}
+~~~
+
+##  Setting Up the Server Using Nodejs
+
+As an impetus to learn, and to see what all the hype was about, I decided to use Nodejs to power the server side for this project, for it's ease in getting up and running and for its appeal to IoT (internet of things) applications
+
+I found it very helpful to take an aside and read some material on the basic workings of Javascript before trying to do too much with Nodejs.  I found this book: [Eloquent Javascript][eloquent_javascript] a great primer that helped integrate my knowledge based on programming in C to how programming works in Javascript-land.
+
+For hosting, my [OpenShift][openshift] account had one more free gear available.  Creating a server with a MongoDB database was as simple as running a few commands from the command line using [rhc][openshift_rhc], updates are managed automatically using git, and all imported node modules are managed by OpenShift using the same [package.json file][package_json] npm uses.  Pretty forking easy.
+
+## Consuming Server Sent Events
+
+The first order of business in my server application was get it connected to the data from the Spark.  Subscribing to the events is as simple as [sending an HTTP request and leaving the connection open][spark_subscribe_onec].  However, with my application running for days at a time, I was running into trouble with the connection closing every twelve hours or so (not surpisingly).  Instead of taking a lot of time to homebake a solution, I searched through the [npm repository][npm] to find an implementation of html5's [EventSource][eventsource] that's been working very well at reconnecting in the event of errors.  Here's a snipper of my implementation:
+
+~~~
+SparkCloud.prototype.init = function init(done){
+    var self = this,
+        url = "https://api.spark.io/v1/devices/" + self.config.DeviceId + "/events",
+        evsSettings = {
+           rejectUnauthorized: false,
+           headers:{
+              "Transfer-Encoding":"Chunked",
+              Authorization: "Bearer "+ self.config.AccessToken
+           }
+        };
+
+    var es = new EventSource(url,evsSettings);
+    es.addEventListener('Readings', function ParseEvent(event) {
+        var sparkObj = JSON.parse(event.data),
+            Readings = JSON.parse(sparkObj.data),
+            SparkData = {
+                "TimeStamp": sparkObj.published_at,
+                "Air Temperature": Readings[0],
+                "Soil Temperature": Readings[1],
+                "Humidity": Readings[2],
+                "Soil Moisture": Readings[3],
+                "Light": Readings[4]
+            };
+
+        self.emit('data', SparkData)
+    }, false);
+
+    es.onerror = function(){
+        console.log("Error with EventSource connection with SparkCloud");
+    };
+
+    self.es = es;
+    done();
+};
+~~~
+
+'SparkCloud,' in the context of the code above, is my own object that inherits from [EventEmitter][eventemitter].  It gathers data from Spark's stream in the background and emits an object to the rest of my application when data from my core becomes available.
+
+In the future, Spark intends to add the to feature register an address for their servers to POST the data to via HTTP when events are published.  When this comes available I may implement it at it makes for a better model, but SSE is working in the mean time.
+
+## Saving to a database
+
+Now that I had my server sending the data, I wanted to save it.  Streaming to plotly is pretty cool, but after you've expanded beyond your maximum points on your plot you start losing data.  When it comes to plant data, only the past few hours of data is pretty boring, my goal is to see days/weeks/months of data with summaries, bells, and whistles.
+
+The node-mongodb-native module is recommended but I decided to use the mongojs module because it makes the code easier to read and implement.  A brief overview of the two is given on the [OpenShift blog][mongodb_openshift].  To start I only needed three methods.  One to add new data, to get the most recent entry, and to get entries from a start date to an end date.  Not too complicated, here's the entire module:
+
+~~~
+"use strict"
+var mongojs = require('mongojs'),
+    connection_string = '127.0.0.1:27017/gardenspark';
+
+// if OPENSHIFT env variables are present, use the available connection info:
+if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
+    connection_string = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
+      process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
+      process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
+      process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
+      process.env.OPENSHIFT_APP_NAME;
+};
+
+var db = mongojs(connection_string, ['readings']),
+    readings = db.readings;
+
+readings.ensureIndex({TimeStamp:1});
+
+exports.insert = function insert(Data){
+    console.log("saved data: " + Data.TimeStamp);
+    readings.insert(Data, {safe:true}, function(err, objects){
+        if (err) {console.warn(err.message);}
+    });
+
+    delete Data._id;
+};
+
+exports.getReadings = function getReadings(start, end, callback){
+    function validDate(dateStr, def){
+        return (Date(dateStr) !== "Invalid Date") ? new Date(dateStr) : new Date(def);
+    };
+
+    var query = {
+            TimeStamp:{
+                $gt:(validDate(start, 0).toISOString()),
+                $lt:(validDate(end, Date.now()).toISOString())
+            }
+        },
+        results = [];
+
+    readings.find(query,{_id:false})
+        .forEach(function(err,doc){
+            if (!doc) {
+                return callback(results);
+            };
+            results.push(doc);
+        });
+};
+
+exports.getLatest = function getLatest(callback){
+    var latest = {};
+
+    readings.find({},{_id:false})
+        .sort({TimeStamp:-1})
+        .limit(1)
+        .forEach(function(err,doc){
+            if (!doc) {
+                callback(latest);
+            };
+
+            latest = doc;
+        });
+};
+~~~
+
+## Sending to plotly
+
+For streaming to plotly, I simply adapted code from their [streaming example][plotly_node_examples], to my application, with some modifications for specifying plot names and tokens in a separate file, and adding a heartbeast function and pass a plotting function to a callback from my initialization.  It's noticeably more amicable streaming the data from nodejs to plotly rather than from the Spark.  Hopefully this pieces of the server code will be short lived as my planned next step is to switch from using plotly to drawing the plots myself with my own code.
+
+## Caching readings for plotly
+
+As another feature I wanted to have the ability to modify the interval at which the application will send data to plotly.  With data being sent from the Spark every 10 seconds the plot will fill rather quickly, and rather than needing to do a git add/commit/push/etc. to update the OpenShift app every time I want to update the interval, using a REST call seemed a lot more convenient.
+
+With the interval to plot possibly longer or shorter than the interval data is being received, just plotting the most recent value received wouldn't accurately represent the data over that time period.  Instead, I made a module that would cache the average of the readings received over the plotting period.  After the interval from the last plot had elapsed, it would send the average to plotly instead.  Here's a snippet of the moving average piece:
+
+~~~
+DataCache.prototype.append = function append(data){
+    var self = this,
+        c = this.data.count;
+
+    for (var key in data){
+        if (key === "TimeStamp"){
+            continue;
+        };
+        if (key in self.data){
+            var o = self.data[key],
+                n = data[key];
+
+            self.data[key] = o + ((n-o)/(c+1));
+        }else{
+            self.data[key] = data[key];
+        }
+    };
+    self.data.count++;
+};
+~~~
+
+This obviously doesn't handle all error conditions, so isn't a fully robust, but handles well in my app where I have full control.  Then for modifying the interval I simply made another method for the DataCache object.  The interval is stored as a member.  When the interval length is modified, the interval variable is cleared and modified.  Every time the interval is triggered, the object will emit the averaged data (if any) to any listeners.
+
+~~~
+DataCache.prototype.setEmitInterval = function setEmitInterval(ms){
+    var self = this;
+
+    self.timeout = ms;
+    if (self.interval !== undefined){
+        clearInterval(self.interval);
+    };
+
+    self.interval = setInterval(function(){
+        if (self.data.count > 0){
+            self.emit('interval', self.get());
+        };
+    }, self.timeout);
+};
+~~~
+
+## Hosting an interface
+
+![web interface](/images/gardenspark/web_interface_preview.png)
+
+It seems there's quite the variety of frameworks for rendering web interfaces for Nodejs.  I stuck with the what seemed the most basic: [express][express].  All I wanted was a simple home page that displays the latest reading alongside the current interval time.  Besides that, I wanted to be able to request data between specified time intervals in either a web page or, if the content type header is specified, as JSON for the use in APIs (such as a plotting utility).  I made sure to default the page for displaying readings to the 50 most recent readings, and not to return all data unless explicitly requested.  Using jade templates made rendering the pages from simple javascript objects a breeze.
+
+~~~
+app.get('/', function(req,res){
+    db.getLatest(function(data){
+        if (req.headers['content-type'] === 'application/json'){
+            res.send(JSON.stringify(data));
+        }else{
+            data.TimeStamp = (new Date(data.TimeStamp));
+            var rs = \_.map(data, function(v,k,l){
+                    return {name:k,value:v};
+                });
+            res.render('index',{
+                title:name,
+                readings:rs,
+                interval:cache.timeout.toString()
+            });
+        };
+
+    });
+});
+
+app.get('/readings', function(req, res){
+        var n = Date.now(),
+            all = (req.query.all ? true : false),
+            startDate = (req.query.start || 0),
+            endDate = (req.query.end || n);
+
+    if (startDate === 0 && endDate === n && !all){
+        endDate = Date.now();
+        startDate = endDate - 300000; // Five minutes ago
+    }else if (all){
+        startDate = 0;
+        endDate = Date.now();
+    };
+
+    db.getReadings(startDate, endDate, function(results) {
+        if (req.headers['content-type'] === 'application/json') {
+            res.send(JSON.stringify(results));
+        }else{
+            var ret = {
+                title:name,
+                readings:results || []
+            };
+            res.render('readings', ret);
+        };
+    });
+});
+~~~
+
+Here's a preview of the readings interface:
+![readings interface](/images/gardenspark/readings_preview.png)
+
+Check it out!  The server is live, so head on over: [gardenspark-evargreen.rhcloud.com](http://gardenspark-evargreen.rhcloud.com/).
+
+Check out the [readings page](http://gardenspark-evargreen.rhcloud.com/readings), and an example of getting readings over [an interval](http://gardenspark-evargreen.rhcloud.com/readings?start=2014-09-11T16:00:00.000Z&end=2014-09-11T17:00:00.000Z).
+
+## Summary
+
+Here's a basic diagram of the system as it is now: x
+
+![System Overview](/images/gardenspark/gardenspark_serverdiagram.png)
+
+Thanks to Nodejs' architecture, with callbacks and event emitters, it was particularly efficient to implement this architecture in an easy to read and snappy fashion without an excessive amount of get-up-and-go time.  Nodejs will definitely be a handy tool for other personal projects I take up.  Now, with a web interface, it's been easy to check up on my system and verify readings have been occurring properly.  I can now even use it for the practical purpose of seeing if I need to water my plant, if it gets too much sunlight during a particular part of the day, if an A/C vent is hitting it the plant too hard, etc.  Exciting stuff!
+
+For the next part of this project I'm going to deviate into the less familiar realm (for myself at least) of graphics and interface design and attempt to implement the [D3][d3js] library to host the plots themselves via my web interface.  Hopefully this will enable more responsive charts as well as the ability to visualize the data more intuitively.
+
+[spark_publish]: http://docs.spark.io/firmware/#spark-publish
+[SSE]: http://dev.w3.org/html5/eventsource/
+[mongojs]: https://github.com/mafintosh/mongojs
+[mongodb_native]: https://github.com/mongodb/node-mongodb-native
+[mongodb_openshift]: https://www.openshift.com/blogs/getting-started-with-mongodb-on-nodejs-on-openshift
+
+[express]: http://expressjs.com/
+[sparkcore]: https://www.spark.io/
+[plotly]: https://plot.ly/
+[eloquent_javascript]: http://eloquentjavascript.net/
+[openshift]: https://www.openshift.com/
+[openshift_rhc]: https://www.openshift.com/blogs/using-rhc-to-manage-paas-apps
+[spark_subscribe_onec]: http://techblog.hybris.com/2014/05/02/consuming-spark-core-sse-events-via-node-js/
+[npm]: https://www.npmjs.org/
+[eventsource]: https://www.npmjs.org/package/eventsource
+[eventemitter]: http://www.sitepoint.com/nodejs-events-and-eventemitter/
+[plotly_node_examples]: https://github.com/plotly/plotly-nodejs/tree/master/examples
+[d3js]: http://d3js.org/
+[package_json]: https://www.npmjs.org/doc/files/package.json.html
+[spark_sse_subscribe]: http://docs.spark.io/api/#reading-data-from-a-core-events

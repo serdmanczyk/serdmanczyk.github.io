@@ -1,0 +1,30 @@
+baseurl = "/"
+
+themesDir = "themes"
+theme = "hugo-theme-cactus-plus"
+
+languageCode = "en-us"
+title = "Steven Erdmanczyk Jr."
+disqusShortname = "serdmanczyk"
+disablePathToLower = true
+googleAnalytics = "UA-51048910-1"
+
+ignoreFiles = [ "\\.foo$", "\\.boo$" ]
+
+[Params]
+    name = "Steven Erdmanczyk Jr."
+    description = "software engineer / adventurer"
+    bio = "Señor Software Engineer"
+    aboutAuthor = "Software Developer"
+    enableGoogleAnalytics = true
+    squareCashtag = "serdmanczyk"
+
+    enableRSS = true
+    iconFont = "font-awesome"
+
+[social]
+    envelope = "mailto:serdmanczyk@gmail.com"
+    twitter = "https://twitter.com/serdmanczyk"
+    linkedin  = "https://www.linkedin.com/in/sjerdmanczykjr/"
+    github   = "https://github.com/serdmanczyk"
+    stack-overflow = "https://stackoverflow.com/users/2406040/serdmanczyk"
